@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoheto — ほへと</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f5f0e4;
+  color: #1a1510;
+  font-family: 'Noto Serif JP', serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 27px,
+    rgba(180,160,120,0.12) 28px
+  );
+}
+
+.wrap {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.symbol {
+  font-size: clamp(2.8rem, 8vw, 5rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #1a1510;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.symbol .at { color: #c4a060; }
+
+.iroha {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.3em;
+  color: #8a7a60;
+  margin-bottom: 48px;
+}
+.iroha .ho { color: #c4a060; font-weight: 600; }
+
+.rule { height: 1px; background: #cec6b5; margin: 0 auto 48px; width: 120px; }
+
+.tagline {
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  font-weight: 300;
+  line-height: 2.2;
+  color: #3a3020;
+  margin-bottom: 48px;
+  letter-spacing: 0.06em;
+}
+.tagline strong {
+  font-weight: 700;
+  display: block;
+  font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+  margin-bottom: 16px;
+  color: #1a1510;
+}
+
+.coming {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.35em;
+  color: #8a7a60;
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+.notify-form {
+  display: flex;
+  gap: 0;
+  max-width: 380px;
+  margin: 0 auto 48px;
+}
+.notify-form input {
+  flex: 1;
+  background: rgba(255,255,255,0.7);
+  border: 1px solid #cec6b5;
+  border-right: none;
+  color: #1a1510;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.88rem;
+  padding: 11px 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.notify-form input:focus { border-color: #c4a060; }
+.notify-form input::placeholder { color: #a09080; }
+.notify-form button {
+  background: #c4a060;
+  border: 1px solid #c4a060;
+  color: #f5f0e4;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  padding: 11px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.notify-form button:hover { background: #b09050; }
+
+.thanks {
+  display: none;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.78rem;
+  color: #6a8a6a;
+  letter-spacing: 0.15em;
+  margin-bottom: 48px;
+  padding: 12px;
+}
+
+.footer {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  color: #cec6b5;
+  letter-spacing: 0.2em;
+}
+
+.gold-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 48px;
+}
+.gold-dots span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: #c4a060;
+  opacity: 0.6;
+}
+.gold-dots span:nth-child(2) { opacity: 0.4; width: 4px; height: 4px; margin-top: 1px; }
+.gold-dots span:nth-child(3) { opacity: 0.25; width: 3px; height: 3px; margin-top: 1.5px; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="symbol">
+    <span class="at">@</span>ゐroh<span class="at">@</span>
+  </div>
+
+  <div class="iroha">
+    い ろ は に <span class="ho">ほ へ と</span> ち り ぬ る を
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="tagline">
+    <strong>関心が先にあり、<br>人は後から静かに現れる。</strong>
+    古書店で、見知らぬ人が<br>
+    同じ本を手にしている瞬間のような出会いを。
+  </div>
+
+  <div class="coming">Coming Soon</div>
+
+  <div class="notify-form" id="form-wrap">
+    <input type="email" id="email-input" placeholder="メールアドレス">
+    <button onclick="handleSubmit()">通知を受け取る</button>
+  </div>
+
+  <div class="thanks" id="thanks-msg">
+    ありがとうございます。開始時にお知らせします。
+  </div>
+
+  <div class="gold-dots">
+    <span></span><span></span><span></span>
+  </div>
+
+  <div class="footer">
+    HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; 2025
+  </div>
+
+</div>
+
+<script>
+function handleSubmit() {
+  const email = document.getElementById('email-input').value;
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').focus();
+    return;
+  }
+  document.getElementById('form-wrap').style.display = 'none';
+  document.getElementById('thanks-msg').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
