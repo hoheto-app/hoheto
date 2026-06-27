@@ -6,9 +6,9 @@
 <title>Hoheto — ほへと</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400&display=swap');
-
+ 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
+ 
 body {
   background: #f5f0e4;
   color: #1a1510;
@@ -24,13 +24,13 @@ body {
     rgba(180,160,120,0.12) 28px
   );
 }
-
+ 
 .wrap {
   max-width: 560px;
   width: 100%;
   text-align: center;
 }
-
+ 
 .symbol {
   font-size: clamp(2.8rem, 8vw, 5rem);
   font-weight: 900;
@@ -40,7 +40,7 @@ body {
   line-height: 1;
 }
 .symbol .at { color: #c4a060; }
-
+ 
 .iroha {
   font-family: 'Inconsolata', monospace;
   font-size: 0.78rem;
@@ -49,9 +49,9 @@ body {
   margin-bottom: 48px;
 }
 .iroha .ho { color: #c4a060; font-weight: 600; }
-
+ 
 .rule { height: 1px; background: #cec6b5; margin: 0 auto 48px; width: 120px; }
-
+ 
 .tagline {
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 300;
@@ -67,7 +67,7 @@ body {
   margin-bottom: 16px;
   color: #1a1510;
 }
-
+ 
 .coming {
   font-family: 'Inconsolata', monospace;
   font-size: 0.72rem;
@@ -76,7 +76,7 @@ body {
   text-transform: uppercase;
   margin-bottom: 36px;
 }
-
+ 
 .notify-form {
   display: flex;
   gap: 0;
@@ -110,7 +110,8 @@ body {
   white-space: nowrap;
 }
 .notify-form button:hover { background: #b09050; }
-
+.notify-form button:disabled { background: #cec6b5; border-color: #cec6b5; cursor: not-allowed; }
+ 
 .thanks {
   display: none;
   font-family: 'Inconsolata', monospace;
@@ -120,14 +121,25 @@ body {
   margin-bottom: 48px;
   padding: 12px;
 }
-
+ 
+.error-msg {
+  display: none;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  color: #c05a3a;
+  letter-spacing: 0.1em;
+  margin-top: -36px;
+  margin-bottom: 36px;
+  padding: 8px;
+}
+ 
 .footer {
   font-family: 'Inconsolata', monospace;
   font-size: 0.65rem;
   color: #cec6b5;
   letter-spacing: 0.2em;
 }
-
+ 
 .gold-dots {
   display: flex;
   justify-content: center;
@@ -145,57 +157,104 @@ body {
 </style>
 </head>
 <body>
-
+ 
 <div class="wrap">
-
+ 
   <div class="symbol">
     <span class="at">@</span>ゐroh<span class="at">@</span>
   </div>
-
+ 
   <div class="iroha">
     い ろ は に <span class="ho">ほ へ と</span> ち り ぬ る を
   </div>
-
+ 
   <div class="rule"></div>
-
+ 
   <div class="tagline">
     <strong>関心が先にあり、<br>人は後から静かに現れる。</strong>
     古書店で、見知らぬ人が<br>
     同じ本を手にしている瞬間のような出会いを。
   </div>
-
+ 
   <div class="coming">Coming Soon</div>
-
+ 
   <div class="notify-form" id="form-wrap">
     <input type="email" id="email-input" placeholder="メールアドレス">
-    <button onclick="handleSubmit()">通知を受け取る</button>
+    <button id="submit-btn" onclick="handleSubmit()">通知を受け取る</button>
   </div>
-
+ 
+  <div class="error-msg" id="error-msg"></div>
+ 
   <div class="thanks" id="thanks-msg">
     ありがとうございます。開始時にお知らせします。
   </div>
-
+ 
   <div class="gold-dots">
     <span></span><span></span><span></span>
   </div>
-
+ 
   <div class="footer">
     HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; 2025
   </div>
-
+ 
 </div>
-
+ 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-function handleSubmit() {
-  const email = document.getElementById('email-input').value;
+const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
+ 
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
+async function handleSubmit() {
+  const email = document.getElementById('email-input').value.trim();
+  const btn = document.getElementById('submit-btn');
+  const errorEl = document.getElementById('error-msg');
+ 
+  // バリデーション
   if (!email || !email.includes('@')) {
     document.getElementById('email-input').focus();
     return;
   }
-  document.getElementById('form-wrap').style.display = 'none';
-  document.getElementById('thanks-msg').style.display = 'block';
+ 
+  // ボタンを無効化
+  btn.disabled = true;
+  btn.textContent = '送信中…';
+  errorEl.style.display = 'none';
+ 
+  try {
+    const { error } = await db
+      .from('waitlist')
+      .insert({ email: email });
+ 
+    if (error) {
+      if (error.code === '23505') {
+        // すでに登録済み
+        errorEl.textContent = 'このメールアドレスはすでに登録されています。';
+      } else {
+        errorEl.textContent = 'エラーが発生しました。もう一度お試しください。';
+      }
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = '通知を受け取る';
+      return;
+    }
+ 
+    // 成功
+    document.getElementById('form-wrap').style.display = 'none';
+    errorEl.style.display = 'none';
+    document.getElementById('thanks-msg').style.display = 'block';
+ 
+  } catch (e) {
+    errorEl.textContent = 'エラーが発生しました。もう一度お試しください。';
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '通知を受け取る';
+  }
 }
 </script>
-
+ 
 </body>
 </html>
