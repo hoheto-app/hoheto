@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoheto — Concept Document</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Noto+Sans+JP:wght@300;400&family=Inconsolata:wght@300;400;600&display=swap');
+ 
+:root {
+  --ink: #111008;
+  --ink2: #3a3528;
+  --ink3: #7a7060;
+  --paper: #f7f3ec;
+  --paper2: #ede8df;
+  --paper3: #e2dbd0;
+  --rule: #cec6b5;
+  --gold: #9a7a32;
+  --gold2: #c4a050;
+  --teal: #2a6a5a;
+  --red: #8a2a1a;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 15px;
+  line-height: 1.9;
+}
+ 
+/* ── COVER ── */
+.cover {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 10vw;
+  border-bottom: 1px solid var(--rule);
+  position: relative;
+  overflow: hidden;
+}
+.cover::before {
+  content: 'ほへと';
+  position: absolute;
+  right: 4vw;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 18vw;
+  color: var(--paper3);
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+  letter-spacing: -0.02em;
+  writing-mode: vertical-rl;
+}
+.cover-eyebrow {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.cover-title {
+  font-size: clamp(4rem, 10vw, 9rem);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 0.95;
+  color: var(--ink);
+  margin-bottom: 24px;
+}
+.cover-title .accent { color: var(--gold2); }
+.cover-sub {
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--ink3);
+  letter-spacing: 0.08em;
+  margin-bottom: 48px;
+  max-width: 520px;
+  line-height: 2;
+}
+.cover-meta {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.7rem;
+  color: var(--rule);
+  letter-spacing: 0.2em;
+  border-top: 1px solid var(--rule);
+  padding-top: 20px;
+  width: 100%;
+  max-width: 520px;
+}
+ 
+/* ── LAYOUT ── */
+.page { max-width: 860px; margin: 0 auto; padding: 80px 40px; }
+.section { margin-bottom: 80px; padding-bottom: 80px; border-bottom: 1px solid var(--rule); }
+.section:last-child { border-bottom: none; }
+.section-eyebrow {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-eyebrow::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
+.section-title { font-size: 2rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.3; margin-bottom: 28px; }
+.section-body { color: var(--ink2); font-size: 0.95rem; line-height: 2; }
+.section-body p + p { margin-top: 16px; }
+ 
+/* ── NAMING STORY ── */
+.name-story {
+  background: var(--ink);
+  color: var(--paper);
+  padding: 56px 48px;
+  margin: 36px 0;
+  position: relative;
+  overflow: hidden;
+}
+.name-story::before {
+  content: 'H';
+  position: absolute;
+  right: -20px; top: -20px;
+  font-size: 200px;
+  font-weight: 900;
+  color: rgba(255,255,255,0.03);
+  line-height: 1;
+}
+.name-story-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  color: var(--gold2);
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.name-decompose {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 36px;
+}
+.name-col { }
+.name-col-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: #666;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.name-letters {
+  display: flex;
+  gap: 0;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+.name-letter {
+  font-size: 2.8rem;
+  font-weight: 900;
+  line-height: 1;
+  color: #555;
+  letter-spacing: -0.02em;
+}
+.name-letter.lit {
+  color: var(--gold2);
+}
+.name-letter-sub {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.7rem;
+  color: #666;
+  margin-top: 6px;
+  letter-spacing: 0.1em;
+}
+.name-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #444;
+  padding-top: 20px;
+}
+.name-result {
+  border-top: 1px solid #333;
+  padding-top: 24px;
+}
+.name-result-word {
+  font-size: 3.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  margin-bottom: 12px;
+}
+.name-result-word .ho { color: var(--gold2); }
+.name-result-word .he { color: #c4b050; }
+.name-result-word .to { color: #7eb8a4; }
+.name-result-desc {
+  font-size: 0.85rem;
+  color: #888;
+  line-height: 1.8;
+  font-family: 'Noto Serif JP', serif;
+}
+ 
+/* ── PULL QUOTE ── */
+.pull-quote {
+  border-left: 3px solid var(--gold2);
+  padding: 16px 28px;
+  margin: 36px 0;
+  background: var(--paper2);
+}
+.pull-quote p { font-size: 1.1rem; font-weight: 700; line-height: 1.7; color: var(--ink); }
+.pull-quote cite { font-family: 'Inconsolata', monospace; font-size: 0.68rem; color: var(--ink3); letter-spacing: 0.15em; display: block; margin-top: 8px; }
+ 
+/* ── CONCEPT GRID ── */
+.concept-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  margin: 36px 0;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+}
+.concept-cell { background: var(--paper); padding: 24px 28px; }
+.concept-cell-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.concept-cell-body { font-size: 0.9rem; line-height: 1.8; color: var(--ink2); }
+ 
+/* ── CONTRAST TABLE ── */
+.contrast-table { width: 100%; border-collapse: collapse; margin: 36px 0; font-size: 0.88rem; }
+.contrast-table th {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--ink);
+}
+.contrast-table td { padding: 12px 16px; border-bottom: 1px solid var(--rule); color: var(--ink2); line-height: 1.6; }
+.contrast-table tr:last-child td { border-bottom: none; }
+.contrast-table td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+.contrast-table .hoheto-col { color: var(--teal); font-weight: 700; }
+ 
+/* ── MECHANICS ── */
+.mechanic-list { list-style: none; margin: 28px 0; }
+.mechanic-list li { display: flex; gap: 20px; padding: 20px 0; border-bottom: 1px solid var(--rule); align-items: flex-start; }
+.mechanic-list li:first-child { padding-top: 0; }
+.mechanic-num { font-family: 'Inconsolata', monospace; font-size: 0.72rem; color: var(--gold); letter-spacing: 0.1em; min-width: 36px; padding-top: 3px; font-weight: 600; }
+.mechanic-title { font-weight: 700; margin-bottom: 4px; font-size: 0.95rem; }
+.mechanic-body { font-size: 0.88rem; color: var(--ink3); line-height: 1.8; }
+ 
+/* ── BRAND BLOCK ── */
+.brand-block { background: var(--ink); color: var(--paper); padding: 48px; margin: 36px 0; }
+.brand-block .main-name { font-size: 4rem; font-weight: 900; letter-spacing: -0.02em; line-height: 1; margin-bottom: 8px; }
+.brand-block .main-name .ho { color: var(--gold2); }
+.brand-block .main-name .he { color: #c4b050; }
+.brand-block .main-name .to { color: #7eb8a4; }
+.brand-symbol { font-size: 1.2rem; color: #555; margin-bottom: 20px; font-family: 'Noto Serif JP', serif; }
+.brand-variants { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid #333; }
+.brand-variant { font-family: 'Inconsolata', monospace; font-size: 0.78rem; letter-spacing: 0.1em; color: #888; }
+.brand-variant span { color: var(--paper); }
+ 
+/* ── ROADMAP ── */
+.roadmap { position: relative; margin: 36px 0; padding-left: 28px; }
+.roadmap::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 1px; background: var(--rule); }
+.roadmap-item { position: relative; padding: 0 0 36px 32px; }
+.roadmap-item::before { content: ''; position: absolute; left: -4px; top: 8px; width: 8px; height: 8px; border-radius: 50%; background: var(--paper); border: 2px solid var(--gold); }
+.roadmap-item:last-child { padding-bottom: 0; }
+.roadmap-phase { font-family: 'Inconsolata', monospace; font-size: 0.62rem; letter-spacing: 0.2em; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+.roadmap-title { font-weight: 700; margin-bottom: 6px; }
+.roadmap-body { font-size: 0.88rem; color: var(--ink3); line-height: 1.8; }
+ 
+/* ── IROHA SEQUENCE ── */
+.iroha-seq {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  line-height: 2.2;
+  color: var(--ink3);
+  padding: 28px 32px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  margin: 28px 0;
+}
+.iroha-seq .dim { color: var(--rule); }
+.iroha-seq .lit-ho { color: var(--gold2); font-weight: 700; }
+.iroha-seq .lit-he { color: #9a8a22; font-weight: 700; }
+.iroha-seq .lit-to { color: var(--teal); font-weight: 700; }
+ 
+/* ── FOOTER ── */
+.doc-footer {
+  background: var(--paper2);
+  border-top: 1px solid var(--rule);
+  padding: 40px;
+  text-align: center;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.7rem;
+  color: var(--ink3);
+  letter-spacing: 0.15em;
+}
+.doc-footer .logo-footer { font-family: 'Noto Serif JP', serif; font-size: 2rem; font-weight: 900; color: var(--ink); margin-bottom: 8px; }
+.doc-footer .logo-footer .ho { color: var(--gold2); }
+.doc-footer .logo-footer .he { color: #9a8a22; }
+.doc-footer .logo-footer .to { color: var(--teal); }
+ 
+@media (max-width: 600px) {
+  .cover { padding: 60px 6vw; }
+  .cover::before { font-size: 28vw; }
+  .concept-grid { grid-template-columns: 1fr; }
+  .name-decompose { grid-template-columns: 1fr; }
+  .page { padding: 60px 20px; }
+  .name-story { padding: 32px 24px; }
+  .name-result-word { font-size: 2.5rem; }
+  .brand-block { padding: 32px 24px; }
+  .brand-block .main-name { font-size: 2.8rem; }
+}
+</style>
+</head>
+<body>
+ 
+<!-- COVER -->
+<div class="cover">
+  <div style="margin-bottom:40px">
+    <img src="../mascot.png" alt="はにほ" style="width:280px;max-width:50%;height:auto;opacity:0.88">
+  </div>
+  <div class="cover-eyebrow">Concept Document — 2026</div>
+  <div class="cover-title">
+    <span class="accent">Ho</span>he<span class="accent">to</span>
+  </div>
+  <div class="cover-sub">
+    古書店での偶然の出会いのように—<br>
+    関心が先にあり、人は後から静かに現れる。<br>
+    新しい知的コミュニティのための設計書。
+  </div>
+  <div class="cover-meta">CONFIDENTIAL &nbsp;·&nbsp; HOHETO Inc. &nbsp;·&nbsp; CONCEPT STAGE</div>
+</div>
+ 
+<div class="page">
+ 
+  <!-- 01 ORIGIN -->
+  <div class="section">
+    <div class="section-eyebrow">Origin</div>
+    <div class="section-title">なぜ今、これが必要か</div>
+    <div class="section-body">
+      <p>2001年、日本にひとつのサービスが生まれた。ブログもSNSも存在しなかった時代に、「関心でつながる」という発想を実装した<strong>関心空間</strong>だ。グッドデザイン賞を受賞し、約6万人のユーザーが集った。しかし2016年、「情報と情報がつながる場としての役目を終えた」という言葉とともに閉鎖された。</p>
+      <p>その後、SNSは爆発的に普及した。しかしFacebookは人間関係の維持装置となり、Xは速度と炎上の場になり、Instagramはビジュアル競争の場になった。どれも「人が先、関心は後」という構造だ。</p>
+      <p>関心空間が問いかけていたことは、まだ誰も完全には答えていない。Hohetoはその問いへの、現代的な答えだ。</p>
+    </div>
+ 
+    <div class="pull-quote">
+      <p>「自分のために書いていたら、<br>同じ場所に立っている人がいた。」</p>
+      <cite>— Hoheto が実現したい体験</cite>
+    </div>
+  </div>
+ 
+  <!-- 02 NAMING -->
+  <div class="section">
+    <div class="section-eyebrow">Naming Story</div>
+    <div class="section-title">Hohetoという名前の必然</div>
+    <div class="section-body">
+      <p>この名前には、三つの必然が重なっている。</p>
+    </div>
+ 
+    <div class="iroha-seq">
+      <span class="dim">い ろ は に </span><span class="lit-ho">ほ</span><span class="lit-he"> へ </span><span class="lit-to">と</span><span class="dim"> ち り ぬ る を</span>
+    </div>
+ 
+    <div class="name-story">
+      <div class="name-story-label">Three Layers of Inevitability</div>
+      <div class="name-decompose">
+        <div class="name-col">
+          <div class="name-col-label">Founder's Name</div>
+          <div class="name-letters">
+            <span class="name-letter lit">H</span>
+            <span class="name-letter">orie &nbsp;</span>
+            <span class="name-letter lit">H</span>
+            <span class="name-letter">ayat</span>
+            <span class="name-letter lit">o</span>
+          </div>
+          <div class="name-letter-sub">堀江 勇人 — 創業者の名前</div>
+        </div>
+        <div class="name-arrow">→</div>
+        <div class="name-col">
+          <div class="name-col-label">Cultural Root</div>
+          <div class="name-letters">
+            <span class="name-letter">いろはに</span>
+            <span class="name-letter lit">ほへと</span>
+          </div>
+          <div class="name-letter-sub">いろは歌 — 日本語の源流</div>
+        </div>
+      </div>
+      <div class="name-result">
+        <div class="name-result-word">
+          <span class="ho">Ho</span><span class="he">he</span><span class="to">to</span>
+        </div>
+        <div class="name-result-desc">
+          創業者の名（Horie Hayato）の頭音が、いろは歌の「ほへと」と重なる。<br>
+          個人の必然と文化的な文脈が、一つの名前に収束した。
+        </div>
+      </div>
+    </div>
+ 
+    <div class="section-body">
+      <p><strong>第一の必然 — いろはの続き。</strong>「いろはにほへと」は平安時代から続く、すべての仮名文字を網羅した歌だ。「いろは」が始まりなら、「ほへと」はその次へ向かう言葉。関心空間の精神を受け継ぎ、その先へ進むというコンセプトと完璧に一致する。</p>
+      <p><strong>第二の必然 — 創業者の名前。</strong>Horie Hayatoの頭音Ho・H・oが「ほへと」の三音と重なる。名前がサービス名に宿るという、語り継がれるブランドストーリーが生まれた。</p>
+      <p><strong>第三の必然 — 意味の空白。</strong>「ほへと」は意味を持たない音の連なりだ。だからこそ、Hohetoというサービスが新しい意味を吹き込むことができる。名前が白紙であることが、最大の強みになる。</p>
+    </div>
+  </div>
+ 
+  <!-- 03 CONCEPT -->
+  <div class="section">
+    <div class="section-eyebrow">Core Concept</div>
+    <div class="section-title">関心が先、人は後から</div>
+    <div class="section-body">
+      <p>Hohetoは「書くこと」を中心に置く。投稿ではなく、育てること。誰かに見せるために書くのではなく、自分のために深く書いていたら、静かに同じ関心を持つ人が現れる—そういう場所だ。</p>
+    </div>
+ 
+    <div class="concept-grid">
+      <div class="concept-cell">
+        <div class="concept-cell-label">書く体験</div>
+        <div class="concept-cell-body">書いている間は完全に一人。邪魔されない、静かなアーカイブ。noteのように長く深く書ける。</div>
+      </div>
+      <div class="concept-cell">
+        <div class="concept-cell-label">出会いの構造</div>
+        <div class="concept-cell-body">アルゴリズムなし。自分でつけたタグが他者のタグと重なったときだけ、接点が生まれる。</div>
+      </div>
+      <div class="concept-cell">
+        <div class="concept-cell-label">反応の設計</div>
+        <div class="concept-cell-body">いいね数もフォロワー数もない。「この関心を私も持っています」という共鳴だけ。数は非表示。</div>
+      </div>
+      <div class="concept-cell">
+        <div class="concept-cell-label">つながりの単位</div>
+        <div class="concept-cell-body">人をフォローするのではなく、キーワードに引き寄せられる。「この人が好き」でなく「この関心が好き」。</div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- 04 DIFFERENTIATION -->
+  <div class="section">
+    <div class="section-eyebrow">Differentiation</div>
+    <div class="section-title">既存SNSとの根本的な違い</div>
+ 
+    <table class="contrast-table">
+      <tr>
+        <th>プラットフォーム</th>
+        <th>起点</th>
+        <th>反応</th>
+        <th>蓄積</th>
+      </tr>
+      <tr><td>Facebook</td><td>人間関係</td><td>いいね・コメント</td><td>流れる</td></tr>
+      <tr><td>X / Twitter</td><td>瞬間の発言</td><td>RT・返信・数字</td><td>流れる</td></tr>
+      <tr><td>Instagram</td><td>ビジュアル</td><td>いいね・フォロワー</td><td>流れる</td></tr>
+      <tr><td>note</td><td>記事・発信</td><td>スキ・フォロー</td><td>残る（個人）</td></tr>
+      <tr>
+        <td class="hoheto-col">Hoheto</td>
+        <td class="hoheto-col">関心・キーワード</td>
+        <td class="hoheto-col">共鳴（数字なし）</td>
+        <td class="hoheto-col">残る・育つ・つながる</td>
+      </tr>
+    </table>
+  </div>
+ 
+  <!-- 05 MECHANICS -->
+  <div class="section">
+    <div class="section-eyebrow">Mechanics</div>
+    <div class="section-title">五つの設計原則</div>
+ 
+    <ul class="mechanic-list">
+      <li>
+        <span class="mechanic-num">ほ</span>
+        <div>
+          <div class="mechanic-title">キーワードを育てる</div>
+          <div class="mechanic-body">投稿の単位は「キーワード」。モノ、場所、概念、記憶—何でもよい。一度書いて終わりではなく、時間をかけて加筆・深化させる生きたドキュメント。</div>
+        </div>
+      </li>
+      <li>
+        <span class="mechanic-num">へ</span>
+        <div>
+          <div class="mechanic-title">熟成してから回廊へ</div>
+          <div class="mechanic-body">書いてすぐ公開ではなく、自分だけが読み返す期間を経て、満足したときに初めて他者の目に触れる。衝動的な発信を防ぐ構造。</div>
+        </div>
+      </li>
+      <li>
+        <span class="mechanic-num">と</span>
+        <div>
+          <div class="mechanic-title">タグだけが道をつなぐ</div>
+          <div class="mechanic-body">アルゴリズムによるレコメンドなし。自分でつけたタグが他者のタグと重なったときだけ、静かに通知が届く。偶然性は人工的に演出しない。</div>
+        </div>
+      </li>
+      <li>
+        <span class="mechanic-num">ち</span>
+        <div>
+          <div class="mechanic-title">数字を消す</div>
+          <div class="mechanic-body">フォロワー数、いいね数、閲覧数—すべて非表示。唯一の反応は「共鳴」ボタンのみ。書く動機が承認欲求ではなく純粋な関心であるための設計。</div>
+        </div>
+      </li>
+      <li>
+        <span class="mechanic-num">り</span>
+        <div>
+          <div class="mechanic-title">関心の時間軸を持つ</div>
+          <div class="mechanic-body">関心は変化する。「以前はこう思っていたが今はこう」という変容が記録され、自分も他者もその軌跡を辿れる。静的なプロフィールではなく、動的な知的自伝。</div>
+        </div>
+      </li>
+    </ul>
+  </div>
+ 
+  <!-- 06 BRAND -->
+  <div class="section">
+    <div class="section-eyebrow">Brand</div>
+    <div class="section-title">ブランドの展開</div>
+ 
+    <div class="brand-block">
+      <div class="brand-symbol">@ゐroh@ → <span style="color:var(--gold2)">Hoheto</span></div>
+      <div class="main-name">
+        <span class="ho">Ho</span><span class="he">he</span><span class="to">to</span>
+      </div>
+      <div style="color:#888;font-size:0.85rem;line-height:1.9;margin-top:16px;font-family:'Noto Serif JP',serif">
+        「いろは」をシンボルに、「ほへと」を正式名に。<br>
+        二つで一つの世界観をなす。
+      </div>
+      <div class="brand-variants">
+        <div class="brand-variant">正式名称 <span>Hoheto</span></div>
+        <div class="brand-variant">法人名 <span>Hoheto Inc.</span></div>
+        <div class="brand-variant">シンボル <span>@ゐroh@</span></div>
+        <div class="brand-variant">ドメイン候補 <span>hoheto.com</span></div>
+        <div class="brand-variant">　 <span>hoheto.social</span></div>
+        <div class="brand-variant">市場 <span>Global</span></div>
+      </div>
+    </div>
+ 
+    <div class="section-body">
+      <p>「ほへと」は意味を持たない音の連なりだ。だからこそ新しい意味を吹き込むことができる。Wabi-sabi、Ikigaiのように、言葉ごと国際展開できる可能性を持つ。発音は "Ho-he-to" と三音節で明快、英語圏でも自然に読める。</p>
+    </div>
+  </div>
+ 
+  <!-- 07 ROADMAP -->
+  <div class="section">
+    <div class="section-eyebrow">Roadmap</div>
+    <div class="section-title">三つのフェーズ</div>
+ 
+    <div class="roadmap">
+      <div class="roadmap-item">
+        <div class="roadmap-phase">Phase 1 — 種を蒔く</div>
+        <div class="roadmap-title">個人アーカイブとしての完成</div>
+        <div class="roadmap-body">まず「極私的関心空間」として自分一人で使える道具を完成させる。キーワード登録・タグ・熱量・タイムライン・AI分析。ユーザー自身が最初の証人になる。</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-phase">Phase 2 — 回廊を開く</div>
+        <div class="roadmap-title">静かなコミュニティの形成</div>
+        <div class="roadmap-body">招待制で少数のユーザーに開放。タグによる偶然の出会い、共鳴機能、キーワード単位の対話を実装。数字ではなく質でつながるコミュニティを育てる。</div>
+      </div>
+      <div class="roadmap-item">
+        <div class="roadmap-phase">Phase 3 — 宇宙へ</div>
+        <div class="roadmap-title">国際展開・会社化</div>
+        <div class="roadmap-body">Hoheto Inc.として法人化。多言語対応、APIの公開、持続可能なビジネスモデル（広告なし・サブスクリプション）の確立。関心の地図を世界規模で描く。</div>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- 08 VISION -->
+  <div class="section">
+    <div class="section-eyebrow">Vision</div>
+    <div class="section-title">私たちが作りたい世界</div>
+    <div class="section-body">
+      <p>インターネットはかつて、偶然の発見に満ちていた。検索していないものに出会い、知らなかった人の言葉に心を動かされた。アルゴリズムはその偶然性を、予測可能な快楽に変えてしまった。</p>
+      <p>Hohetoは、その偶然性を人間の手に戻す試みだ。自分の関心を丁寧に言語化し、静かに世界に置いておく。そこに同じ場所に立っている誰かが、ある日静かに現れる。</p>
+      <p>古書店で、見知らぬ人が同じ本を手にしている瞬間のような出会い。それがHohetoの目指す体験だ。</p>
+    </div>
+ 
+    <div class="pull-quote">
+      <p>いろはにほへと　ちりぬるを—<br>
+      散っても、また集まる。<br>
+      すべての関心が、ここへと向かう。</p>
+      <cite>— Hoheto tagline</cite>
+    </div>
+  </div>
+ 
+</div>
+ 
+<div class="doc-footer">
+  <div class="logo-footer">
+    <span class="ho">Ho</span><span class="he">he</span><span class="to">to</span>
+  </div>
+  HOHETO INC. — CONCEPT DOCUMENT &nbsp;·&nbsp; CONFIDENTIAL &nbsp;·&nbsp; 2026
+</div>
+ 
+</body>
+</html>
