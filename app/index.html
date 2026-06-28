@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoheto — ほへと</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
+ 
+:root {
+  --paper: #f5f0e4;
+  --paper2: #ede8dc;
+  --paper3: #e4ddd0;
+  --ink: #1a1510;
+  --ink2: #3a3020;
+  --ink3: #6a5a40;
+  --ink4: #9a8a70;
+  --rule: #cec6b0;
+  --rule2: #ddd6c0;
+  --gold: #9a7a2a;
+  --gold2: #c4a050;
+  --gold3: #e8c870;
+  --teal: #2a6a5a;
+  --teal2: #4a9a8a;
+  --red: #8a2a1a;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  min-height: 100vh;
+  overflow: hidden;
+}
+ 
+/* ── HEADER ── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 52px;
+  background: var(--paper);
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+}
+.logo {
+  font-size: 1.1rem; font-weight: 900;
+  letter-spacing: 0.06em; color: var(--ink);
+}
+.logo .at { color: var(--gold2); }
+ 
+/* VIEW SWITCHER */
+.view-switcher {
+  display: flex; gap: 2px;
+  background: var(--paper3);
+  border: 1px solid var(--rule);
+  padding: 3px;
+}
+.view-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.7rem; letter-spacing: 0.1em;
+  padding: 5px 14px;
+  background: none; border: none; cursor: pointer;
+  color: var(--ink4); transition: all 0.18s;
+  display: flex; align-items: center; gap: 5px;
+}
+.view-btn.active {
+  background: var(--paper);
+  color: var(--ink);
+  box-shadow: 0 1px 3px rgba(26,21,16,0.1);
+}
+.view-btn:hover:not(.active) { color: var(--ink2); }
+ 
+.header-right {
+  display: flex; align-items: center; gap: 12px;
+}
+.growth-badge {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem; color: var(--teal);
+  letter-spacing: 0.08em;
+}
+.avatar {
+  width: 28px; height: 28px;
+  background: var(--paper3);
+  border: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-family: 'Inconsolata', monospace;
+  color: var(--ink3); cursor: pointer;
+}
+ 
+/* ── MAIN LAYOUT ── */
+.app {
+  position: fixed;
+  top: 52px; left: 0; right: 0; bottom: 0;
+}
+ 
+/* ── VIEW PANELS ── */
+.view-panel {
+  display: none;
+  width: 100%; height: 100%;
+}
+.view-panel.active { display: flex; }
+ 
+/* ══════════════════════════════════
+   VIEW A: 書く（WRITE）
+══════════════════════════════════ */
+#view-write {
+  flex-direction: row;
+}
+ 
+/* Sidebar: keyword list */
+.kw-sidebar {
+  width: 260px; flex-shrink: 0;
+  border-right: 1px solid var(--rule);
+  display: flex; flex-direction: column;
+  background: var(--paper2);
+  overflow: hidden;
+}
+.kw-sidebar-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.sidebar-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem; letter-spacing: 0.2em;
+  color: var(--ink4); text-transform: uppercase;
+}
+.new-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem; padding: 4px 10px;
+  background: var(--gold2); color: var(--paper);
+  border: none; cursor: pointer; letter-spacing: 0.05em;
+  transition: background 0.15s;
+}
+.new-btn:hover { background: var(--gold); }
+ 
+.kw-list { flex: 1; overflow-y: auto; padding: 8px; }
+.kw-list::-webkit-scrollbar { width: 3px; }
+.kw-list::-webkit-scrollbar-thumb { background: var(--rule); }
+ 
+.kw-card {
+  padding: 10px 12px;
+  border: 0.5px solid var(--rule2);
+  margin-bottom: 5px;
+  cursor: pointer;
+  background: var(--paper);
+  transition: all 0.15s;
+}
+.kw-card:hover, .kw-card.active {
+  border-color: var(--gold2);
+  background: var(--paper);
+}
+.kw-card.active { border-left: 2px solid var(--gold2); }
+.kw-card-title {
+  font-size: 0.88rem; font-weight: 700;
+  margin-bottom: 3px; color: var(--ink);
+}
+.kw-card-tags {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem; color: var(--teal);
+  margin-bottom: 4px;
+}
+.kw-card-meta {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.kw-card-status {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem; padding: 1px 6px;
+  letter-spacing: 0.1em;
+}
+.status-draft { color: var(--ink4); border: 0.5px solid var(--rule); }
+.status-pub { color: var(--teal); border: 0.5px solid var(--teal); }
+.heat-dots { display: flex; gap: 2px; }
+.heat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--rule); }
+.heat-dot.on { background: var(--gold2); }
+ 
+/* Editor */
+.editor-area {
+  flex: 1;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.editor-toolbar {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--rule);
+  display: flex; align-items: center; gap: 10px;
+  background: var(--paper);
+}
+.tool-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem; padding: 4px 10px;
+  background: none; border: 0.5px solid var(--rule);
+  color: var(--ink3); cursor: pointer; transition: all 0.15s;
+}
+.tool-btn:hover { border-color: var(--gold2); color: var(--gold2); }
+.tool-btn.primary {
+  background: var(--ink); color: var(--paper);
+  border-color: var(--ink);
+}
+.tool-btn.primary:hover { background: var(--ink2); }
+.tool-sep { width: 1px; height: 20px; background: var(--rule); }
+ 
+.editor-scroll { flex: 1; overflow-y: auto; padding: 32px 40px; }
+.editor-scroll::-webkit-scrollbar { width: 3px; }
+.editor-scroll::-webkit-scrollbar-thumb { background: var(--rule); }
+ 
+.editor-title {
+  font-size: 1.6rem; font-weight: 700;
+  border: none; background: none;
+  color: var(--ink); font-family: 'Noto Serif JP', serif;
+  width: 100%; outline: none;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--rule2);
+  padding-bottom: 12px;
+  line-height: 1.4;
+}
+.editor-title::placeholder { color: var(--rule); }
+ 
+.editor-body {
+  font-size: 0.95rem; line-height: 2.2;
+  border: none; background: none;
+  color: var(--ink2); font-family: 'Noto Serif JP', serif;
+  width: 100%; outline: none; resize: none;
+  min-height: 280px;
+}
+.editor-body::placeholder { color: var(--rule); }
+ 
+.editor-meta {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--rule2);
+  display: flex; gap: 16px; align-items: flex-start;
+  flex-wrap: wrap;
+}
+.meta-field { display: flex; flex-direction: column; gap: 5px; }
+.meta-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem; letter-spacing: 0.2em;
+  color: var(--ink4); text-transform: uppercase;
+}
+.meta-input {
+  background: var(--paper2);
+  border: 0.5px solid var(--rule);
+  color: var(--ink);
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.78rem; padding: 6px 10px;
+  outline: none; transition: border-color 0.15s;
+  width: 220px;
+}
+.meta-input:focus { border-color: var(--gold2); }
+.heat-selector { display: flex; gap: 5px; align-items: center; margin-top: 2px; }
+.hs-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--rule); background: none;
+  cursor: pointer; transition: all 0.15s;
+  font-family: 'Inconsolata', monospace; font-size: 0.62rem;
+  color: var(--ink4); display: flex; align-items: center; justify-content: center;
+}
+.hs-btn.active { border-color: var(--gold2); background: var(--gold2); color: var(--paper); }
+ 
+/* Right panel: resonance */
+.resonance-panel {
+  width: 220px; flex-shrink: 0;
+  border-left: 1px solid var(--rule);
+  background: var(--paper2);
+  overflow-y: auto; padding: 16px 14px;
+}
+.resonance-panel::-webkit-scrollbar { width: 3px; }
+.res-title {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem; letter-spacing: 0.2em;
+  color: var(--ink4); text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.res-item {
+  padding: 10px; border: 0.5px solid var(--rule2);
+  margin-bottom: 7px; background: var(--paper);
+  cursor: pointer; transition: all 0.15s;
+}
+.res-item:hover { border-color: var(--teal); }
+.res-kw { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; }
+.res-user { font-family: 'Inconsolata', monospace; font-size: 0.65rem; color: var(--ink4); margin-bottom: 4px; }
+.res-conn { font-family: 'Inconsolata', monospace; font-size: 0.6rem; padding: 1px 6px; display: inline-block; }
+.conn-root { color: #c47a3a; border: 0.5px solid #c47a3a; }
+.conn-trunk { color: #8ab83a; border: 0.5px solid #8ab83a; }
+.conn-branch { color: #4a9a8a; border: 0.5px solid #4a9a8a; }
+.conn-leaf { color: #6a9a5a; border: 0.5px solid #6a9a5a; }
+ 
+/* ══════════════════════════════════
+   VIEW B: 森（FOREST）
+══════════════════════════════════ */
+#view-forest {
+  position: relative;
+  background: #080b06;
+}
+#forest-canvas {
+  position: absolute; top: 0; left: 0;
+  width: calc(100% - 200px); height: 100%;
+}
+.forest-legend {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 200px;
+  background: rgba(8,11,6,0.96);
+  border-left: 1px solid #1a2018;
+  padding: 16px 14px; overflow-y: auto;
+}
+.forest-legend::-webkit-scrollbar { width: 3px; }
+.fl-title {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem; letter-spacing: 0.2em;
+  color: #c4943a; text-transform: uppercase; margin-bottom: 12px;
+}
+.fl-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.fl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
+.fl-label { font-size: 0.75rem; color: #a09080; line-height: 1.7; }
+.fl-label strong { display: block; font-size: 0.78rem; color: #c8c0b0; font-weight: 700; margin-bottom: 1px; }
+.forest-controls {
+  position: absolute; bottom: 14px; left: 14px;
+  display: flex; gap: 6px;
+}
+.fc-btn {
+  font-family: 'Inconsolata', monospace; font-size: 0.65rem;
+  padding: 5px 10px; background: rgba(8,11,6,0.9);
+  border: 1px solid #1a2018; color: #5a5040;
+  cursor: pointer; transition: all 0.15s; letter-spacing: 0.1em;
+}
+.fc-btn:hover, .fc-btn.active { border-color: #c4943a; color: #c4943a; }
+.forest-stats {
+  position: absolute; bottom: 14px; right: 214px;
+  font-family: 'Inconsolata', monospace; font-size: 0.62rem;
+  color: #3a3828; letter-spacing: 0.1em;
+}
+ 
+/* ══════════════════════════════════
+   VIEW C: 地図（MAP）
+══════════════════════════════════ */
+#view-map {
+  position: relative;
+  background: var(--paper);
+}
+#map-canvas {
+  position: absolute; top: 0; left: 0;
+  width: calc(100% - 200px); height: 100%;
+}
+.map-legend {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 200px;
+  background: var(--paper2);
+  border-left: 1px solid var(--rule);
+  padding: 16px 14px; overflow-y: auto;
+}
+.map-legend::-webkit-scrollbar { width: 3px; }
+.ml-title {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem; letter-spacing: 0.2em;
+  color: var(--gold); text-transform: uppercase; margin-bottom: 12px;
+}
+.map-tag-item {
+  padding: 7px 10px; border: 0.5px solid var(--rule2);
+  margin-bottom: 5px; cursor: pointer;
+  font-size: 0.78rem; transition: all 0.15s;
+  background: var(--paper);
+}
+.map-tag-item:hover { border-color: var(--gold2); }
+.map-tag-count {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem; color: var(--ink4); float: right;
+}
+ 
+/* EMPTY STATE */
+.empty-hint {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center; pointer-events: none;
+  color: var(--ink4);
+}
+.empty-hint .em { font-size: 2rem; margin-bottom: 10px; opacity: 0.3; }
+.empty-hint p { font-size: 0.8rem; line-height: 2; }
+ 
+/* TOAST */
+.toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: var(--paper);
+  font-family: 'Inconsolata', monospace; font-size: 0.72rem;
+  letter-spacing: 0.1em; padding: 10px 20px;
+  opacity: 0; transition: all 0.3s; pointer-events: none;
+  z-index: 500;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+ 
+<!-- HEADER -->
+<header>
+  <div class="logo"><span class="at">@</span>ゐroh<span class="at">@</span></div>
+ 
+  <div class="view-switcher">
+    <button class="view-btn active" id="btn-write" onclick="switchView('write')">
+      植える
+    </button>
+    <button class="view-btn" id="btn-forest" onclick="switchView('forest')">
+      森林浴
+    </button>
+    <button class="view-btn" id="btn-map" onclick="switchView('map')">
+      すん
+    </button>
+  </div>
+ 
+  <div class="header-right">
+    <span class="growth-badge">🌿 二葉（7投稿）</span>
+    <div class="avatar">H</div>
+  </div>
+</header>
+ 
+<div class="app">
+ 
+  <!-- ══ VIEW A: 書く ══ -->
+  <div id="view-write" class="view-panel active">
+ 
+    <!-- Keyword List Sidebar -->
+    <div class="kw-sidebar">
+      <div class="kw-sidebar-header">
+        <span class="sidebar-label">関心ごと</span>
+        <button class="new-btn" onclick="newKeyword()">＋ 植える</button>
+      </div>
+      <div class="kw-list" id="kw-list"></div>
+    </div>
+ 
+    <!-- Editor -->
+    <div class="editor-area">
+      <div class="editor-toolbar">
+        <button class="tool-btn" onclick="saveDraft()">下書き保存</button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn primary" onclick="publish()">公開する</button>
+        <div class="tool-sep"></div>
+        <button class="tool-btn" onclick="deleteKw()" style="color:var(--red);border-color:var(--red)">削除</button>
+      </div>
+      <div class="editor-scroll">
+        <input type="text" class="editor-title" id="ed-title" placeholder="キーワードを植えてください…">
+        <textarea class="editor-body" id="ed-body" placeholder="なぜこれに関心があるのか、どんなことを感じているのか、じっくりと書いてください。邪魔されない、あなただけの空間です。"></textarea>
+        <div class="editor-meta">
+          <div class="meta-field">
+            <span class="meta-label">タグ</span>
+            <input type="text" class="meta-input" id="ed-tags" placeholder="旅, 記憶, 孤独…">
+          </div>
+          <div class="meta-field">
+            <span class="meta-label">熱量</span>
+            <div class="heat-selector" id="heat-selector">
+              <button class="hs-btn" data-v="1" onclick="setHeat(1)">1</button>
+              <button class="hs-btn active" data-v="2" onclick="setHeat(2)">2</button>
+              <button class="hs-btn" data-v="3" onclick="setHeat(3)">3</button>
+              <button class="hs-btn" data-v="4" onclick="setHeat(4)">4</button>
+              <button class="hs-btn" data-v="5" onclick="setHeat(5)">5</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Resonance Panel -->
+    <div class="resonance-panel">
+      <div class="res-title">回廊 — つながり</div>
+      <div id="res-list"></div>
+    </div>
+ 
+  </div>
+ 
+  <!-- ══ VIEW B: 森 ══ -->
+  <div id="view-forest" class="view-panel">
+    <canvas id="forest-canvas"></canvas>
+    <div class="forest-legend">
+      <div class="fl-title">つながりの深さ</div>
+      <div class="fl-item">
+        <div class="fl-dot" style="background:#8B4513"></div>
+        <div class="fl-label"><strong style="color:#c47a3a">根</strong>本質が同じ。AIが深層を読んで判定。</div>
+      </div>
+      <div class="fl-item">
+        <div class="fl-dot" style="background:#6B8E23"></div>
+        <div class="fl-label"><strong style="color:#8ab83a">幹</strong>大きなテーマが共鳴。</div>
+      </div>
+      <div class="fl-item">
+        <div class="fl-dot" style="background:#4a9a7a"></div>
+        <div class="fl-label"><strong style="color:#6ab89a">枝</strong>具体的な興味が重なる。</div>
+      </div>
+      <div class="fl-item">
+        <div class="fl-dot" style="background:#4a7a3a"></div>
+        <div class="fl-label"><strong style="color:#6a9a5a">葉</strong>偶然の細かい一致。</div>
+      </div>
+      <div style="height:1px;background:#1a2018;margin:12px 0"></div>
+      <div class="fl-title">成長</div>
+      <div style="font-size:0.72rem;color:#6a6050;line-height:2.2">
+        🌰 種<br>🌱 芽<br>🌿 二葉<br>🍃 本葉<br>🌲 若木<br>🌳 大樹
+      </div>
+      <div style="height:1px;background:#1a2018;margin:12px 0"></div>
+      <div class="fl-title" id="forest-selected-title">木をクリック</div>
+      <div id="forest-selected-body" style="font-size:0.72rem;color:#6a6050;line-height:1.9">
+        クリックするとつながりの詳細が表示されます
+      </div>
+    </div>
+    <div class="forest-controls">
+      <button class="fc-btn active" id="fc-all" onclick="setForestFilter('all')">全て</button>
+      <button class="fc-btn" id="fc-root" onclick="setForestFilter('root')">根</button>
+      <button class="fc-btn" id="fc-trunk" onclick="setForestFilter('trunk')">幹</button>
+      <button class="fc-btn" id="fc-branch" onclick="setForestFilter('branch')">枝</button>
+      <button class="fc-btn" id="fc-leaf" onclick="setForestFilter('leaf')">葉</button>
+    </div>
+    <div class="forest-stats" id="forest-stats"></div>
+  </div>
+ 
+  <!-- ══ VIEW C: 地図 ══ -->
+  <div id="view-map" class="view-panel">
+    <canvas id="map-canvas"></canvas>
+    <div class="map-legend">
+      <div class="ml-title">タグの系譜</div>
+      <div id="map-tag-list"></div>
+    </div>
+  </div>
+ 
+</div>
+ 
+<div class="toast" id="toast"></div>
+ 
+<script>
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let keywords = [
+  { id:'1', title:'京都の古書店', body:'雨の日に迷い込んだ小さな古書店。棚の奥に眠る言葉たちが、静かに待っていた。何時間でもいられる場所。', tags:['京都','本','雨の日','記憶'], heat:4, status:'published', date:'2025.03.15' },
+  { id:'2', title:'深夜の珈琲', body:'誰もいない深夜に珈琲を淹れる。その香りと静けさだけが友達な時間。', tags:['珈琲','深夜','孤独','静けさ'], heat:3, status:'published', date:'2025.04.02' },
+  { id:'3', title:'孤独について', body:'孤独は欠乏ではなく、充満だと思う。', tags:['孤独','思索','哲学'], heat:5, status:'draft', date:'2025.05.10' },
+  { id:'4', title:'旅の記憶', body:'場所の記憶ではなく、その時の空気の記憶。', tags:['旅','記憶','匂い'], heat:4, status:'published', date:'2025.06.01' },
+  { id:'5', title:'余白のこと', body:'余白があるから、言葉が生きる。', tags:['余白','言葉','デザイン'], heat:3, status:'draft', date:'2025.06.20' },
+];
+ 
+const resonances = [
+  { id:'r1', kwId:'1', title:'神保町の古本屋', user:'@akiko', conn:'root', shared:'本・記憶' },
+  { id:'r2', kwId:'1', title:'活字の匂い', user:'@kenji', conn:'branch', shared:'本' },
+  { id:'r3', kwId:'2', title:'深夜3時の音楽', user:'@sato', conn:'trunk', shared:'深夜・孤独' },
+  { id:'r4', kwId:'4', title:'匂いの記憶', user:'@miki', conn:'root', shared:'旅・記憶・匂い' },
+];
+ 
+let selectedKwId = keywords[0].id;
+let currentHeat = 2;
+let forestFilter = 'all';
+let forestSelectedId = null;
+let forestPositions = {};
+let forestDrag = null, forestPanning = false;
+let forestOx = 0, forestOy = 0, forestScale = 1;
+let mapPositions = {};
+let mapDrag = null, mapPanning = false;
+let mapOx = 0, mapOy = 0, mapScale = 1;
+ 
+// ══════════════════════════════════════════════════
+// VIEW SWITCHING
+// ══════════════════════════════════════════════════
+function switchView(v) {
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  document.getElementById('btn-' + v).classList.add('active');
+  if (v === 'forest') { initForest(); drawForest(); }
+  if (v === 'map') { initMap(); drawMap(); }
+}
+ 
+// ══════════════════════════════════════════════════
+// VIEW A: WRITE
+// ══════════════════════════════════════════════════
+function renderKwList() {
+  const list = document.getElementById('kw-list');
+  list.innerHTML = '';
+  keywords.forEach(kw => {
+    const div = document.createElement('div');
+    div.className = 'kw-card' + (kw.id === selectedKwId ? ' active' : '');
+    const dots = Array.from({length:5}, (_,i) =>
+      `<div class="heat-dot ${i<kw.heat?'on':''}"></div>`).join('');
+    div.innerHTML = `
+      <div class="kw-card-title">${esc(kw.title)}</div>
+      <div class="kw-card-tags">${kw.tags.slice(0,3).join(' · ')}</div>
+      <div class="kw-card-meta">
+        <span class="kw-card-status status-${kw.status === 'published' ? 'pub' : 'draft'}">
+          ${kw.status === 'published' ? '公開' : '下書き'}
+        </span>
+        <div class="heat-dots">${dots}</div>
+      </div>`;
+    div.onclick = () => selectKw(kw.id);
+    list.appendChild(div);
+  });
+}
+ 
+function selectKw(id) {
+  selectedKwId = id;
+  const kw = keywords.find(k => k.id === id);
+  if (!kw) return;
+  document.getElementById('ed-title').value = kw.title;
+  document.getElementById('ed-body').value = kw.body;
+  document.getElementById('ed-tags').value = kw.tags.join(', ');
+  setHeat(kw.heat);
+  renderKwList();
+  renderResonances();
+}
+ 
+function renderResonances() {
+  const list = document.getElementById('res-list');
+  const related = resonances.filter(r => r.kwId === selectedKwId);
+  if (!related.length) {
+    list.innerHTML = '<div style="font-size:0.75rem;color:var(--ink4);line-height:1.9">公開すると同じ関心を持つ人が静かに現れます</div>';
+    return;
+  }
+  list.innerHTML = related.map(r => `
+    <div class="res-item">
+      <div class="res-kw">${esc(r.title)}</div>
+      <div class="res-user">${r.user}</div>
+      <span class="res-conn conn-${r.conn}">${connLabel(r.conn)}</span>
+      <div style="font-size:0.65rem;color:var(--ink4);margin-top:4px;font-family:'Inconsolata',monospace">「${r.shared}」</div>
+    </div>`).join('');
+}
+ 
+function connLabel(c) {
+  return { root:'根', trunk:'幹', branch:'枝', leaf:'葉' }[c] + 'でつながる';
+}
+ 
+function setHeat(v) {
+  currentHeat = v;
+  document.querySelectorAll('.hs-btn').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.v) === v);
+  });
+}
+ 
+function newKeyword() {
+  const id = Date.now().toString();
+  keywords.unshift({ id, title:'', body:'', tags:[], heat:3, status:'draft', date:new Date().toLocaleDateString('ja-JP') });
+  selectedKwId = id;
+  renderKwList();
+  document.getElementById('ed-title').value = '';
+  document.getElementById('ed-body').value = '';
+  document.getElementById('ed-tags').value = '';
+  setHeat(3);
+  document.getElementById('ed-title').focus();
+  renderResonances();
+}
+ 
+function saveDraft() {
+  saveCurrentKw('draft');
+  showToast('下書きを保存しました');
+}
+ 
+function publish() {
+  saveCurrentKw('published');
+  showToast('公開しました — 回廊へ出ました');
+}
+ 
+function saveCurrentKw(status) {
+  const kw = keywords.find(k => k.id === selectedKwId);
+  if (!kw) return;
+  kw.title = document.getElementById('ed-title').value;
+  kw.body = document.getElementById('ed-body').value;
+  kw.tags = document.getElementById('ed-tags').value.split(/[,、，\s]+/).map(t=>t.trim()).filter(Boolean);
+  kw.heat = currentHeat;
+  kw.status = status;
+  renderKwList();
+}
+ 
+function deleteKw() {
+  keywords = keywords.filter(k => k.id !== selectedKwId);
+  if (keywords.length) selectKw(keywords[0].id);
+  else {
+    selectedKwId = null;
+    document.getElementById('ed-title').value = '';
+    document.getElementById('ed-body').value = '';
+  }
+  renderKwList();
+  showToast('削除しました');
+}
+ 
+// ══════════════════════════════════════════════════
+// VIEW B: FOREST
+// ══════════════════════════════════════════════════
+const forestUsers = [
+  { id:'u1', name:'Hayato', handle:'@hayato', growth:7, emoji:'🌿', keywords:['京都','本','孤独','旅','記憶'], theme:'消えゆくものへの眼差し' },
+  { id:'u2', name:'Akiko', handle:'@akiko', growth:12, emoji:'🍃', keywords:['本','珈琲','雨の日','記憶'], theme:'消えゆくものへの眼差し' },
+  { id:'u3', name:'Kenji', handle:'@kenji', growth:3, emoji:'🌱', keywords:['音楽','深夜','孤独'], theme:'孤独の豊かさ' },
+  { id:'u4', name:'Yuki', handle:'@yuki', growth:28, emoji:'🌲', keywords:['余白','静けさ','京都','写真'], theme:'余白の美学' },
+  { id:'u5', name:'Sato', handle:'@sato', growth:52, emoji:'🌳', keywords:['哲学','孤独','言葉','深夜'], theme:'孤独の豊かさ' },
+  { id:'u6', name:'Miki', handle:'@miki', growth:7, emoji:'🌿', keywords:['旅','記憶','匂い','場所'], theme:'消えゆくものへの眼差し' },
+  { id:'u7', name:'Hana', handle:'@hana', growth:18, emoji:'🍃', keywords:['余白','静けさ','言葉','詩'], theme:'余白の美学' },
+  { id:'u8', name:'Ryo', handle:'@ryo', growth:35, emoji:'🌲', keywords:['山','孤独','記憶','歩く'], theme:'孤独の豊かさ' },
+];
+ 
+function calcConn(a, b) {
+  const shared = a.keywords.filter(k => b.keywords.includes(k));
+  const sameTheme = a.theme === b.theme;
+  if (sameTheme && shared.length >= 2) return { level:'root', shared };
+  if (sameTheme || shared.length >= 2) return { level:'trunk', shared };
+  if (shared.length === 1) return { level:'branch', shared };
+  return null;
+}
+ 
+const forestConns = [];
+for (let i = 0; i < forestUsers.length; i++)
+  for (let j = i+1; j < forestUsers.length; j++) {
+    const c = calcConn(forestUsers[i], forestUsers[j]);
+    if (c) forestConns.push({ a:forestUsers[i].id, b:forestUsers[j].id, ...c });
+  }
+ 
+function initForest() {
+  const canvas = document.getElementById('forest-canvas');
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  const cx = W/2, cy = H/2;
+  forestUsers.forEach((u,i) => {
+    if (!forestPositions[u.id]) {
+      const angle = (i/forestUsers.length)*Math.PI*2;
+      const r = Math.min(W,H)*0.3;
+      forestPositions[u.id] = {
+        x: cx + Math.cos(angle)*r + (Math.random()-.5)*50,
+        y: cy + Math.sin(angle)*r + (Math.random()-.5)*50
+      };
+    }
+  });
+}
+ 
+function levelColorF(level) {
+  const map = {
+    root: ['rgba(139,69,19,', 'rgba(196,122,58,'],
+    trunk: ['rgba(107,142,35,', 'rgba(138,184,58,'],
+    branch: ['rgba(74,154,122,', 'rgba(106,184,154,'],
+    leaf: ['rgba(74,122,58,', 'rgba(106,154,90,'],
+  };
+  return map[level];
+}
+ 
+function treeR(u) { return 12 + Math.min(u.growth,50)*0.45; }
+ 
+function drawForest() {
+  const canvas = document.getElementById('forest-canvas');
+  if (!canvas.offsetWidth) return;
+  const dpr = window.devicePixelRatio||1;
+  canvas.width = canvas.offsetWidth*dpr;
+  canvas.height = canvas.offsetHeight*dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.translate(forestOx, forestOy);
+  ctx.scale(forestScale, forestScale);
+ 
+  // ground glow
+  forestUsers.forEach(u => {
+    const p = forestPositions[u.id]; if(!p) return;
+    const r = treeR(u);
+    const g = ctx.createRadialGradient(p.x,p.y+r,0,p.x,p.y+r,r*2);
+    g.addColorStop(0,'rgba(42,90,42,0.12)'); g.addColorStop(1,'transparent');
+    ctx.beginPath(); ctx.ellipse(p.x,p.y+r,r*2,r*0.6,0,0,Math.PI*2);
+    ctx.fillStyle=g; ctx.fill();
+  });
+ 
+  // connections
+  forestConns.forEach(c => {
+    if (forestFilter!=='all' && c.level!==forestFilter) return;
+    const pa=forestPositions[c.a], pb=forestPositions[c.b]; if(!pa||!pb) return;
+    const sel = forestSelectedId && (c.a===forestSelectedId||c.b===forestSelectedId);
+    const alpha = sel?0.9:(forestSelectedId?0.08:0.45);
+    const col = levelColorF(c.level);
+    const w = {root:2.5,trunk:1.8,branch:1.2,leaf:0.7}[c.level];
+    const ra=treeR(forestUsers.find(u=>u.id===c.a));
+    const rb=treeR(forestUsers.find(u=>u.id===c.b));
+ 
+    ctx.beginPath();
+    if (c.level==='root') {
+      ctx.moveTo(pa.x,pa.y+ra*0.8);
+      ctx.quadraticCurveTo((pa.x+pb.x)/2, Math.max(pa.y+ra,pb.y+rb)+50, pb.x,pb.y+rb*0.8);
+    } else {
+      ctx.moveTo(pa.x,pa.y-ra*0.3);
+      ctx.bezierCurveTo(pa.x+(pb.x-pa.x)*0.3,pa.y-ra,pb.x-(pb.x-pa.x)*0.3,pb.y-rb,pb.x,pb.y-rb*0.3);
+    }
+    ctx.strokeStyle=col[0]+alpha+')';
+    ctx.lineWidth=w*(sel?2:1);
+    c.level==='leaf'?ctx.setLineDash([3,3]):ctx.setLineDash([]);
+    ctx.stroke(); ctx.setLineDash([]);
+  });
+ 
+  // trees
+  forestUsers.forEach(u => {
+    const p=forestPositions[u.id]; if(!p) return;
+    const r=treeR(u);
+    const isSel=u.id===forestSelectedId;
+    const isConn=forestSelectedId&&forestConns.some(c=>(c.a===forestSelectedId||c.b===forestSelectedId)&&(c.a===u.id||c.b===u.id));
+    ctx.globalAlpha=forestSelectedId?(isSel||isConn?1:0.2):1;
+ 
+    ctx.beginPath(); ctx.moveTo(p.x,p.y+r*0.8); ctx.lineTo(p.x,p.y);
+    ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=Math.max(2,r*0.12); ctx.lineCap='round'; ctx.stroke();
+ 
+    const layers=Math.min(3,Math.floor(u.growth/8)+1);
+    for(let l=0;l<layers;l++){
+      const lr=r*(1-l*0.22), ly=p.y-r*0.2-l*r*0.28;
+      const g=ctx.createRadialGradient(p.x,ly,0,p.x,ly,lr);
+      g.addColorStop(0,isSel?'#5a9a7a':'#3a7a4a');
+      g.addColorStop(1,isSel?'#2a6a4a':'#1a4a2a');
+      ctx.beginPath(); ctx.arc(p.x,ly,lr,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+    }
+ 
+    if (isSel) {
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*2.5);
+      g.addColorStop(0,'rgba(196,148,58,0.25)'); g.addColorStop(1,'transparent');
+      ctx.beginPath(); ctx.arc(p.x,p.y,r*2.5,0,Math.PI*2);
+      ctx.fillStyle=g; ctx.fill();
+    }
+ 
+    ctx.font=`${Math.max(12,r*0.55)}px serif`;
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(u.emoji,p.x,p.y-r*0.2);
+    ctx.font=`${Math.max(9,r*0.3)}px 'Inconsolata',monospace`;
+    ctx.fillStyle=isSel?'#c4943a':'#4a4030';
+    ctx.fillText(u.handle,p.x,p.y+r*1.3);
+    ctx.globalAlpha=1;
+  });
+  ctx.restore();
+}
+ 
+function getForestUserAt(cx,cy) {
+  const wx=(cx-forestOx)/forestScale, wy=(cy-forestOy)/forestScale;
+  let found=null, minD=Infinity;
+  forestUsers.forEach(u=>{
+    const p=forestPositions[u.id]; if(!p) return;
+    const r=treeR(u);
+    const d=Math.hypot(wx-p.x,wy-p.y);
+    if(d<r*1.6&&d<minD){minD=d;found=u;}
+  });
+  return found;
+}
+ 
+function setForestFilter(f) {
+  forestFilter=f;
+  document.querySelectorAll('.fc-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('fc-'+f).classList.add('active');
+  drawForest();
+}
+ 
+function updateForestSelectedPanel(u) {
+  const titleEl=document.getElementById('forest-selected-title');
+  const bodyEl=document.getElementById('forest-selected-body');
+  if(!u){titleEl.textContent='木をクリック';bodyEl.textContent='クリックするとつながりの詳細が表示されます';return;}
+  titleEl.textContent=u.name+'の木';
+  const conns=forestConns.filter(c=>c.a===u.id||c.b===u.id);
+  const order=['root','trunk','branch','leaf'];
+  conns.sort((a,b)=>order.indexOf(a.level)-order.indexOf(b.level));
+  const lmap={root:'根',trunk:'幹',branch:'枝',leaf:'葉'};
+  const lcol={root:'#c47a3a',trunk:'#8ab83a',branch:'#6ab89a',leaf:'#6a9a5a'};
+  bodyEl.innerHTML=conns.map(c=>{
+    const other=forestUsers.find(x=>x.id===(c.a===u.id?c.b:c.a));
+    return `<div style="margin-bottom:8px;padding:6px 8px;border:0.5px solid #1a2018">
+      <div style="font-size:0.65rem;color:${lcol[c.level]};font-family:'Inconsolata',monospace;margin-bottom:2px">${lmap[c.level]}でつながる</div>
+      <div style="font-size:0.75rem;color:#a09080">${other.handle}</div>
+      ${c.shared.length?`<div style="font-size:0.65rem;color:#5a5040;font-style:italic">「${c.shared.join('・')}」</div>`:''}
+    </div>`;
+  }).join('') || '<div style="font-size:0.72rem;color:#4a4030">まだつながりがありません</div>';
+}
+ 
+// forest events
+document.getElementById('forest-canvas').addEventListener('mousedown', e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const cx=e.clientX-r.left,cy=e.clientY-r.top;
+  const u=getForestUserAt(cx,cy);
+  if(u){forestDrag={id:u.id,sx:cx,sy:cy,ox:forestPositions[u.id].x,oy:forestPositions[u.id].y};}
+  else{forestPanning=true;forestPanSx=cx;forestPanSy=cy;forestPanOx=forestOx;forestPanOy=forestOy;}
+});
+let forestPanSx,forestPanSy,forestPanOx,forestPanOy;
+document.getElementById('forest-canvas').addEventListener('mousemove',e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const cx=e.clientX-r.left,cy=e.clientY-r.top;
+  if(forestDrag){forestPositions[forestDrag.id].x=forestDrag.ox+(cx-forestDrag.sx)/forestScale;forestPositions[forestDrag.id].y=forestDrag.oy+(cy-forestDrag.sy)/forestScale;drawForest();}
+  else if(forestPanning){forestOx=forestPanOx+(cx-forestPanSx);forestOy=forestPanOy+(cy-forestPanSy);drawForest();}
+});
+document.getElementById('forest-canvas').addEventListener('mouseup',e=>{
+  const r=e.currentTarget.getBoundingClientRect();
+  const cx=e.clientX-r.left,cy=e.clientY-r.top;
+  if(forestDrag&&Math.hypot(cx-forestDrag.sx,cy-forestDrag.sy)<5){
+    forestSelectedId=forestSelectedId===forestDrag.id?null:forestDrag.id;
+    updateForestSelectedPanel(forestSelectedId?forestUsers.find(u=>u.id===forestSelectedId):null);
+    drawForest();
+  }
+  forestDrag=null;forestPanning=false;
+});
+document.getElementById('forest-canvas').addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=e.currentTarget.getBoundingClientRect();
+  const cx=e.clientX-r.left,cy=e.clientY-r.top;
+  const d=e.deltaY>0?0.9:1.1;
+  forestOx=cx-(cx-forestOx)*d;forestOy=cy-(cy-forestOy)*d;
+  forestScale=Math.max(0.3,Math.min(3,forestScale*d));drawForest();
+},{passive:false});
+ 
+// ══════════════════════════════════════════════════
+// VIEW C: MAP (tag genealogy)
+// ══════════════════════════════════════════════════
+const mapTags = [
+  {id:'t1',name:'孤独',parent:null,users:284},
+  {id:'t2',name:'静かな孤独',parent:'t1',users:89},
+  {id:'t3',name:'雑踏の孤独',parent:'t1',users:112},
+  {id:'t4',name:'甘い孤独',parent:'t1',users:67},
+  {id:'t5',name:'図書館の孤独',parent:'t2',users:38},
+  {id:'t6',name:'耳の孤独',parent:'t3',users:21},
+  {id:'t7',name:'深夜の耳',parent:'t6',users:4},
+  {id:'t8',name:'記憶',parent:null,users:312},
+  {id:'t9',name:'旅の記憶',parent:'t8',users:145},
+  {id:'t10',name:'匂いの記憶',parent:'t8',users:88},
+  {id:'t11',name:'音楽の記憶',parent:'t8',users:203},
+  {id:'t12',name:'幼少期の音楽',parent:'t11',users:119},
+  {id:'t13',name:'消えた曲',parent:'t11',users:31},
+];
+ 
+function initMap() {
+  const canvas=document.getElementById('map-canvas');
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  const roots=mapTags.filter(t=>!t.parent);
+  function layout(id,x,y,spread){
+    mapPositions[id]={x,y};
+    const children=mapTags.filter(t=>t.parent===id);
+    if(!children.length) return;
+    const childX=x+160;
+    children.forEach((c,i)=>{
+      const cy=y-((children.length-1)*spread/2)+i*spread;
+      layout(c.id,childX,cy,spread*0.6);
+    });
+  }
+  const rh=H/(roots.length+1);
+  roots.forEach((r,i)=>layout(r.id,80,rh*(i+1),80));
+ 
+  // tag list
+  const list=document.getElementById('map-tag-list');
+  list.innerHTML=mapTags.filter(t=>!t.parent).map(t=>`
+    <div class="map-tag-item" onclick="highlightTag('${t.id}')">
+      ${t.name}<span class="map-tag-count">${t.users}</span>
+    </div>`).join('');
+}
+ 
+let highlightedTag=null;
+function highlightTag(id){highlightedTag=id===highlightedTag?null:id;drawMap();}
+ 
+function getDepth(id){let d=0,t=mapTags.find(x=>x.id===id);while(t&&t.parent){d++;t=mapTags.find(x=>x.id===t.parent);}return d;}
+ 
+function drawMap() {
+  const canvas=document.getElementById('map-canvas');
+  if(!canvas.offsetWidth) return;
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=canvas.offsetWidth*dpr;
+  canvas.height=canvas.offsetHeight*dpr;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  const W=canvas.offsetWidth,H=canvas.offsetHeight;
+  ctx.clearRect(0,0,W,H);
+  ctx.save();
+  ctx.translate(mapOx,mapOy);
+  ctx.scale(mapScale,mapScale);
+ 
+  // edges
+  mapTags.forEach(t=>{
+    if(!t.parent) return;
+    const a=mapPositions[t.id],b=mapPositions[t.parent];if(!a||!b) return;
+    const depth=getDepth(t.id);
+    const hl=highlightedTag&&(t.id===highlightedTag||t.parent===highlightedTag);
+    ctx.beginPath();
+    ctx.moveTo(b.x,b.y);
+    ctx.bezierCurveTo(b.x+(a.x-b.x)*0.5,b.y,a.x-(a.x-b.x)*0.3,a.y,a.x,a.y);
+    ctx.strokeStyle=hl?`rgba(196,160,80,0.8)`:`rgba(180,160,120,${0.3-depth*0.05})`;
+    ctx.lineWidth=hl?2:1;
+    ctx.stroke();
+    // midpoint tag
+    const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+    if(hl){
+      ctx.fillStyle='rgba(154,122,42,0.6)';
+      ctx.font='9px Inconsolata,monospace';
+      ctx.textAlign='center';
+      ctx.fillText('共通タグ',mx,my-4);
+    }
+  });
+ 
+  // nodes
+  mapTags.forEach(t=>{
+    const p=mapPositions[t.id];if(!p) return;
+    const depth=getDepth(t.id);
+    const r=Math.max(6,14-depth*2)+(t.users/284)*8;
+    const hl=highlightedTag===t.id;
+    const isRoot=!t.parent;
+ 
+    ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
+    ctx.fillStyle=hl?'#c4a050':isRoot?'#9a7a2a':'#cec6b0';
+    ctx.strokeStyle=isRoot?'#9a7a2a':'#b0a890';
+    ctx.lineWidth=isRoot?1.5:0.5;
+    ctx.fill();ctx.stroke();
+ 
+    const fs=Math.max(9,12-depth*1.5);
+    ctx.font=`${isRoot?700:400} ${fs}px 'Noto Serif JP',serif`;
+    ctx.fillStyle=hl?'#5a3a0a':isRoot?'#2a2010':'#5a5040';
+    ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(t.name,p.x+r+5,p.y);
+ 
+    if(t.users<=5){
+      ctx.beginPath();ctx.arc(p.x,p.y,r+4,0,Math.PI*2);
+      ctx.strokeStyle='rgba(140,60,30,0.4)';ctx.lineWidth=1;
+      ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+  });
+  ctx.restore();
+}
+ 
+// map events
+const mapCanvas=document.getElementById('map-canvas');
+let mpSx,mpSy,mpOx,mpOy;
+mapCanvas.addEventListener('mousedown',e=>{const r=e.currentTarget.getBoundingClientRect();mapPanning=true;mpSx=e.clientX-r.left;mpSy=e.clientY-r.top;mpOx=mapOx;mpOy=mapOy;});
+mapCanvas.addEventListener('mousemove',e=>{if(!mapPanning)return;const r=e.currentTarget.getBoundingClientRect();mapOx=mpOx+(e.clientX-r.left-mpSx);mapOy=mpOy+(e.clientY-r.top-mpSy);drawMap();});
+mapCanvas.addEventListener('mouseup',()=>{mapPanning=false;});
+mapCanvas.addEventListener('wheel',e=>{
+  e.preventDefault();
+  const r=e.currentTarget.getBoundingClientRect();
+  const cx=e.clientX-r.left,cy=e.clientY-r.top;
+  const d=e.deltaY>0?0.9:1.1;
+  mapOx=cx-(cx-mapOx)*d;mapOy=cy-(cy-mapOy)*d;
+  mapScale=Math.max(0.3,Math.min(3,mapScale*d));drawMap();
+},{passive:false});
+ 
+// ══════════════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════════════
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+ 
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+ 
+// forest stats
+function updateForestStats(){
+  document.getElementById('forest-stats').textContent=
+    `${forestUsers.length}本の木 · ${forestConns.length}のつながり`;
+}
+ 
+// INIT
+window.addEventListener('resize',()=>{
+  if(document.getElementById('view-forest').classList.contains('active')) drawForest();
+  if(document.getElementById('view-map').classList.contains('active')) drawMap();
+});
+ 
+renderKwList();
+selectKw(keywords[0].id);
+updateForestStats();
+</script>
+</body>
+</html>
