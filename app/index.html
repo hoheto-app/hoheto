@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoheto — ほへと</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
- <style>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
  
 :root {
@@ -392,6 +390,40 @@ header {
   z-index: 500;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+ 
+/* ── LANG SWITCHER ── */
+.lang-switcher {
+  position: fixed;
+  top: 12px;
+  right: 60px;
+  z-index: 300;
+  display: flex;
+  gap: 0;
+}
+.lang-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  color: var(--ink4);
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.lang-btn.active {
+  background: var(--gold2);
+  border-color: var(--gold2);
+  color: var(--paper);
+}
+.lang-btn:first-child { border-right: none; }
+[data-lang="en"] { display: none; }
+body.en [data-lang="ja"] { display: none; }
+body.en [data-lang="en"] { display: block; }
+body.en [data-lang="en"].inline { display: inline; }
+body.en [data-lang="ja"].inline { display: none; }
+[data-lang="en"].inline { display: none; }
+[data-lang="ja"].inline { display: inline; }
 </style>
 </head>
 <body>
@@ -416,10 +448,18 @@ header {
   </div>
  
   <div class="header-right">
-    <span class="growth-badge">🌿 二葉（7投稿）</span>
+    <span class="growth-badge">
+    <span data-lang="ja" class="inline">🌿 二葉（7投稿）</span>
+    <span data-lang="en" class="inline">🌿 Second Leaf (7 posts)</span>
+  </span>
     <div class="avatar">H</div>
   </div>
 </header>
+ 
+<div class="lang-switcher">
+  <button class="lang-btn active" onclick="setLang('ja')">JP</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
  
 <div class="app">
  
@@ -429,8 +469,14 @@ header {
     <!-- Keyword List Sidebar -->
     <div class="kw-sidebar">
       <div class="kw-sidebar-header">
-        <span class="sidebar-label">関心ごと</span>
-        <button class="new-btn" onclick="newKeyword()">＋ 植える</button>
+        <span class="sidebar-label">
+    <span data-lang="ja" class="inline">関心ごと</span>
+    <span data-lang="en" class="inline">Interests</span>
+  </span>
+        <button class="new-btn" onclick="newKeyword()">
+    <span data-lang="ja" class="inline">＋ 植える</span>
+    <span data-lang="en" class="inline">＋ Plant</span>
+  </button>
       </div>
       <div class="kw-list" id="kw-list"></div>
     </div>
@@ -438,11 +484,20 @@ header {
     <!-- Editor -->
     <div class="editor-area">
       <div class="editor-toolbar">
-        <button class="tool-btn" onclick="saveDraft()">下書き保存</button>
+        <button class="tool-btn" onclick="saveDraft()">
+    <span data-lang="ja" class="inline">下書き保存</span>
+    <span data-lang="en" class="inline">Save Draft</span>
+  </button>
         <div class="tool-sep"></div>
-        <button class="tool-btn primary" onclick="publish()">公開する</button>
+        <button class="tool-btn primary" onclick="publish()">
+    <span data-lang="ja" class="inline">公開する</span>
+    <span data-lang="en" class="inline">Publish</span>
+  </button>
         <div class="tool-sep"></div>
-        <button class="tool-btn" onclick="deleteKw()" style="color:var(--red);border-color:var(--red)">削除</button>
+        <button class="tool-btn" onclick="deleteKw()" style="color:var(--red);border-color:var(--red)">
+    <span data-lang="ja" class="inline">削除</span>
+    <span data-lang="en" class="inline">Delete</span>
+  </button>
       </div>
       <div class="editor-scroll">
         <input type="text" class="editor-title" id="ed-title" placeholder="キーワードを植えてください…">
@@ -468,7 +523,10 @@ header {
  
     <!-- Resonance Panel -->
     <div class="resonance-panel">
-      <div class="res-title">回廊 — つながり</div>
+      <div class="res-title">
+    <span data-lang="ja" class="inline">回廊 — つながり</span>
+    <span data-lang="en" class="inline">Corridor — Connections</span>
+  </div>
       <div id="res-list"></div>
     </div>
  
@@ -478,27 +536,31 @@ header {
   <div id="view-forest" class="view-panel">
     <canvas id="forest-canvas"></canvas>
     <div class="forest-legend">
-      <div class="fl-title">つながりの深さ</div>
+      <div class="fl-title">
+    <span data-lang="ja" class="inline">つながりの深さ</span>
+    <span data-lang="en" class="inline">Depth of Connection</span>
+  </div>
       <div class="fl-item">
         <div class="fl-dot" style="background:#8B4513"></div>
-        <div class="fl-label"><strong style="color:#c47a3a">根</strong>本質が同じ。AIが深層を読んで判定。</div>
+        <div class="fl-label"><strong style="color:#c47a3a"><span data-lang="ja" class="inline">根</span><span data-lang="en" class="inline">Root</span></strong><span data-lang="ja" class="inline">本質が同じ。AIが深層を読んで判定。</span><span data-lang="en" class="inline">Same essence. AI reads the depth.</span></div>
       </div>
       <div class="fl-item">
         <div class="fl-dot" style="background:#6B8E23"></div>
-        <div class="fl-label"><strong style="color:#8ab83a">幹</strong>大きなテーマが共鳴。</div>
+        <div class="fl-label"><strong style="color:#8ab83a"><span data-lang="ja" class="inline">幹</span><span data-lang="en" class="inline">Trunk</span></strong><span data-lang="ja" class="inline">大きなテーマが共鳴。</span><span data-lang="en" class="inline">Shared themes resonate.</span></div>
       </div>
       <div class="fl-item">
         <div class="fl-dot" style="background:#4a9a7a"></div>
-        <div class="fl-label"><strong style="color:#6ab89a">枝</strong>具体的な興味が重なる。</div>
+        <div class="fl-label"><strong style="color:#6ab89a"><span data-lang="ja" class="inline">枝</span><span data-lang="en" class="inline">Branch</span></strong><span data-lang="ja" class="inline">具体的な興味が重なる。</span><span data-lang="en" class="inline">Specific interests overlap.</span></div>
       </div>
       <div class="fl-item">
         <div class="fl-dot" style="background:#4a7a3a"></div>
-        <div class="fl-label"><strong style="color:#6a9a5a">葉</strong>偶然の細かい一致。</div>
+        <div class="fl-label"><strong style="color:#6a9a5a"><span data-lang="ja" class="inline">葉</span><span data-lang="en" class="inline">Leaf</span></strong><span data-lang="ja" class="inline">偶然の細かい一致。</span><span data-lang="en" class="inline">Coincidental small matches.</span></div>
       </div>
       <div style="height:1px;background:#1a2018;margin:12px 0"></div>
       <div class="fl-title">成長</div>
       <div style="font-size:0.72rem;color:#6a6050;line-height:2.2">
-        🌰 種<br>🌱 芽<br>🌿 二葉<br>🍃 本葉<br>🌲 若木<br>🌳 大樹
+        <span data-lang="ja">🌰 種<br>🌱 芽<br>🌿 二葉<br>🍃 本葉<br>🌲 若木<br>🌳 大樹</span>
+        <span data-lang="en">🌰 Seed<br>🌱 Sprout<br>🌿 Seedling<br>🍃 Young Leaf<br>🌲 Sapling<br>🌳 Tree</span>
       </div>
       <div style="height:1px;background:#1a2018;margin:12px 0"></div>
       <div class="fl-title" id="forest-selected-title">木をクリック</div>
@@ -507,11 +569,11 @@ header {
       </div>
     </div>
     <div class="forest-controls">
-      <button class="fc-btn active" id="fc-all" onclick="setForestFilter('all')">全て</button>
-      <button class="fc-btn" id="fc-root" onclick="setForestFilter('root')">根</button>
-      <button class="fc-btn" id="fc-trunk" onclick="setForestFilter('trunk')">幹</button>
-      <button class="fc-btn" id="fc-branch" onclick="setForestFilter('branch')">枝</button>
-      <button class="fc-btn" id="fc-leaf" onclick="setForestFilter('leaf')">葉</button>
+      <button class="fc-btn active" id="fc-all" onclick="setForestFilter('all')"><span data-lang='ja' class='inline'>全て</span><span data-lang='en' class='inline'>All</span></button>
+      <button class="fc-btn" id="fc-root" onclick="setForestFilter('root')"><span data-lang='ja' class='inline'>根</span><span data-lang='en' class='inline'>Root</span></button>
+      <button class="fc-btn" id="fc-trunk" onclick="setForestFilter('trunk')"><span data-lang='ja' class='inline'>幹</span><span data-lang='en' class='inline'>Trunk</span></button>
+      <button class="fc-btn" id="fc-branch" onclick="setForestFilter('branch')"><span data-lang='ja' class='inline'>枝</span><span data-lang='en' class='inline'>Branch</span></button>
+      <button class="fc-btn" id="fc-leaf" onclick="setForestFilter('leaf')"><span data-lang='ja' class='inline'>葉</span><span data-lang='en' class='inline'>Leaf</span></button>
     </div>
     <div class="forest-stats" id="forest-stats"></div>
   </div>
@@ -520,7 +582,10 @@ header {
   <div id="view-map" class="view-panel">
     <canvas id="map-canvas"></canvas>
     <div class="map-legend">
-      <div class="ml-title">タグの系譜</div>
+      <div class="ml-title">
+    <span data-lang="ja" class="inline">タグの系譜</span>
+    <span data-lang="en" class="inline">Tag Genealogy</span>
+  </div>
       <div id="map-tag-list"></div>
     </div>
   </div>
@@ -612,7 +677,7 @@ function renderResonances() {
   const list = document.getElementById('res-list');
   const related = resonances.filter(r => r.kwId === selectedKwId);
   if (!related.length) {
-    list.innerHTML = '<div style="font-size:0.75rem;color:var(--ink4);line-height:1.9">公開すると同じ関心を持つ人が静かに現れます</div>';
+    list.innerHTML = '<div style="font-size:0.75rem;color:var(--ink4);line-height:1.9">はにほが回廊で待っています。公開すると同じ関心を持つ人が静かに現れます。</div>';
     return;
   }
   list.innerHTML = related.map(r => `
@@ -1055,6 +1120,31 @@ window.addEventListener('resize',()=>{
 renderKwList();
 selectKw(keywords[0].id);
 updateForestStats();
+</script>
+ 
+<script>
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
+  });
+ 
+  // Editor placeholders
+  const title = document.getElementById('ed-title');
+  const body = document.getElementById('ed-body');
+  const tags = document.getElementById('ed-tags');
+  if (title) title.placeholder = lang === 'ja' ? 'キーワードを植えてください…' : 'Plant your keyword…';
+  if (body) body.placeholder = lang === 'ja'
+    ? 'なぜこれに関心があるのか、どんなことを感じているのか、じっくりと書いてください。邪魔されない、あなただけの空間です。'
+    : 'Write about why this interests you, what you feel. This is your quiet space, uninterrupted.';
+  if (tags) tags.placeholder = lang === 'ja' ? 'タグ（カンマ区切り）例: 旅, 記憶, 孤独…' : 'Tags (comma separated) e.g. travel, memory, solitude…';
+ 
+  localStorage.setItem('hoheto_lang', lang);
+}
+ 
+// Restore language preference
+const savedLangApp = localStorage.getItem('hoheto_lang');
+if (savedLangApp === 'en') setLang('en');
 </script>
 </body>
 </html>
