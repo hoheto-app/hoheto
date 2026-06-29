@@ -592,6 +592,8 @@ body.en [data-lang="ja"].inline { display: none; }
 // ── STATE ──
 var keywords = [];
 var resonances = [];
+var currentHeat = 3;
+var linkCount = 0;
 var selectedKwId = null;
  
 // forestUsers と mapTags（森林浴・すん用）
@@ -708,7 +710,8 @@ function connLabel(c) {
 }
  
 function setHeat(v) {
-  currentHeat = v;
+  window.currentHeat = v;
+  currentHeat = v; window.currentHeat = v;
   document.querySelectorAll('.hs-btn').forEach(b => {
     b.classList.toggle('active', parseInt(b.dataset.v) === v);
   });
@@ -1200,7 +1203,7 @@ if (savedLangApp === 'en') setLang('en');
     var tagsRaw = document.getElementById('ed-tags').value;
     var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
     if (!title) { document.getElementById('ed-title').focus(); return; }
-    var kwData = { title: title, body: body, heat: currentHeat, status: status, user_id: _currentUser.id };
+    var kwData = { title: title, body: body, heat: (window.currentHeat || 3), status: status, user_id: _currentUser.id };
     var kwId = selectedKwId;
     var exists = keywords.find(function(k) { return k.id === selectedKwId; });
     if (!exists) {
@@ -1253,8 +1256,8 @@ if (savedLangApp === 'en') setLang('en');
     document.getElementById('ed-title').value = '';
     document.getElementById('ed-body').value = '';
     document.getElementById('ed-tags').value = '';
-    currentHeat = 3;
-    setHeat(3);
+    window.currentHeat = 3;
+    if (typeof setHeat === "function") setHeat(3);
     renderKwList();
     renderResonances();
     document.getElementById('ed-title').focus();
