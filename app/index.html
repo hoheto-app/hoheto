@@ -685,6 +685,22 @@ function selectKw(id) {
   document.getElementById('ed-body').value = kw.body;
   document.getElementById('ed-tags').value = kw.tags.join(', ');
   setHeat(kw.heat);
+  // 画像プレビュー更新
+  var preview = document.getElementById('img-preview');
+  var removeBtn = document.getElementById('img-remove-btn');
+  var uploadLabel = document.getElementById('img-upload-label');
+  if (kw.image_url) {
+    preview.src = kw.image_url;
+    preview.style.display = 'block';
+    removeBtn.style.display = 'block';
+    uploadLabel.style.display = 'none';
+    window._currentImageUrl = kw.image_url;
+  } else {
+    preview.style.display = 'none';
+    removeBtn.style.display = 'none';
+    uploadLabel.style.display = 'block';
+    window._currentImageUrl = null;
+  }
   renderKwList();
   renderResonances();
 }
@@ -1105,6 +1121,37 @@ function updateForestStats(){
     `${forestUsers.length}本の木 · ${forestConns.length}のつながり`;
 }
  
+// ── 画像選択 ──
+function handleImageSelect(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  var preview = document.getElementById('img-preview');
+  var removeBtn = document.getElementById('img-remove-btn');
+  var uploadLabel = document.getElementById('img-upload-label');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    preview.src = ev.target.result;
+    preview.style.display = 'block';
+    removeBtn.style.display = 'block';
+    uploadLabel.style.display = 'none';
+    window._pendingImageFile = file;
+  };
+  reader.readAsDataURL(file);
+}
+ 
+function removeImage() {
+  var preview = document.getElementById('img-preview');
+  var removeBtn = document.getElementById('img-remove-btn');
+  var uploadLabel = document.getElementById('img-upload-label');
+  preview.src = '';
+  preview.style.display = 'none';
+  removeBtn.style.display = 'none';
+  uploadLabel.style.display = 'block';
+  window._pendingImageFile = null;
+  window._currentImageUrl = null;
+  document.getElementById('img-file-input').value = '';
+}
+ 
 // INIT
 window.addEventListener('resize',()=>{
   if(document.getElementById('view-forest').classList.contains('active')) drawForest();
@@ -1153,7 +1200,7 @@ if (savedLangApp === 'en') setLang('en');
     if (!_currentUser) return;
     var result = await _db
       .from('keywords')
-      .select('id, title, body, heat, status, created_at, keyword_tags(tags(name))')
+      .select('id, title, body, heat, status, image_url, created_at, keyword_tags(tags(name))')
       .eq('user_id', _currentUser.id)
       .order('created_at', { ascending: false });
     if (result.error) { console.error('loadKeywords:', result.error); return; }
@@ -1165,6 +1212,7 @@ if (savedLangApp === 'en') setLang('en');
         tags: (k.keyword_tags || []).map(function(kt) { return kt.tags && kt.tags.name; }).filter(Boolean),
         heat: k.heat || 3,
         status: k.status || 'draft',
+        image_url: k.image_url || null,
         date: new Date(k.created_at).toLocaleDateString('ja-JP')
       };
     });
@@ -1196,6 +1244,15 @@ if (savedLangApp === 'en') setLang('en');
     }
   }
  
+  async function uploadImage(file, kwId) {
+    var ext = file.name.split('.').pop();
+    var path = _currentUser.id + '/' + kwId + '.' + ext;
+    var result = await _db.storage.from('hoheto-images').upload(path, file, { upsert: true });
+    if (result.error) { console.error('upload error:', result.error); return null; }
+    var urlResult = _db.storage.from('hoheto-images').getPublicUrl(path);
+    return urlResult.data.publicUrl;
+  }
+ 
   async function saveKwToDb(status) {
     if (!_currentUser) return;
     var title = document.getElementById('ed-title').value.trim();
@@ -1205,7 +1262,8 @@ if (savedLangApp === 'en') setLang('en');
     if (!title) { document.getElementById('ed-title').focus(); return; }
  
     var heat = window.currentHeat || 3;
-    var kwData = { title: title, body: body, heat: heat, status: status, user_id: _currentUser.id };
+    var imageUrl = window._currentImageUrl || null;
+    var kwData = { title: title, body: body, heat: heat, status: status, user_id: _currentUser.id, image_url: imageUrl };
     var kwId = selectedKwId;
     var exists = keywords.find(function(k) { return k.id === selectedKwId; });
  
@@ -1231,6 +1289,16 @@ if (savedLangApp === 'en') setLang('en');
           console.error('UPDATE error:', JSON.stringify(upd.error));
           showToast('更新エラー: ' + (upd.error.message || upd.error.code));
           return;
+        }
+      }
+ 
+      // 画像アップロード
+      if (window._pendingImageFile) {
+        var imgUrl = await uploadImage(window._pendingImageFile, kwId);
+        if (imgUrl) {
+          await _db.from('keywords').update({ image_url: imgUrl }).eq('id', kwId);
+          window._currentImageUrl = imgUrl;
+          window._pendingImageFile = null;
         }
       }
  
