@@ -4,13 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoheto — ほへと</title>
-<script>
-// グローバル変数（最優先で宣言）
-window.selectedKwId = null;
-window.currentHeat = 3;
-window.keywords = [];
-window.resonances = [];
-</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
  
@@ -596,24 +589,9 @@ body.en [data-lang="ja"].inline { display: none; }
 <div class="toast" id="toast"></div>
  
 <script>
-// ── グローバル変数（最初に宣言）──
+// ── STATE ──
 var keywords = [];
 var selectedKwId = null;
-var currentHeat = 3;
-var forestFilter = 'all';
-var forestSelectedId = null;
-var forestPositions = {};
-var forestDrag = null;
-var forestPanning = false;
-var forestOx = 0, forestOy = 0, forestScale = 1;
-var mapPositions = {};
-var mapPanning = false;
-var mapOx = 0, mapOy = 0, mapScale = 1;
-var highlightedTag = null;
-var drag = null;
-var linkCount = 0;
-var forestPanSx, forestPanSy, forestPanOx, forestPanOy;
-var mpSx, mpSy, mpOx, mpOy;
  
 // forestUsers と mapTags（森林浴・すん用）
 var forestUsers = [
@@ -646,14 +624,10 @@ var mapTags = [
  
  
  
-// ══════════════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════════════
  
-var resonances = [];
  
-// selectedKwId declared globally above
-var currentHeat = 2;
+ 
+ 
 var forestFilter = 'all';
 var forestSelectedId = null;
 var forestPositions = {};
@@ -788,7 +762,7 @@ function deleteKw() {
 // ══════════════════════════════════════════════════
 // VIEW B: FOREST
 // ══════════════════════════════════════════════════
-// forestUsers declared globally above
+ 
  
 function calcConn(a, b) {
   const shared = a.keywords.filter(k => b.keywords.includes(k));
@@ -969,7 +943,7 @@ document.getElementById('forest-canvas').addEventListener('mousedown', e=>{
   if(u){forestDrag={id:u.id,sx:cx,sy:cy,ox:forestPositions[u.id].x,oy:forestPositions[u.id].y};}
   else{forestPanning=true;forestPanSx=cx;forestPanSy=cy;forestPanOx=forestOx;forestPanOy=forestOy;}
 });
-let forestPanSx,forestPanSy,forestPanOx,forestPanOy;
+var forestPanSx,forestPanSy,forestPanOx,forestPanOy;
 document.getElementById('forest-canvas').addEventListener('mousemove',e=>{
   const r=e.currentTarget.getBoundingClientRect();
   const cx=e.clientX-r.left,cy=e.clientY-r.top;
@@ -998,7 +972,7 @@ document.getElementById('forest-canvas').addEventListener('wheel',e=>{
 // ══════════════════════════════════════════════════
 // VIEW C: MAP (tag genealogy)
 // ══════════════════════════════════════════════════
-// mapTags declared globally above
+ 
  
 function initMap() {
   const canvas=document.getElementById('map-canvas');
@@ -1097,7 +1071,7 @@ function drawMap() {
  
 // map events
 const mapCanvas=document.getElementById('map-canvas');
-let mpSx,mpSy,mpOx,mpOy;
+// mpSx declared above
 mapCanvas.addEventListener('mousedown',e=>{const r=e.currentTarget.getBoundingClientRect();mapPanning=true;mpSx=e.clientX-r.left;mpSy=e.clientY-r.top;mpOx=mapOx;mpOy=mapOy;});
 mapCanvas.addEventListener('mousemove',e=>{if(!mapPanning)return;const r=e.currentTarget.getBoundingClientRect();mapOx=mpOx+(e.clientX-r.left-mpSx);mapOy=mpOy+(e.clientY-r.top-mpSy);drawMap();});
 mapCanvas.addEventListener('mouseup',()=>{mapPanning=false;});
@@ -1162,154 +1136,144 @@ function setLang(lang) {
 const savedLangApp = localStorage.getItem('hoheto_lang');
 if (savedLangApp === 'en') setLang('en');
 </script>
- 
- 
- 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ── Supabase初期化（一箇所のみ）──
-// グローバル変数への参照を確保
-if (typeof selectedKwId === 'undefined') var selectedKwId = null;
-if (typeof currentHeat === 'undefined') var currentHeat = 3;
-if (typeof keywords === 'undefined') var keywords = [];
-const _SB_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
-const _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
-const _db = supabase.createClient(_SB_URL, _SB_KEY);
-var _currentUser = null;
+(function() {
+  var _SB_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
+  var _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
+  var _db = supabase.createClient(_SB_URL, _SB_KEY);
+  var _currentUser = null;
  
-// ── キーワード読み込み ──
-async function loadKeywords() {
-  if (!_currentUser) return;
-  const { data, error } = await _db
-    .from('keywords')
-    .select('id, title, body, heat, status, created_at, keyword_tags(tags(name))')
-    .eq('user_id', _currentUser.id)
-    .order('created_at', { ascending: false });
-  if (error) { console.error('loadKeywords error:', error); return; }
-  keywords = (data || []).map(k => ({
-    id: k.id,
-    title: k.title || '',
-    body: k.body || '',
-    tags: (k.keyword_tags || []).map(kt => kt.tags?.name).filter(Boolean),
-    heat: k.heat || 3,
-    status: k.status || 'draft',
-    date: new Date(k.created_at).toLocaleDateString('ja-JP')
-  }));
-  renderKwList();
-  if (keywords.length > 0) selectKw(keywords[0].id);
-  else {
+  async function loadKeywords() {
+    if (!_currentUser) return;
+    var result = await _db
+      .from('keywords')
+      .select('id, title, body, heat, status, created_at, keyword_tags(tags(name))')
+      .eq('user_id', _currentUser.id)
+      .order('created_at', { ascending: false });
+    if (result.error) { console.error('loadKeywords:', result.error); return; }
+    keywords = (result.data || []).map(function(k) {
+      return {
+        id: k.id,
+        title: k.title || '',
+        body: k.body || '',
+        tags: (k.keyword_tags || []).map(function(kt) { return kt.tags && kt.tags.name; }).filter(Boolean),
+        heat: k.heat || 3,
+        status: k.status || 'draft',
+        date: new Date(k.created_at).toLocaleDateString('ja-JP')
+      };
+    });
+    renderKwList();
+    if (keywords.length > 0) selectKw(keywords[0].id);
+    else {
+      selectedKwId = null;
+      document.getElementById('ed-title').value = '';
+      document.getElementById('ed-body').value = '';
+      document.getElementById('ed-tags').value = '';
+      renderResonances();
+    }
+  }
+ 
+  async function saveTagsToDb(kwId, tagNames) {
+    await _db.from('keyword_tags').delete().eq('keyword_id', kwId);
+    for (var i = 0; i < tagNames.length; i++) {
+      var name = tagNames[i];
+      if (!name) continue;
+      var tagResult = await _db.from('tags').select('id').eq('name', name).maybeSingle();
+      var tagData = tagResult.data;
+      if (!tagData) {
+        var newTagResult = await _db.from('tags').insert({ name: name, created_by: _currentUser.id }).select().maybeSingle();
+        tagData = newTagResult.data;
+      }
+      if (tagData) {
+        await _db.from('keyword_tags').insert({ keyword_id: kwId, tag_id: tagData.id });
+      }
+    }
+  }
+ 
+  async function saveKwToDb(status) {
+    if (!_currentUser) return;
+    var title = document.getElementById('ed-title').value.trim();
+    var body = document.getElementById('ed-body').value.trim();
+    var tagsRaw = document.getElementById('ed-tags').value;
+    var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+    if (!title) { document.getElementById('ed-title').focus(); return; }
+    var kwData = { title: title, body: body, heat: currentHeat, status: status, user_id: _currentUser.id };
+    var kwId = selectedKwId;
+    var exists = keywords.find(function(k) { return k.id === selectedKwId; });
+    if (!exists) {
+      var ins = await _db.from('keywords').insert(kwData).select().maybeSingle();
+      if (ins.error) { showToast('保存エラー'); console.error(ins.error); return; }
+      kwId = ins.data.id;
+    } else {
+      var upd = await _db.from('keywords').update(kwData).eq('id', selectedKwId);
+      if (upd.error) { showToast('更新エラー'); console.error(upd.error); return; }
+    }
+    await saveTagsToDb(kwId, tags);
+    await loadKeywords();
+    selectedKwId = kwId;
+    showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
+  }
+ 
+  async function deleteKwFromDb() {
+    if (!selectedKwId || !_currentUser) return;
+    var del = await _db.from('keywords').delete().eq('id', selectedKwId);
+    if (del.error) { console.error(del.error); return; }
+    selectedKwId = null;
+    await loadKeywords();
+    showToast('削除しました');
+  }
+ 
+  function updateHeader(user) {
+    var email = user.email || '';
+    var handle = email.split('@')[0];
+    var avatar = document.querySelector('.avatar');
+    if (avatar) { avatar.textContent = handle.charAt(0).toUpperCase(); avatar.title = email; }
+    var headerRight = document.querySelector('.header-right');
+    if (headerRight && !document.getElementById('logout-btn')) {
+      var btn = document.createElement('button');
+      btn.id = 'logout-btn';
+      btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid #cec6b0;background:none;color:#9a8a70;cursor:pointer;';
+      btn.innerHTML = '<span data-lang="ja" class="inl">ログアウト</span><span data-lang="en" class="inl">Sign Out</span>';
+      btn.onmouseover = function() { btn.style.color='#8a2a1a'; btn.style.borderColor='#8a2a1a'; };
+      btn.onmouseout  = function() { btn.style.color='#9a8a70'; btn.style.borderColor='#cec6b0'; };
+      btn.onclick = async function() { await _db.auth.signOut(); window.location.href = '/login'; };
+      headerRight.insertBefore(btn, headerRight.firstChild);
+    }
+  }
+ 
+  // 既存関数を上書き
+  window.saveDraft = function() { saveKwToDb('draft'); };
+  window.publish   = function() { saveKwToDb('published'); };
+  window.deleteKw  = function() { deleteKwFromDb(); };
+  window.newKeyword = function() {
     selectedKwId = null;
     document.getElementById('ed-title').value = '';
     document.getElementById('ed-body').value = '';
     document.getElementById('ed-tags').value = '';
+    currentHeat = 3;
+    setHeat(3);
+    renderKwList();
     renderResonances();
-  }
-}
+    document.getElementById('ed-title').focus();
+  };
  
-// ── タグ保存 ──
-async function saveTagsToDb(kwId, tagNames) {
-  await _db.from('keyword_tags').delete().eq('keyword_id', kwId);
-  for (const name of tagNames) {
-    if (!name) continue;
-    let { data: tagData } = await _db.from('tags').select('id').eq('name', name).maybeSingle();
-    if (!tagData) {
-      const { data: newTag } = await _db.from('tags')
-        .insert({ name, created_by: _currentUser.id }).select().maybeSingle();
-      tagData = newTag;
-    }
-    if (tagData) {
-      await _db.from('keyword_tags').insert({ keyword_id: kwId, tag_id: tagData.id });
-    }
-  }
-}
+  // 認証チェック
+  _db.auth.getSession().then(function(result) {
+    var session = result.data.session;
+    if (!session) { window.location.href = '/login'; return; }
+    _currentUser = session.user;
+    updateHeader(_currentUser);
+    loadKeywords();
+    updateForestStats();
+  });
  
-// ── キーワード保存 ──
-async function saveKwToDb(status) {
-  if (!_currentUser) return;
-  const title = document.getElementById('ed-title').value.trim();
-  const body = document.getElementById('ed-body').value.trim();
-  const tagsRaw = document.getElementById('ed-tags').value;
-  const tags = tagsRaw.split(/[,、，]+/).map(t => t.trim()).filter(Boolean);
-  if (!title) { document.getElementById('ed-title').focus(); return; }
- 
-  const kwData = { title, body, heat: currentHeat, status, user_id: _currentUser.id };
-  let kwId = selectedKwId;
-  const exists = keywords.find(k => k.id === selectedKwId);
- 
-  if (!exists) {
-    const { data, error } = await _db.from('keywords').insert(kwData).select().maybeSingle();
-    if (error) { console.error('insert error:', error); showToast('保存エラー'); return; }
-    kwId = data.id;
-  } else {
-    const { error } = await _db.from('keywords').update(kwData).eq('id', selectedKwId);
-    if (error) { console.error('update error:', error); showToast('更新エラー'); return; }
-  }
- 
-  await saveTagsToDb(kwId, tags);
-  await loadKeywords();
-  selectedKwId = kwId;
-  showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
-}
- 
-// ── キーワード削除 ──
-async function deleteKwFromDb() {
-  if (!selectedKwId || !_currentUser) return;
-  const { error } = await _db.from('keywords').delete().eq('id', selectedKwId);
-  if (error) { console.error('delete error:', error); return; }
-  selectedKwId = null;
-  await loadKeywords();
-  showToast('削除しました');
-}
- 
-// ── 既存関数を上書き ──
-saveDraft = () => saveKwToDb('draft');
-publish   = () => saveKwToDb('published');
-deleteKw  = () => deleteKwFromDb();
-newKeyword = function() {
-  selectedKwId = null;
-  document.getElementById('ed-title').value = '';
-  document.getElementById('ed-body').value = '';
-  document.getElementById('ed-tags').value = '';
-  setHeat(3);
-  renderKwList();
-  renderResonances();
-  document.getElementById('ed-title').focus();
-};
- 
-// ── ヘッダー更新 ──
-function updateHeader(user) {
-  const email = user.email || '';
-  const handle = email.split('@')[0];
-  const avatar = document.querySelector('.avatar');
-  if (avatar) { avatar.textContent = handle.charAt(0).toUpperCase(); avatar.title = email; }
-  const headerRight = document.querySelector('.header-right');
-  if (headerRight && !document.getElementById('logout-btn')) {
-    const btn = document.createElement('button');
-    btn.id = 'logout-btn';
-    btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid var(--rule);background:none;color:var(--ink4);cursor:pointer;';
-    btn.innerHTML = '<span data-lang="ja" class="inl">ログアウト</span><span data-lang="en" class="inl">Sign Out</span>';
-    btn.onmouseover = () => { btn.style.color='var(--red)'; btn.style.borderColor='var(--red)'; };
-    btn.onmouseout  = () => { btn.style.color='var(--ink4)'; btn.style.borderColor='var(--rule)'; };
-    btn.onclick = async () => { await _db.auth.signOut(); window.location.href = '/login'; };
-    headerRight.insertBefore(btn, headerRight.firstChild);
-  }
-}
- 
-// ── 認証チェック＆初期化 ──
-(async () => {
-  const { data: { session } } = await _db.auth.getSession();
-  if (!session) { window.location.href = '/login'; return; }
-  _currentUser = session.user;
-  updateHeader(_currentUser);
-  await loadKeywords();
-  updateForestStats();
+  _db.auth.onAuthStateChange(function(event, session) {
+    if (event === 'SIGNED_OUT') window.location.href = '/login';
+    if (event === 'SIGNED_IN' && session) { _currentUser = session.user; updateHeader(_currentUser); }
+  });
 })();
- 
-_db.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') window.location.href = '/login';
-  if (event === 'SIGNED_IN' && session) { _currentUser = session.user; updateHeader(_currentUser); }
-});
 </script>
  
 </body>
