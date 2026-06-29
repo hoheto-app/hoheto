@@ -1203,21 +1203,50 @@ if (savedLangApp === 'en') setLang('en');
     var tagsRaw = document.getElementById('ed-tags').value;
     var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
     if (!title) { document.getElementById('ed-title').focus(); return; }
-    var kwData = { title: title, body: body, heat: (window.currentHeat || 3), status: status, user_id: _currentUser.id };
+ 
+    var heat = window.currentHeat || 3;
+    var kwData = { title: title, body: body, heat: heat, status: status, user_id: _currentUser.id };
     var kwId = selectedKwId;
     var exists = keywords.find(function(k) { return k.id === selectedKwId; });
-    if (!exists) {
-      var ins = await _db.from('keywords').insert(kwData).select().maybeSingle();
-      if (ins.error) { showToast('保存エラー'); console.error(ins.error); return; }
-      kwId = ins.data.id;
-    } else {
-      var upd = await _db.from('keywords').update(kwData).eq('id', selectedKwId);
-      if (upd.error) { showToast('更新エラー'); console.error(upd.error); return; }
+ 
+    try {
+      if (!exists || !selectedKwId) {
+        // 新規作成
+        var ins = await _db.from('keywords').insert([kwData]).select();
+        if (ins.error) {
+          console.error('INSERT error:', JSON.stringify(ins.error));
+          showToast('保存エラー: ' + (ins.error.message || ins.error.code));
+          return;
+        }
+        if (ins.data && ins.data.length > 0) {
+          kwId = ins.data[0].id;
+        } else {
+          showToast('保存エラー：データが返されませんでした');
+          return;
+        }
+      } else {
+        // 更新
+        var upd = await _db.from('keywords').update(kwData).eq('id', selectedKwId).eq('user_id', _currentUser.id);
+        if (upd.error) {
+          console.error('UPDATE error:', JSON.stringify(upd.error));
+          showToast('更新エラー: ' + (upd.error.message || upd.error.code));
+          return;
+        }
+      }
+ 
+      // タグを保存
+      if (tags.length > 0) {
+        await saveTagsToDb(kwId, tags);
+      }
+ 
+      await loadKeywords();
+      selectedKwId = kwId;
+      showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
+ 
+    } catch(e) {
+      console.error('saveKwToDb exception:', e);
+      showToast('エラーが発生しました');
     }
-    await saveTagsToDb(kwId, tags);
-    await loadKeywords();
-    selectedKwId = kwId;
-    showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
   }
  
   async function deleteKwFromDb() {
