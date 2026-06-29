@@ -6,7 +6,7 @@
 <title>Hoheto — ほへと</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
- 
+
 :root {
   --paper: #f5f0e4;
   --paper2: #ede8dc;
@@ -24,9 +24,9 @@
   --teal2: #4a9a8a;
   --red: #8a2a1a;
 }
- 
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 body {
   background: var(--paper);
   color: var(--ink);
@@ -34,7 +34,7 @@ body {
   min-height: 100vh;
   overflow: hidden;
 }
- 
+
 /* ── HEADER ── */
 header {
   position: fixed; top: 0; left: 0; right: 0; z-index: 200;
@@ -49,7 +49,7 @@ header {
   letter-spacing: 0.06em; color: var(--ink);
 }
 .logo .at { color: var(--gold2); }
- 
+
 /* VIEW SWITCHER */
 .view-switcher {
   display: flex; gap: 2px;
@@ -71,7 +71,7 @@ header {
   box-shadow: 0 1px 3px rgba(26,21,16,0.1);
 }
 .view-btn:hover:not(.active) { color: var(--ink2); }
- 
+
 .header-right {
   display: flex; align-items: center; gap: 12px;
 }
@@ -88,27 +88,27 @@ header {
   font-size: 0.75rem; font-family: 'Inconsolata', monospace;
   color: var(--ink3); cursor: pointer;
 }
- 
+
 /* ── MAIN LAYOUT ── */
 .app {
   position: fixed;
   top: 52px; left: 0; right: 0; bottom: 0;
 }
- 
+
 /* ── VIEW PANELS ── */
 .view-panel {
   display: none;
   width: 100%; height: 100%;
 }
 .view-panel.active { display: flex; }
- 
+
 /* ══════════════════════════════════
    VIEW A: 書く（WRITE）
 ══════════════════════════════════ */
 #view-write {
   flex-direction: row;
 }
- 
+
 /* Sidebar: keyword list */
 .kw-sidebar {
   width: 260px; flex-shrink: 0;
@@ -135,11 +135,11 @@ header {
   transition: background 0.15s;
 }
 .new-btn:hover { background: var(--gold); }
- 
+
 .kw-list { flex: 1; overflow-y: auto; padding: 8px; }
 .kw-list::-webkit-scrollbar { width: 3px; }
 .kw-list::-webkit-scrollbar-thumb { background: var(--rule); }
- 
+
 .kw-card {
   padding: 10px 12px;
   border: 0.5px solid var(--rule2);
@@ -175,7 +175,7 @@ header {
 .heat-dots { display: flex; gap: 2px; }
 .heat-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--rule); }
 .heat-dot.on { background: var(--gold2); }
- 
+
 /* Editor */
 .editor-area {
   flex: 1;
@@ -201,11 +201,11 @@ header {
 }
 .tool-btn.primary:hover { background: var(--ink2); }
 .tool-sep { width: 1px; height: 20px; background: var(--rule); }
- 
+
 .editor-scroll { flex: 1; overflow-y: auto; padding: 32px 40px; }
 .editor-scroll::-webkit-scrollbar { width: 3px; }
 .editor-scroll::-webkit-scrollbar-thumb { background: var(--rule); }
- 
+
 .editor-title {
   font-size: 1.6rem; font-weight: 700;
   border: none; background: none;
@@ -217,7 +217,7 @@ header {
   line-height: 1.4;
 }
 .editor-title::placeholder { color: var(--rule); }
- 
+
 .editor-body {
   font-size: 0.95rem; line-height: 2.2;
   border: none; background: none;
@@ -226,7 +226,7 @@ header {
   min-height: 280px;
 }
 .editor-body::placeholder { color: var(--rule); }
- 
+
 .editor-meta {
   margin-top: 24px;
   padding-top: 20px;
@@ -259,7 +259,7 @@ header {
   color: var(--ink4); display: flex; align-items: center; justify-content: center;
 }
 .hs-btn.active { border-color: var(--gold2); background: var(--gold2); color: var(--paper); }
- 
+
 /* Right panel: resonance */
 .resonance-panel {
   width: 220px; flex-shrink: 0;
@@ -287,7 +287,7 @@ header {
 .conn-trunk { color: #8ab83a; border: 0.5px solid #8ab83a; }
 .conn-branch { color: #4a9a8a; border: 0.5px solid #4a9a8a; }
 .conn-leaf { color: #6a9a5a; border: 0.5px solid #6a9a5a; }
- 
+
 /* ══════════════════════════════════
    VIEW B: 森（FOREST）
 ══════════════════════════════════ */
@@ -332,7 +332,7 @@ header {
   font-family: 'Inconsolata', monospace; font-size: 0.62rem;
   color: #3a3828; letter-spacing: 0.1em;
 }
- 
+
 /* ══════════════════════════════════
    VIEW C: 地図（MAP）
 ══════════════════════════════════ */
@@ -368,7 +368,7 @@ header {
   font-family: 'Inconsolata', monospace;
   font-size: 0.62rem; color: var(--ink4); float: right;
 }
- 
+
 /* EMPTY STATE */
 .empty-hint {
   position: absolute; top: 50%; left: 50%;
@@ -378,7 +378,7 @@ header {
 }
 .empty-hint .em { font-size: 2rem; margin-bottom: 10px; opacity: 0.3; }
 .empty-hint p { font-size: 0.8rem; line-height: 2; }
- 
+
 /* TOAST */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -390,7 +390,7 @@ header {
   z-index: 500;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
- 
+
 /* ── LANG SWITCHER ── */
 .lang-switcher {
   position: fixed;
@@ -427,20 +427,20 @@ body.en [data-lang="ja"].inline { display: none; }
 </style>
 </head>
 <body>
- 
+
 <!-- HEADER -->
 <header>
   <div style="display:flex;align-items:center;gap:10px">
       <img src="../mascot.png" alt="Hoheto" style="height:36px;width:auto;opacity:0.9">
       <div class="logo"><span class="at">@</span>ゐroh<span class="at">@</span></div>
     </div>
- 
+
   <div class="view-switcher">
     <button class="view-btn active" id="btn-write" onclick="switchView('write')"><span data-lang="ja" class="inline">植える</span><span data-lang="en" class="inline">Plant</span></button>
     <button class="view-btn" id="btn-forest" onclick="switchView('forest')"><span data-lang="ja" class="inline">森林浴</span><span data-lang="en" class="inline">Forest</span></button>
     <button class="view-btn" id="btn-map" onclick="switchView('map')"><span data-lang="ja" class="inline">すん</span><span data-lang="en" class="inline">Sun</span></button>
   </div>
- 
+
   <div class="header-right">
     <span class="growth-badge">
     <span data-lang="ja" class="inline">🌿 二葉（7投稿）</span>
@@ -449,17 +449,17 @@ body.en [data-lang="ja"].inline { display: none; }
     <div class="avatar">H</div>
   </div>
 </header>
- 
+
 <div class="lang-switcher">
   <button class="lang-btn active" onclick="setLang('ja')">JP</button>
   <button class="lang-btn" onclick="setLang('en')">EN</button>
 </div>
- 
+
 <div class="app">
- 
+
   <!-- ══ VIEW A: 書く ══ -->
   <div id="view-write" class="view-panel active">
- 
+
     <!-- Keyword List Sidebar -->
     <div class="kw-sidebar">
       <div class="kw-sidebar-header">
@@ -474,7 +474,7 @@ body.en [data-lang="ja"].inline { display: none; }
       </div>
       <div class="kw-list" id="kw-list"></div>
     </div>
- 
+
     <!-- Editor -->
     <div class="editor-area">
       <div class="editor-toolbar">
@@ -514,7 +514,7 @@ body.en [data-lang="ja"].inline { display: none; }
         </div>
       </div>
     </div>
- 
+
     <!-- Resonance Panel -->
     <div class="resonance-panel">
       <div class="res-title">
@@ -523,9 +523,9 @@ body.en [data-lang="ja"].inline { display: none; }
   </div>
       <div id="res-list"></div>
     </div>
- 
+
   </div>
- 
+
   <!-- ══ VIEW B: 森 ══ -->
   <div id="view-forest" class="view-panel">
     <canvas id="forest-canvas"></canvas>
@@ -571,7 +571,7 @@ body.en [data-lang="ja"].inline { display: none; }
     </div>
     <div class="forest-stats" id="forest-stats"></div>
   </div>
- 
+
   <!-- ══ VIEW C: 地図 ══ -->
   <div id="view-map" class="view-panel">
     <canvas id="map-canvas"></canvas>
@@ -583,11 +583,11 @@ body.en [data-lang="ja"].inline { display: none; }
       <div id="map-tag-list"></div>
     </div>
   </div>
- 
+
 </div>
- 
+
 <div class="toast" id="toast"></div>
- 
+
 <script>
 // ── STATE ──
 var keywords = [];
@@ -595,7 +595,7 @@ var resonances = [];
 var currentHeat = 3;
 var linkCount = 0;
 var selectedKwId = null;
- 
+
 // forestUsers と mapTags（森林浴・すん用）
 var forestUsers = [
   { id:'u1', name:'Hayato', handle:'@hayato', growth:7, emoji:'🌿', keywords:['京都','本','孤独','旅','記憶'], theme:'消えゆくものへの眼差し' },
@@ -607,7 +607,7 @@ var forestUsers = [
   { id:'u7', name:'Hana', handle:'@hana', growth:18, emoji:'🍃', keywords:['余白','静けさ','言葉','詩'], theme:'余白の美学' },
   { id:'u8', name:'Ryo', handle:'@ryo', growth:35, emoji:'🌲', keywords:['山','孤独','記憶','歩く'], theme:'孤独の豊かさ' },
 ];
- 
+
 var mapTags = [
   {id:'t1',name:'孤独',parent:null,users:284},
   {id:'t2',name:'静かな孤独',parent:'t1',users:89},
@@ -623,14 +623,14 @@ var mapTags = [
   {id:'t12',name:'幼少期の音楽',parent:'t11',users:119},
   {id:'t13',name:'消えた曲',parent:'t11',users:31},
 ];
- 
- 
- 
- 
- 
- 
- 
- 
+
+
+
+
+
+
+
+
 var forestFilter = 'all';
 var forestSelectedId = null;
 var forestPositions = {};
@@ -639,7 +639,7 @@ var forestOx = 0, forestOy = 0, forestScale = 1;
 var mapPositions = {};
 var mapDrag = null, mapPanning = false;
 var mapOx = 0, mapOy = 0, mapScale = 1;
- 
+
 // ══════════════════════════════════════════════════
 // VIEW SWITCHING
 // ══════════════════════════════════════════════════
@@ -651,7 +651,7 @@ function switchView(v) {
   if (v === 'forest') { initForest(); drawForest(); }
   if (v === 'map') { initMap(); drawMap(); }
 }
- 
+
 // ══════════════════════════════════════════════════
 // VIEW A: WRITE
 // ══════════════════════════════════════════════════
@@ -676,7 +676,7 @@ function renderKwList() {
     list.appendChild(div);
   });
 }
- 
+
 function selectKw(id) {
   selectedKwId = id;
   const kw = keywords.find(k => k.id === id);
@@ -704,7 +704,7 @@ function selectKw(id) {
   renderKwList();
   renderResonances();
 }
- 
+
 function renderResonances() {
   const list = document.getElementById('res-list');
   const related = resonances.filter(r => r.kwId === selectedKwId);
@@ -720,11 +720,11 @@ function renderResonances() {
       <div style="font-size:0.65rem;color:var(--ink4);margin-top:4px;font-family:'Inconsolata',monospace">「${r.shared}」</div>
     </div>`).join('');
 }
- 
+
 function connLabel(c) {
   return { root:'根', trunk:'幹', branch:'枝', leaf:'葉' }[c] + 'でつながる';
 }
- 
+
 function setHeat(v) {
   window.currentHeat = v;
   currentHeat = v; window.currentHeat = v;
@@ -732,7 +732,7 @@ function setHeat(v) {
     b.classList.toggle('active', parseInt(b.dataset.v) === v);
   });
 }
- 
+
 function newKeyword() {
   const id = Date.now().toString();
   keywords.unshift({ id, title:'', body:'', tags:[], heat:3, status:'draft', date:new Date().toLocaleDateString('ja-JP') });
@@ -745,17 +745,17 @@ function newKeyword() {
   document.getElementById('ed-title').focus();
   renderResonances();
 }
- 
+
 function saveDraft() {
   saveCurrentKw('draft');
   showToast('下書きを保存しました');
 }
- 
+
 function publish() {
   saveCurrentKw('published');
   showToast('公開しました — 回廊へ出ました');
 }
- 
+
 function saveCurrentKw(status) {
   const kw = keywords.find(k => k.id === selectedKwId);
   if (!kw) return;
@@ -766,7 +766,7 @@ function saveCurrentKw(status) {
   kw.status = status;
   renderKwList();
 }
- 
+
 function deleteKw() {
   keywords = keywords.filter(k => k.id !== selectedKwId);
   if (keywords.length) selectKw(keywords[0].id);
@@ -778,12 +778,12 @@ function deleteKw() {
   renderKwList();
   showToast('削除しました');
 }
- 
+
 // ══════════════════════════════════════════════════
 // VIEW B: FOREST
 // ══════════════════════════════════════════════════
- 
- 
+
+
 function calcConn(a, b) {
   const shared = a.keywords.filter(k => b.keywords.includes(k));
   const sameTheme = a.theme === b.theme;
@@ -792,14 +792,14 @@ function calcConn(a, b) {
   if (shared.length === 1) return { level:'branch', shared };
   return null;
 }
- 
+
 const forestConns = [];
 for (let i = 0; i < forestUsers.length; i++)
   for (let j = i+1; j < forestUsers.length; j++) {
     const c = calcConn(forestUsers[i], forestUsers[j]);
     if (c) forestConns.push({ a:forestUsers[i].id, b:forestUsers[j].id, ...c });
   }
- 
+
 function initForest() {
   const canvas = document.getElementById('forest-canvas');
   const W = canvas.offsetWidth, H = canvas.offsetHeight;
@@ -815,7 +815,7 @@ function initForest() {
     }
   });
 }
- 
+
 function levelColorF(level) {
   const map = {
     root: ['rgba(139,69,19,', 'rgba(196,122,58,'],
@@ -825,9 +825,9 @@ function levelColorF(level) {
   };
   return map[level];
 }
- 
+
 function treeR(u) { return 12 + Math.min(u.growth,50)*0.45; }
- 
+
 function drawForest() {
   const canvas = document.getElementById('forest-canvas');
   if (!canvas.offsetWidth) return;
@@ -841,7 +841,7 @@ function drawForest() {
   ctx.save();
   ctx.translate(forestOx, forestOy);
   ctx.scale(forestScale, forestScale);
- 
+
   // ground glow
   forestUsers.forEach(u => {
     const p = forestPositions[u.id]; if(!p) return;
@@ -851,7 +851,7 @@ function drawForest() {
     ctx.beginPath(); ctx.ellipse(p.x,p.y+r,r*2,r*0.6,0,0,Math.PI*2);
     ctx.fillStyle=g; ctx.fill();
   });
- 
+
   // connections
   forestConns.forEach(c => {
     if (forestFilter!=='all' && c.level!==forestFilter) return;
@@ -862,7 +862,7 @@ function drawForest() {
     const w = {root:2.5,trunk:1.8,branch:1.2,leaf:0.7}[c.level];
     const ra=treeR(forestUsers.find(u=>u.id===c.a));
     const rb=treeR(forestUsers.find(u=>u.id===c.b));
- 
+
     ctx.beginPath();
     if (c.level==='root') {
       ctx.moveTo(pa.x,pa.y+ra*0.8);
@@ -876,7 +876,7 @@ function drawForest() {
     c.level==='leaf'?ctx.setLineDash([3,3]):ctx.setLineDash([]);
     ctx.stroke(); ctx.setLineDash([]);
   });
- 
+
   // trees
   forestUsers.forEach(u => {
     const p=forestPositions[u.id]; if(!p) return;
@@ -884,10 +884,10 @@ function drawForest() {
     const isSel=u.id===forestSelectedId;
     const isConn=forestSelectedId&&forestConns.some(c=>(c.a===forestSelectedId||c.b===forestSelectedId)&&(c.a===u.id||c.b===u.id));
     ctx.globalAlpha=forestSelectedId?(isSel||isConn?1:0.2):1;
- 
+
     ctx.beginPath(); ctx.moveTo(p.x,p.y+r*0.8); ctx.lineTo(p.x,p.y);
     ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=Math.max(2,r*0.12); ctx.lineCap='round'; ctx.stroke();
- 
+
     const layers=Math.min(3,Math.floor(u.growth/8)+1);
     for(let l=0;l<layers;l++){
       const lr=r*(1-l*0.22), ly=p.y-r*0.2-l*r*0.28;
@@ -897,14 +897,14 @@ function drawForest() {
       ctx.beginPath(); ctx.arc(p.x,ly,lr,0,Math.PI*2);
       ctx.fillStyle=g; ctx.fill();
     }
- 
+
     if (isSel) {
       const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*2.5);
       g.addColorStop(0,'rgba(196,148,58,0.25)'); g.addColorStop(1,'transparent');
       ctx.beginPath(); ctx.arc(p.x,p.y,r*2.5,0,Math.PI*2);
       ctx.fillStyle=g; ctx.fill();
     }
- 
+
     ctx.font=`${Math.max(12,r*0.55)}px serif`;
     ctx.textAlign='center'; ctx.textBaseline='middle';
     ctx.fillText(u.emoji,p.x,p.y-r*0.2);
@@ -915,7 +915,7 @@ function drawForest() {
   });
   ctx.restore();
 }
- 
+
 function getForestUserAt(cx,cy) {
   const wx=(cx-forestOx)/forestScale, wy=(cy-forestOy)/forestScale;
   let found=null, minD=Infinity;
@@ -927,14 +927,14 @@ function getForestUserAt(cx,cy) {
   });
   return found;
 }
- 
+
 function setForestFilter(f) {
   forestFilter=f;
   document.querySelectorAll('.fc-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('fc-'+f).classList.add('active');
   drawForest();
 }
- 
+
 function updateForestSelectedPanel(u) {
   const titleEl=document.getElementById('forest-selected-title');
   const bodyEl=document.getElementById('forest-selected-body');
@@ -954,7 +954,7 @@ function updateForestSelectedPanel(u) {
     </div>`;
   }).join('') || '<div style="font-size:0.72rem;color:#4a4030">まだつながりがありません</div>';
 }
- 
+
 // forest events
 document.getElementById('forest-canvas').addEventListener('mousedown', e=>{
   const r=e.currentTarget.getBoundingClientRect();
@@ -988,12 +988,12 @@ document.getElementById('forest-canvas').addEventListener('wheel',e=>{
   forestOx=cx-(cx-forestOx)*d;forestOy=cy-(cy-forestOy)*d;
   forestScale=Math.max(0.3,Math.min(3,forestScale*d));drawForest();
 },{passive:false});
- 
+
 // ══════════════════════════════════════════════════
 // VIEW C: MAP (tag genealogy)
 // ══════════════════════════════════════════════════
- 
- 
+
+
 function initMap() {
   const canvas=document.getElementById('map-canvas');
   const W=canvas.offsetWidth,H=canvas.offsetHeight;
@@ -1010,7 +1010,7 @@ function initMap() {
   }
   const rh=H/(roots.length+1);
   roots.forEach((r,i)=>layout(r.id,80,rh*(i+1),80));
- 
+
   // tag list
   const list=document.getElementById('map-tag-list');
   list.innerHTML=mapTags.filter(t=>!t.parent).map(t=>`
@@ -1018,12 +1018,12 @@ function initMap() {
       ${t.name}<span class="map-tag-count">${t.users}</span>
     </div>`).join('');
 }
- 
+
 var highlightedTag=null;
 function highlightTag(id){highlightedTag=id===highlightedTag?null:id;drawMap();}
- 
+
 function getDepth(id){let d=0,t=mapTags.find(x=>x.id===id);while(t&&t.parent){d++;t=mapTags.find(x=>x.id===t.parent);}return d;}
- 
+
 function drawMap() {
   const canvas=document.getElementById('map-canvas');
   if(!canvas.offsetWidth) return;
@@ -1037,7 +1037,7 @@ function drawMap() {
   ctx.save();
   ctx.translate(mapOx,mapOy);
   ctx.scale(mapScale,mapScale);
- 
+
   // edges
   mapTags.forEach(t=>{
     if(!t.parent) return;
@@ -1059,7 +1059,7 @@ function drawMap() {
       ctx.fillText('共通タグ',mx,my-4);
     }
   });
- 
+
   // nodes
   mapTags.forEach(t=>{
     const p=mapPositions[t.id];if(!p) return;
@@ -1067,19 +1067,19 @@ function drawMap() {
     const r=Math.max(6,14-depth*2)+(t.users/284)*8;
     const hl=highlightedTag===t.id;
     const isRoot=!t.parent;
- 
+
     ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
     ctx.fillStyle=hl?'#c4a050':isRoot?'#9a7a2a':'#cec6b0';
     ctx.strokeStyle=isRoot?'#9a7a2a':'#b0a890';
     ctx.lineWidth=isRoot?1.5:0.5;
     ctx.fill();ctx.stroke();
- 
+
     const fs=Math.max(9,12-depth*1.5);
     ctx.font=`${isRoot?700:400} ${fs}px 'Noto Serif JP',serif`;
     ctx.fillStyle=hl?'#5a3a0a':isRoot?'#2a2010':'#5a5040';
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.fillText(t.name,p.x+r+5,p.y);
- 
+
     if(t.users<=5){
       ctx.beginPath();ctx.arc(p.x,p.y,r+4,0,Math.PI*2);
       ctx.strokeStyle='rgba(140,60,30,0.4)';ctx.lineWidth=1;
@@ -1088,7 +1088,7 @@ function drawMap() {
   });
   ctx.restore();
 }
- 
+
 // map events
 const mapCanvas=document.getElementById('map-canvas');
 // mpSx declared above
@@ -1103,24 +1103,24 @@ mapCanvas.addEventListener('wheel',e=>{
   mapOx=cx-(cx-mapOx)*d;mapOy=cy-(cy-mapOy)*d;
   mapScale=Math.max(0.3,Math.min(3,mapScale*d));drawMap();
 },{passive:false});
- 
+
 // ══════════════════════════════════════════════════
 // UTILS
 // ══════════════════════════════════════════════════
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
- 
+
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2200);
 }
- 
+
 // forest stats
 function updateForestStats(){
   document.getElementById('forest-stats').textContent=
     `${forestUsers.length}本の木 · ${forestConns.length}のつながり`;
 }
- 
+
 // ── 画像選択 ──
 function handleImageSelect(e) {
   var file = e.target.files[0];
@@ -1138,7 +1138,7 @@ function handleImageSelect(e) {
   };
   reader.readAsDataURL(file);
 }
- 
+
 function removeImage() {
   var preview = document.getElementById('img-preview');
   var removeBtn = document.getElementById('img-remove-btn');
@@ -1151,25 +1151,25 @@ function removeImage() {
   window._currentImageUrl = null;
   document.getElementById('img-file-input').value = '';
 }
- 
+
 // INIT
 window.addEventListener('resize',()=>{
   if(document.getElementById('view-forest').classList.contains('active')) drawForest();
   if(document.getElementById('view-map').classList.contains('active')) drawMap();
 });
- 
+
 renderKwList();
 if (keywords.length > 0) selectKw(keywords[0].id);
 updateForestStats();
 </script>
- 
+
 <script>
 function setLang(lang) {
   document.body.classList.toggle('en', lang === 'en');
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
   });
- 
+
   // Editor placeholders
   const title = document.getElementById('ed-title');
   const body = document.getElementById('ed-body');
@@ -1179,10 +1179,10 @@ function setLang(lang) {
     ? 'なぜこれに関心があるのか、どんなことを感じているのか、じっくりと書いてください。邪魔されない、あなただけの空間です。'
     : 'Write about why this interests you, what you feel. This is your quiet space, uninterrupted.';
   if (tags) tags.placeholder = lang === 'ja' ? 'タグ（カンマ区切り）例: 旅, 記憶, 孤独…' : 'Tags (comma separated) e.g. travel, memory, solitude…';
- 
+
   localStorage.setItem('hoheto_lang', lang);
 }
- 
+
 // Restore language preference
 const savedLangApp = localStorage.getItem('hoheto_lang');
 if (savedLangApp === 'en') setLang('en');
@@ -1195,7 +1195,7 @@ if (savedLangApp === 'en') setLang('en');
   var _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
   var _db = supabase.createClient(_SB_URL, _SB_KEY);
   var _currentUser = null;
- 
+
   async function loadKeywords() {
     if (!_currentUser) return;
     var result = await _db
@@ -1226,7 +1226,7 @@ if (savedLangApp === 'en') setLang('en');
       renderResonances();
     }
   }
- 
+
   async function saveTagsToDb(kwId, tagNames) {
     await _db.from('keyword_tags').delete().eq('keyword_id', kwId);
     for (var i = 0; i < tagNames.length; i++) {
@@ -1243,7 +1243,7 @@ if (savedLangApp === 'en') setLang('en');
       }
     }
   }
- 
+
   async function uploadImage(file, kwId) {
     var ext = file.name.split('.').pop();
     var path = _currentUser.id + '/' + kwId + '.' + ext;
@@ -1252,7 +1252,7 @@ if (savedLangApp === 'en') setLang('en');
     var urlResult = _db.storage.from('hoheto-images').getPublicUrl(path);
     return urlResult.data.publicUrl;
   }
- 
+
   async function saveKwToDb(status) {
     if (!_currentUser) return;
     var title = document.getElementById('ed-title').value.trim();
@@ -1260,13 +1260,13 @@ if (savedLangApp === 'en') setLang('en');
     var tagsRaw = document.getElementById('ed-tags').value;
     var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
     if (!title) { document.getElementById('ed-title').focus(); return; }
- 
+
     var heat = window.currentHeat || 3;
     var imageUrl = window._currentImageUrl || null;
     var kwData = { title: title, body: body, heat: heat, status: status, user_id: _currentUser.id, image_url: imageUrl };
     var kwId = selectedKwId;
     var exists = keywords.find(function(k) { return k.id === selectedKwId; });
- 
+
     try {
       if (!exists || !selectedKwId) {
         // 新規作成
@@ -1291,7 +1291,7 @@ if (savedLangApp === 'en') setLang('en');
           return;
         }
       }
- 
+
       // 画像アップロード
       if (window._pendingImageFile) {
         var imgUrl = await uploadImage(window._pendingImageFile, kwId);
@@ -1301,22 +1301,22 @@ if (savedLangApp === 'en') setLang('en');
           window._pendingImageFile = null;
         }
       }
- 
+
       // タグを保存
       if (tags.length > 0) {
         await saveTagsToDb(kwId, tags);
       }
- 
+
       await loadKeywords();
       selectedKwId = kwId;
       showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
- 
+
     } catch(e) {
       console.error('saveKwToDb exception:', e);
       showToast('エラーが発生しました');
     }
   }
- 
+
   async function deleteKwFromDb() {
     if (!selectedKwId || !_currentUser) return;
     var del = await _db.from('keywords').delete().eq('id', selectedKwId);
@@ -1325,7 +1325,7 @@ if (savedLangApp === 'en') setLang('en');
     await loadKeywords();
     showToast('削除しました');
   }
- 
+
   function updateHeader(user) {
     var email = user.email || '';
     var handle = email.split('@')[0];
@@ -1343,7 +1343,7 @@ if (savedLangApp === 'en') setLang('en');
       headerRight.insertBefore(btn, headerRight.firstChild);
     }
   }
- 
+
   // 既存関数を上書き
   window.saveDraft = function() { saveKwToDb('draft'); };
   window.publish   = function() { saveKwToDb('published'); };
@@ -1359,7 +1359,7 @@ if (savedLangApp === 'en') setLang('en');
     renderResonances();
     document.getElementById('ed-title').focus();
   };
- 
+
   // 認証チェック
   _db.auth.getSession().then(function(result) {
     var session = result.data.session;
@@ -1369,13 +1369,13 @@ if (savedLangApp === 'en') setLang('en');
     loadKeywords();
     updateForestStats();
   });
- 
+
   _db.auth.onAuthStateChange(function(event, session) {
     if (event === 'SIGNED_OUT') window.location.href = '/login';
     if (event === 'SIGNED_IN' && session) { _currentUser = session.user; updateHeader(_currentUser); }
   });
 })();
 </script>
- 
+
 </body>
 </html>
