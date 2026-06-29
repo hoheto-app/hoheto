@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoheto — Concept Document</title>
-<link rel="icon" type="image/png" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
- <style>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Noto+Sans+JP:wght@300;400&family=Inconsolata:wght@300;400;600&display=swap');
  
 :root {
@@ -318,6 +316,41 @@ body {
   .brand-block { padding: 32px 24px; }
   .brand-block .main-name { font-size: 2.8rem; }
 }
+ 
+/* ── LANG SWITCHER ── */
+.lang-switcher-concept {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 300;
+  display: flex;
+  gap: 0;
+}
+.lang-btn-c {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  padding: 5px 12px;
+  border: 1px solid var(--rule);
+  background: rgba(247,243,236,0.92);
+  color: var(--ink3);
+  cursor: pointer;
+  transition: all 0.18s;
+  backdrop-filter: blur(4px);
+}
+.lang-btn-c.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #fff;
+}
+.lang-btn-c:first-child { border-right: none; }
+[data-lang="en"] { display: none; }
+body.en [data-lang="ja"] { display: none; }
+body.en [data-lang="en"] { display: block; }
+[data-lang="en"].inl { display: none; }
+[data-lang="ja"].inl { display: inline; }
+body.en [data-lang="en"].inl { display: inline; }
+body.en [data-lang="ja"].inl { display: none; }
 </style>
 </head>
 <body>
@@ -325,8 +358,8 @@ body {
 <!-- COVER -->
 <div class="cover" style="display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:40px;min-height:100vh;padding:80px 10vw;background:transparent;">
   <!-- 左：はにほ -->
-  <div style="display:flex;align-items:center;justify-content:center;">
-    <img src="../mascot.png" alt="はにほ" style="width:100%;max-width:500px;height:auto;opacity:0.9;mix-blend-mode:multiply;">
+  <div style="display:flex;align-items:center;justify-content:center;mix-blend-mode:multiply;">
+    <img src="../mascot.png" alt="はにほ" style="width:100%;max-width:500px;height:auto;opacity:0.95;mix-blend-mode:multiply;background:transparent;">
   </div>
   <!-- 右：テキスト -->
   <div>
@@ -335,12 +368,20 @@ body {
       <span class="accent">Ho</span>he<span class="accent">to</span>
     </div>
     <div class="cover-sub">
-      古書店での偶然の出会いのように—<br>
+      <span data-lang="ja">古書店での偶然の出会いのように—<br>
       関心が先にあり、人は後から静かに現れる。<br>
-      新しい知的コミュニティのための設計書。
+      新しい知的コミュニティのための設計書。</span>
+      <span data-lang="en">Like a chance encounter in an old bookshop—<br>
+      Interest comes first, people follow quietly.<br>
+      A design document for a new intellectual community.</span>
     </div>
     <div class="cover-meta">CONFIDENTIAL &nbsp;·&nbsp; HOHETO Inc. &nbsp;·&nbsp; CONCEPT STAGE</div>
   </div>
+</div>
+ 
+<div class="lang-switcher-concept">
+  <button class="lang-btn-c active" onclick="setLang('ja')">JP</button>
+  <button class="lang-btn-c" onclick="setLang('en')">EN</button>
 </div>
  
 <div class="page">
@@ -348,23 +389,33 @@ body {
   <!-- 01 ORIGIN -->
   <div class="section">
     <div class="section-eyebrow">Origin</div>
-    <div class="section-title">なぜ今、これが必要か</div>
+    <div class="section-title">
+      <span data-lang="ja">なぜ今、これが必要か</span>
+      <span data-lang="en">Why This Is Needed Now</span>
+    </div>
     <div class="section-body">
-      <p>2001年、日本にひとつのサービスが生まれた。ブログもSNSも存在しなかった時代に、「関心でつながる」という発想を実装した<strong>関心空間</strong>だ。グッドデザイン賞を受賞し、約6万人のユーザーが集った。しかし2016年、「情報と情報がつながる場としての役目を終えた」という言葉とともに閉鎖された。</p>
+      <span data-lang="ja"><p>2001年、日本にひとつのサービスが生まれた。ブログもSNSも存在しなかった時代に、「関心でつながる」という発想を実装した<strong>関心空間</strong>だ。グッドデザイン賞を受賞し、約6万人のユーザーが集った。しかし2016年、「情報と情報がつながる場としての役目を終えた」という言葉とともに閉鎖された。</p>
       <p>その後、SNSは爆発的に普及した。しかしFacebookは人間関係の維持装置となり、Xは速度と炎上の場になり、Instagramはビジュアル競争の場になった。どれも「人が先、関心は後」という構造だ。</p>
-      <p>関心空間が問いかけていたことは、まだ誰も完全には答えていない。Hohetoはその問いへの、現代的な答えだ。</p>
+      <p>関心空間が問いかけていたことは、まだ誰も完全には答えていない。Hohetoはその問いへの、現代的な答えだ。</p></span>
+      <span data-lang="en"><p>In 2001, a service was born in Japan. In an era before blogs or social media existed, <strong>Kanshinkukan</strong> implemented the idea of "connecting through interests." It won the Good Design Award and gathered around 60,000 users. But in 2016, it closed with the words "its role as a place where information connects with information has ended."</p>
+      <p>Since then, social media has exploded. But Facebook became a machine for maintaining human relationships, X became a place of speed and outrage, and Instagram became a visual competition. All of them share the structure of "people first, interests second."</p>
+      <p>The question Kanshinkukan was asking has never been fully answered. Hoheto is the modern answer to that question.</p></span>
     </div>
  
     <div class="pull-quote">
-      <p>「自分のために書いていたら、<br>同じ場所に立っている人がいた。」</p>
-      <cite>— Hoheto が実現したい体験</cite>
+      <p><span data-lang="ja">「自分のために書いていたら、<br>同じ場所に立っている人がいた。」</span>
+      <span data-lang="en">"I was writing for myself,<br>and someone was standing in the same place."</span></p>
+      <cite>— <span data-lang="ja">Hoheto が実現したい体験</span><span data-lang="en">The experience Hoheto aims to create</span></cite>
     </div>
   </div>
  
   <!-- 02 NAMING -->
   <div class="section">
     <div class="section-eyebrow">Naming Story</div>
-    <div class="section-title">Hohetoという名前の必然</div>
+    <div class="section-title">
+      <span data-lang="ja">Hohetoという名前の必然</span>
+      <span data-lang="en">The Inevitability of the Name Hoheto</span>
+    </div>
     <div class="section-body">
       <p>この名前には、三つの必然が重なっている。</p>
     </div>
@@ -409,18 +460,25 @@ body {
     </div>
  
     <div class="section-body">
-      <p><strong>第一の必然 — いろはの続き。</strong>「いろはにほへと」は平安時代から続く、すべての仮名文字を網羅した歌だ。「いろは」が始まりなら、「ほへと」はその次へ向かう言葉。関心空間の精神を受け継ぎ、その先へ進むというコンセプトと完璧に一致する。</p>
+      <span data-lang="ja"><p><strong>第一の必然 — いろはの続き。</strong>「いろはにほへと」は平安時代から続く、すべての仮名文字を網羅した歌だ。「いろは」が始まりなら、「ほへと」はその次へ向かう言葉。関心空間の精神を受け継ぎ、その先へ進むというコンセプトと完璧に一致する。</p>
       <p><strong>第二の必然 — 創業者の名前。</strong>Horie Hayatoの頭音Ho・H・oが「ほへと」の三音と重なる。名前がサービス名に宿るという、語り継がれるブランドストーリーが生まれた。</p>
-      <p><strong>第三の必然 — 意味の空白。</strong>「ほへと」は意味を持たない音の連なりだ。だからこそ、Hohetoというサービスが新しい意味を吹き込むことができる。名前が白紙であることが、最大の強みになる。</p>
+      <p><strong>第三の必然 — 意味の空白。</strong>「ほへと」は意味を持たない音の連なりだ。だからこそ、Hohetoというサービスが新しい意味を吹き込むことができる。名前が白紙であることが、最大の強みになる。</p></span>
+      <span data-lang="en"><p><strong>First inevitability — continuation of Iroha.</strong>"Iroha ni hoheto" is a poem from the Heian period that encompasses all Japanese syllables. If "iroha" is the beginning, "hoheto" is the word that moves toward what comes next — perfectly aligned with the concept of inheriting the spirit of Kanshinkukan and moving beyond it.</p>
+      <p><strong>Second inevitability — the founder's name.</strong>The opening sounds of Horie Hayato — Ho, H, o — overlap with the three sounds of "hoheto." A brand story was born in which the founder's name lives within the service name.</p>
+      <p><strong>Third inevitability — the blank of meaning.</strong>"Hoheto" is a sequence of sounds with no inherent meaning. That is precisely why the Hoheto service can breathe new meaning into it. The name being a blank slate becomes its greatest strength.</p></span>
     </div>
   </div>
  
   <!-- 03 CONCEPT -->
   <div class="section">
     <div class="section-eyebrow">Core Concept</div>
-    <div class="section-title">関心が先、人は後から</div>
+    <div class="section-title">
+      <span data-lang="ja">関心が先、人は後から</span>
+      <span data-lang="en">Interest First, People Follow</span>
+    </div>
     <div class="section-body">
-      <p>Hohetoは「書くこと」を中心に置く。投稿ではなく、育てること。誰かに見せるために書くのではなく、自分のために深く書いていたら、静かに同じ関心を持つ人が現れる—そういう場所だ。</p>
+      <span data-lang="ja"><p>Hohetoは「書くこと」を中心に置く。投稿ではなく、育てること。誰かに見せるために書くのではなく、自分のために深く書いていたら、静かに同じ関心を持つ人が現れる—そういう場所だ。</p></span>
+    <span data-lang="en"><p>Hoheto places "writing" at its center. Not posting, but nurturing. Not writing to show someone, but writing deeply for yourself — and then, quietly, someone with the same interest appears. That is what this place is.</p></span>
     </div>
  
     <div class="concept-grid">
@@ -568,17 +626,26 @@ body {
   <!-- 08 VISION -->
   <div class="section">
     <div class="section-eyebrow">Vision</div>
-    <div class="section-title">私たちが作りたい世界</div>
+    <div class="section-title">
+      <span data-lang="ja">私たちが作りたい世界</span>
+      <span data-lang="en">The World We Want to Create</span>
+    </div>
     <div class="section-body">
-      <p>インターネットはかつて、偶然の発見に満ちていた。検索していないものに出会い、知らなかった人の言葉に心を動かされた。アルゴリズムはその偶然性を、予測可能な快楽に変えてしまった。</p>
+      <span data-lang="ja"><p>インターネットはかつて、偶然の発見に満ちていた。検索していないものに出会い、知らなかった人の言葉に心を動かされた。アルゴリズムはその偶然性を、予測可能な快楽に変えてしまった。</p>
       <p>Hohetoは、その偶然性を人間の手に戻す試みだ。自分の関心を丁寧に言語化し、静かに世界に置いておく。そこに同じ場所に立っている誰かが、ある日静かに現れる。</p>
-      <p>古書店で、見知らぬ人が同じ本を手にしている瞬間のような出会い。それがHohetoの目指す体験だ。</p>
+      <p>古書店で、見知らぬ人が同じ本を手にしている瞬間のような出会い。それがHohetoの目指す体験だ。</p></span>
+      <span data-lang="en"><p>The internet was once full of unexpected discoveries. We encountered things we hadn't searched for, and were moved by the words of people we didn't know. Algorithms have turned that serendipity into predictable pleasure.</p>
+      <p>Hoheto is an attempt to return that serendipity to human hands. Carefully put your interests into words, and quietly place them in the world. One day, someone standing in the same place will quietly appear.</p>
+      <p>Like the moment in an old bookshop when a stranger reaches for the same book. That is the experience Hoheto aims for.</p></span>
     </div>
  
     <div class="pull-quote">
-      <p>いろはにほへと　ちりぬるを—<br>
+      <p><span data-lang="ja">いろはにほへと　ちりぬるを—<br>
       散っても、また集まる。<br>
-      すべての関心が、ここへと向かう。</p>
+      すべての関心が、ここへと向かう。</span>
+      <span data-lang="en">Iroha ni hoheto, chirinuru wo—<br>
+      Even scattered, we gather again.<br>
+      All interests lead here.</span></p>
       <cite>— Hoheto tagline</cite>
     </div>
   </div>
@@ -592,5 +659,17 @@ body {
   HOHETO INC. — CONCEPT DOCUMENT &nbsp;·&nbsp; CONFIDENTIAL &nbsp;·&nbsp; 2026
 </div>
  
+ 
+<script>
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn-c').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
+  });
+  localStorage.setItem('hoheto_concept_lang', lang);
+}
+const savedLang = localStorage.getItem('hoheto_concept_lang');
+if (savedLang === 'en') setLang('en');
+</script>
 </body>
 </html>
