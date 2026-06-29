@@ -588,16 +588,7 @@ body.en [data-lang="ja"].inline { display: none; }
  
 <div class="toast" id="toast"></div>
  
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ══════════════════════════════════════════════════
-// SUPABASE
-// ══════════════════════════════════════════════════
-const _SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
-const _SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
-const { createClient: _createClient } = supabase;
-const _db = _createClient(_SUPABASE_URL, _SUPABASE_KEY);
-let _currentUser = null;
  
  
  
@@ -1147,64 +1138,151 @@ const savedLangApp = localStorage.getItem('hoheto_lang');
 if (savedLangApp === 'en') setLang('en');
 </script>
  
-<!-- Supabase Auth -->
  
+ 
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
-const { createClient } = supabase;
-const authDb = createClient(SUPABASE_URL, SUPABASE_KEY);
+// ── Supabase初期化（一箇所のみ）──
+const _SB_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
+const _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
+const _db = supabase.createClient(_SB_URL, _SB_KEY);
+var _currentUser = null;
  
-// ── 認証チェック ──
-async function checkAuth() {
-  const { data: { session } } = await authDb.auth.getSession();
-  if (!session) {
-    // 未ログインならloginへ
-    window.location.href = '/login';
-    return;
+// ── キーワード読み込み ──
+async function loadKeywords() {
+  if (!_currentUser) return;
+  const { data, error } = await _db
+    .from('keywords')
+    .select('id, title, body, heat, status, created_at, keyword_tags(tags(name))')
+    .eq('user_id', _currentUser.id)
+    .order('created_at', { ascending: false });
+  if (error) { console.error('loadKeywords error:', error); return; }
+  keywords = (data || []).map(k => ({
+    id: k.id,
+    title: k.title || '',
+    body: k.body || '',
+    tags: (k.keyword_tags || []).map(kt => kt.tags?.name).filter(Boolean),
+    heat: k.heat || 3,
+    status: k.status || 'draft',
+    date: new Date(k.created_at).toLocaleDateString('ja-JP')
+  }));
+  renderKwList();
+  if (keywords.length > 0) selectKw(keywords[0].id);
+  else {
+    selectedKwId = null;
+    document.getElementById('ed-title').value = '';
+    document.getElementById('ed-body').value = '';
+    document.getElementById('ed-tags').value = '';
+    renderResonances();
+  }
+}
+ 
+// ── タグ保存 ──
+async function saveTagsToDb(kwId, tagNames) {
+  await _db.from('keyword_tags').delete().eq('keyword_id', kwId);
+  for (const name of tagNames) {
+    if (!name) continue;
+    let { data: tagData } = await _db.from('tags').select('id').eq('name', name).maybeSingle();
+    if (!tagData) {
+      const { data: newTag } = await _db.from('tags')
+        .insert({ name, created_by: _currentUser.id }).select().maybeSingle();
+      tagData = newTag;
+    }
+    if (tagData) {
+      await _db.from('keyword_tags').insert({ keyword_id: kwId, tag_id: tagData.id });
+    }
+  }
+}
+ 
+// ── キーワード保存 ──
+async function saveKwToDb(status) {
+  if (!_currentUser) return;
+  const title = document.getElementById('ed-title').value.trim();
+  const body = document.getElementById('ed-body').value.trim();
+  const tagsRaw = document.getElementById('ed-tags').value;
+  const tags = tagsRaw.split(/[,、，]+/).map(t => t.trim()).filter(Boolean);
+  if (!title) { document.getElementById('ed-title').focus(); return; }
+ 
+  const kwData = { title, body, heat: currentHeat, status, user_id: _currentUser.id };
+  let kwId = selectedKwId;
+  const exists = keywords.find(k => k.id === selectedKwId);
+ 
+  if (!exists) {
+    const { data, error } = await _db.from('keywords').insert(kwData).select().maybeSingle();
+    if (error) { console.error('insert error:', error); showToast('保存エラー'); return; }
+    kwId = data.id;
+  } else {
+    const { error } = await _db.from('keywords').update(kwData).eq('id', selectedKwId);
+    if (error) { console.error('update error:', error); showToast('更新エラー'); return; }
   }
  
-  // ログイン済み：ユーザー情報を表示
-  const user = session.user;
+  await saveTagsToDb(kwId, tags);
+  await loadKeywords();
+  selectedKwId = kwId;
+  showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
+}
+ 
+// ── キーワード削除 ──
+async function deleteKwFromDb() {
+  if (!selectedKwId || !_currentUser) return;
+  const { error } = await _db.from('keywords').delete().eq('id', selectedKwId);
+  if (error) { console.error('delete error:', error); return; }
+  selectedKwId = null;
+  await loadKeywords();
+  showToast('削除しました');
+}
+ 
+// ── 既存関数を上書き ──
+saveDraft = () => saveKwToDb('draft');
+publish   = () => saveKwToDb('published');
+deleteKw  = () => deleteKwFromDb();
+newKeyword = function() {
+  selectedKwId = null;
+  document.getElementById('ed-title').value = '';
+  document.getElementById('ed-body').value = '';
+  document.getElementById('ed-tags').value = '';
+  setHeat(3);
+  renderKwList();
+  renderResonances();
+  document.getElementById('ed-title').focus();
+};
+ 
+// ── ヘッダー更新 ──
+function updateHeader(user) {
   const email = user.email || '';
   const handle = email.split('@')[0];
- 
-  // アバターとハンドル名を更新
   const avatar = document.querySelector('.avatar');
-  if (avatar) {
-    avatar.textContent = handle.charAt(0).toUpperCase();
-    avatar.title = email;
-  }
- 
-  // ログアウトボタンを追加
+  if (avatar) { avatar.textContent = handle.charAt(0).toUpperCase(); avatar.title = email; }
   const headerRight = document.querySelector('.header-right');
   if (headerRight && !document.getElementById('logout-btn')) {
     const btn = document.createElement('button');
     btn.id = 'logout-btn';
-    btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid var(--rule);background:none;color:var(--ink4);cursor:pointer;transition:all 0.15s;';
+    btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid var(--rule);background:none;color:var(--ink4);cursor:pointer;';
     btn.innerHTML = '<span data-lang="ja" class="inl">ログアウト</span><span data-lang="en" class="inl">Sign Out</span>';
-    btn.onmouseover = () => { btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)'; };
-    btn.onmouseout = () => { btn.style.borderColor = 'var(--rule)'; btn.style.color = 'var(--ink4)'; };
-    btn.onclick = handleLogout;
+    btn.onmouseover = () => { btn.style.color='var(--red)'; btn.style.borderColor='var(--red)'; };
+    btn.onmouseout  = () => { btn.style.color='var(--ink4)'; btn.style.borderColor='var(--rule)'; };
+    btn.onclick = async () => { await _db.auth.signOut(); window.location.href = '/login'; };
     headerRight.insertBefore(btn, headerRight.firstChild);
   }
 }
  
-// ── ログアウト ──
-async function handleLogout() {
-  await authDb.auth.signOut();
-  window.location.href = '/login';
-}
+// ── 認証チェック＆初期化 ──
+(async () => {
+  const { data: { session } } = await _db.auth.getSession();
+  if (!session) { window.location.href = '/login'; return; }
+  _currentUser = session.user;
+  updateHeader(_currentUser);
+  await loadKeywords();
+  updateForestStats();
+})();
  
-// 認証チェック実行
-checkAuth();
- 
-// セッション変化を監視
-authDb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_OUT') {
-    window.location.href = '/login';
-  }
+_db.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') window.location.href = '/login';
+  if (event === 'SIGNED_IN' && session) { _currentUser = session.user; updateHeader(_currentUser); }
 });
 </script>
+ 
 </body>
 </html>
+ 
