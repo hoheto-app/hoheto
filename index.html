@@ -176,9 +176,48 @@ body {
   color: #cec6b5;
   letter-spacing: 0.2em;
 }
+ 
+.lang-switcher {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 100;
+  display: flex;
+  gap: 0;
+}
+.lang-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  padding: 5px 12px;
+  border: 1px solid #cec6b5;
+  background: rgba(245,240,228,0.92);
+  color: #9a8a70;
+  cursor: pointer;
+  transition: all 0.18s;
+  backdrop-filter: blur(4px);
+}
+.lang-btn.active {
+  background: #c4a060;
+  border-color: #c4a060;
+  color: #f5f0e4;
+}
+.lang-btn:first-child { border-right: none; }
+[data-lang="en"] { display: none; }
+body.en [data-lang="ja"] { display: none; }
+body.en [data-lang="en"] { display: block; }
+body.en .iroha-ja { display: none; }
+body.en .iroha-en { display: block; }
+.iroha-en { display: none; }
 </style>
 </head>
 <body>
+ 
+<!-- 言語切り替え -->
+<div class="lang-switcher">
+  <button class="lang-btn active" onclick="setLang('ja')">JP</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
  
 <div class="wrap">
  
@@ -186,8 +225,11 @@ body {
     <span class="at">@</span>ゐroh<span class="at">@</span>
   </div>
  
-  <div class="iroha">
+  <div class="iroha iroha-ja">
     い ろ は に <span class="ho">ほ へ と</span> ち り ぬ る を
+  </div>
+  <div class="iroha iroha-en">
+    i · ro · ha · ni · <span class="ho">ho · he · to</span> · chi · ri · nu · ru · wo
   </div>
  
   <div class="rule"></div>
@@ -198,12 +240,18 @@ body {
   </div>
  
   <div class="tagline">
-    <strong>関心が先にあり、<br>人は後から静かに現れる。</strong>
+    <span data-lang="ja"><strong>関心が先にあり、<br>人は後から静かに現れる。</strong>
     古書店で、見知らぬ人が<br>
-    同じ本を手にしている瞬間のような出会いを。
+    同じ本を手にしている瞬間のような出会いを。</span>
+    <span data-lang="en"><strong>Interest comes first,<br>people follow quietly.</strong>
+    Like the moment in an old bookshop<br>
+    when a stranger reaches for the same book.</span>
   </div>
  
-  <div class="coming">Coming Soon</div>
+  <div class="coming">
+    <span data-lang="ja">Coming Soon</span>
+    <span data-lang="en">Coming Soon</span>
+  </div>
  
   <div class="notify-form" id="form-wrap">
     <input type="email" id="email-input" placeholder="メールアドレス">
@@ -213,7 +261,8 @@ body {
   <div class="error-msg" id="error-msg"></div>
  
   <div class="thanks" id="thanks-msg">
-    ありがとうございます。開始時にお知らせします。
+    <span data-lang="ja">ありがとうございます。開始時にお知らせします。</span>
+    <span data-lang="en">Thank you. We will notify you when we launch.</span>
   </div>
  
   <div class="gold-dots">
@@ -221,7 +270,8 @@ body {
   </div>
  
   <div class="footer">
-    HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; 2026
+    <span data-lang="ja">HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; 関心の場 &nbsp;·&nbsp; 2026</span>
+    <span data-lang="en">HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; Personal Interest Field &nbsp;·&nbsp; 2026</span>
   </div>
  
 </div>
@@ -273,5 +323,29 @@ async function handleSubmit() {
 }
 </script>
  
+ 
+<script>
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
+  });
+  // Update placeholder
+  const input = document.getElementById('email-input');
+  if (input) {
+    input.placeholder = lang === 'ja' ? 'メールアドレス' : 'Email address';
+  }
+  // Update submit button
+  const btn = document.getElementById('submit-btn');
+  if (btn && btn.textContent !== '送信中…' && btn.textContent !== 'Sending...') {
+    btn.textContent = lang === 'ja' ? '通知を受け取る' : 'Notify me';
+  }
+  localStorage.setItem('hoheto_lang', lang);
+}
+ 
+// Restore language preference
+const savedLang = localStorage.getItem('hoheto_lang');
+if (savedLang === 'en') setLang('en');
+</script>
 </body>
 </html>
