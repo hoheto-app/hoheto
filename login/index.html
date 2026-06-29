@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hoheto — はじめる</title>
+<link rel="icon" type="image/png" href="../favicon.png">
+<link rel="apple-touch-icon" href="../favicon.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
+ 
+:root {
+  --paper: #f5f0e4;
+  --paper2: #ede8dc;
+  --ink: #1a1510;
+  --ink2: #3a3020;
+  --ink3: #6a5a40;
+  --ink4: #9a8a70;
+  --rule: #cec6b0;
+  --gold: #9a7a2a;
+  --gold2: #c4a050;
+  --teal: #2a6a5a;
+  --red: #8a2a1a;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 27px,
+    rgba(180,160,120,0.10) 28px
+  );
+}
+ 
+.container {
+  width: 100%;
+  max-width: 400px;
+}
+ 
+/* Logo */
+.logo-area {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.mascot {
+  width: 80px;
+  height: auto;
+  margin-bottom: 12px;
+  opacity: 0.9;
+}
+.logo {
+  font-size: 1.8rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+.logo .at { color: var(--gold2); }
+.logo-sub {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.25em;
+  color: var(--ink4);
+}
+ 
+/* Card */
+.card {
+  background: rgba(255,255,255,0.5);
+  border: 1px solid var(--rule);
+  padding: 32px 36px;
+  backdrop-filter: blur(4px);
+}
+ 
+/* Tabs */
+.tabs {
+  display: flex;
+  margin-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
+}
+.tab {
+  flex: 1;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  color: var(--ink4);
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: all 0.18s;
+}
+.tab.active {
+  color: var(--ink);
+  border-bottom-color: var(--gold2);
+}
+.tab:hover:not(.active) { color: var(--ink2); }
+ 
+/* Form */
+.form { display: none; }
+.form.active { display: block; }
+ 
+.form-group {
+  margin-bottom: 16px;
+}
+.form-label {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--ink4);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 6px;
+}
+.form-input {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.18s;
+}
+.form-input:focus { border-color: var(--gold2); }
+.form-input::placeholder { color: var(--rule); }
+ 
+.submit-btn {
+  width: 100%;
+  background: var(--gold2);
+  border: none;
+  color: var(--paper);
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  padding: 12px;
+  cursor: pointer;
+  transition: background 0.18s;
+  margin-top: 8px;
+}
+.submit-btn:hover { background: var(--gold); }
+.submit-btn:disabled {
+  background: var(--rule);
+  cursor: not-allowed;
+}
+ 
+/* Messages */
+.msg {
+  display: none;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  padding: 10px 14px;
+  margin-top: 14px;
+  line-height: 1.7;
+}
+.msg.success {
+  display: block;
+  color: var(--teal);
+  border: 1px solid var(--teal);
+  background: rgba(42,106,90,0.05);
+}
+.msg.error {
+  display: block;
+  color: var(--red);
+  border: 1px solid var(--red);
+  background: rgba(138,42,26,0.05);
+}
+ 
+/* Divider */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: var(--ink4);
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+}
+.divider::before, .divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--rule);
+}
+ 
+/* Google btn */
+.google-btn {
+  width: 100%;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  color: var(--ink2);
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.google-btn:hover { border-color: var(--gold2); color: var(--gold); }
+ 
+/* Footer */
+.footer-note {
+  text-align: center;
+  margin-top: 24px;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  color: var(--ink4);
+  letter-spacing: 0.1em;
+  line-height: 1.9;
+}
+.footer-note a {
+  color: var(--teal);
+  text-decoration: none;
+}
+.footer-note a:hover { color: var(--gold); }
+ 
+/* Lang switcher */
+.lang-switcher {
+  position: fixed;
+  top: 16px; right: 20px;
+  display: flex; gap: 0; z-index: 100;
+}
+.lang-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem; letter-spacing: 0.15em;
+  padding: 4px 10px;
+  border: 1px solid var(--rule);
+  background: rgba(245,240,228,0.92);
+  color: var(--ink4); cursor: pointer;
+  transition: all 0.18s;
+}
+.lang-btn.active { background: var(--gold2); border-color: var(--gold2); color: var(--paper); }
+.lang-btn:first-child { border-right: none; }
+[data-lang="en"] { display: none; }
+body.en [data-lang="ja"] { display: none; }
+body.en [data-lang="en"] { display: block; }
+[data-lang="en"].inl { display: none; }
+[data-lang="ja"].inl { display: inline; }
+body.en [data-lang="en"].inl { display: inline; }
+body.en [data-lang="ja"].inl { display: none; }
+</style>
+</head>
+<body>
+ 
+<!-- 言語切り替え -->
+<div class="lang-switcher">
+  <button class="lang-btn active" onclick="setLang('ja')">JP</button>
+  <button class="lang-btn" onclick="setLang('en')">EN</button>
+</div>
+ 
+<div class="container">
+ 
+  <!-- Logo -->
+  <div class="logo-area">
+    <img src="../mascot.png" alt="はにほ" class="mascot">
+    <div class="logo"><span class="at">@</span>ゐroh<span class="at">@</span></div>
+    <div class="logo-sub">
+      <span data-lang="ja" class="inl">関心が先にあり、人は後から静かに現れる。</span>
+      <span data-lang="en" class="inl">Interest comes first, people follow quietly.</span>
+    </div>
+  </div>
+ 
+  <!-- Card -->
+  <div class="card">
+ 
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" id="tab-login" onclick="switchTab('login')">
+        <span data-lang="ja" class="inl">ログイン</span>
+        <span data-lang="en" class="inl">Sign In</span>
+      </button>
+      <button class="tab" id="tab-signup" onclick="switchTab('signup')">
+        <span data-lang="ja" class="inl">新規登録</span>
+        <span data-lang="en" class="inl">Sign Up</span>
+      </button>
+    </div>
+ 
+    <!-- Login Form -->
+    <div class="form active" id="form-login">
+      <div class="form-group">
+        <label class="form-label">
+          <span data-lang="ja" class="inl">メールアドレス</span>
+          <span data-lang="en" class="inl">Email</span>
+        </label>
+        <input type="email" class="form-input" id="login-email"
+          placeholder="irohani@hohe.to">
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <span data-lang="ja" class="inl">パスワード</span>
+          <span data-lang="en" class="inl">Password</span>
+        </label>
+        <input type="password" class="form-input" id="login-password"
+          placeholder="••••••••">
+      </div>
+      <button class="submit-btn" id="login-btn" onclick="handleLogin()">
+        <span data-lang="ja" class="inl">ログイン</span>
+        <span data-lang="en" class="inl">Sign In</span>
+      </button>
+      <div class="msg" id="login-msg"></div>
+ 
+      <div class="divider">or</div>
+ 
+      <button class="google-btn" onclick="handleGoogle()">
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span data-lang="ja" class="inl">Googleでログイン</span>
+        <span data-lang="en" class="inl">Sign in with Google</span>
+      </button>
+ 
+      <div style="text-align:center;margin-top:14px">
+        <a href="#" onclick="forgotPassword()" style="font-family:'Inconsolata',monospace;font-size:0.68rem;color:var(--ink4);text-decoration:none;letter-spacing:0.1em">
+          <span data-lang="ja" class="inl">パスワードを忘れた方</span>
+          <span data-lang="en" class="inl">Forgot password?</span>
+        </a>
+      </div>
+    </div>
+ 
+    <!-- Signup Form -->
+    <div class="form" id="form-signup">
+      <div class="form-group">
+        <label class="form-label">
+          <span data-lang="ja" class="inl">メールアドレス</span>
+          <span data-lang="en" class="inl">Email</span>
+        </label>
+        <input type="email" class="form-input" id="signup-email"
+          placeholder="irohani@hohe.to">
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <span data-lang="ja" class="inl">パスワード（8文字以上）</span>
+          <span data-lang="en" class="inl">Password (8+ characters)</span>
+        </label>
+        <input type="password" class="form-input" id="signup-password"
+          placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          <span data-lang="ja" class="inl">パスワード確認</span>
+          <span data-lang="en" class="inl">Confirm Password</span>
+        </label>
+        <input type="password" class="form-input" id="signup-password2"
+          placeholder="••••••••">
+      </div>
+      <button class="submit-btn" id="signup-btn" onclick="handleSignup()">
+        <span data-lang="ja" class="inl">最初のキーワードを植えに行く</span>
+        <span data-lang="en" class="inl">Plant your first keyword</span>
+      </button>
+      <div class="msg" id="signup-msg"></div>
+ 
+      <div class="divider">or</div>
+ 
+      <button class="google-btn" onclick="handleGoogle()">
+        <svg width="16" height="16" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span data-lang="ja" class="inl">Googleで登録</span>
+        <span data-lang="en" class="inl">Sign up with Google</span>
+      </button>
+    </div>
+ 
+  </div>
+ 
+  <!-- Footer -->
+  <div class="footer-note">
+    <a href="/">hohe.to</a> &nbsp;·&nbsp;
+    <a href="/concept">
+      <span data-lang="ja" class="inl">コンセプト</span>
+      <span data-lang="en" class="inl">Concept</span>
+    </a>
+    <br>
+    <span data-lang="ja" class="inl">登録することで、静かな関心の場へようこそ。</span>
+    <span data-lang="en" class="inl">Welcome to a quiet place of interests.</span>
+  </div>
+ 
+</div>
+ 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
+// ── TAB SWITCH ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('form-' + tab).classList.add('active');
+}
+ 
+// ── LOGIN ──
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const msg = document.getElementById('login-msg');
+  const isEn = document.body.classList.contains('en');
+ 
+  if (!email || !password) return;
+ 
+  btn.disabled = true;
+  btn.textContent = isEn ? 'Signing in...' : 'ログイン中…';
+  msg.className = 'msg';
+ 
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+ 
+  if (error) {
+    msg.textContent = isEn
+      ? 'Incorrect email or password.'
+      : 'メールアドレスまたはパスワードが正しくありません。';
+    msg.className = 'msg error';
+    btn.disabled = false;
+    btn.innerHTML = isEn
+      ? '<span data-lang="en" class="inl">Sign In</span>'
+      : '<span data-lang="ja" class="inl">ログイン</span>';
+    return;
+  }
+ 
+  // ログイン成功 → appへ
+  msg.textContent = isEn ? 'Welcome! Redirecting...' : 'ようこそ！移動中…';
+  msg.className = 'msg success';
+  setTimeout(() => { window.location.href = '/app'; }, 1000);
+}
+ 
+// ── SIGNUP ──
+async function handleSignup() {
+  const email = document.getElementById('signup-email').value.trim();
+  const password = document.getElementById('signup-password').value;
+  const password2 = document.getElementById('signup-password2').value;
+  const btn = document.getElementById('signup-btn');
+  const msg = document.getElementById('signup-msg');
+  const isEn = document.body.classList.contains('en');
+ 
+  if (!email || !password) return;
+ 
+  if (password !== password2) {
+    msg.textContent = isEn ? 'Passwords do not match.' : 'パスワードが一致しません。';
+    msg.className = 'msg error';
+    return;
+  }
+ 
+  if (password.length < 8) {
+    msg.textContent = isEn ? 'Password must be at least 8 characters.' : 'パスワードは8文字以上にしてください。';
+    msg.className = 'msg error';
+    return;
+  }
+ 
+  btn.disabled = true;
+  btn.textContent = isEn ? 'Registering...' : '登録中…';
+  msg.className = 'msg';
+ 
+  const { data, error } = await db.auth.signUp({ email, password });
+ 
+  if (error) {
+    msg.textContent = isEn
+      ? error.message
+      : 'エラーが発生しました。もう一度お試しください。';
+    msg.className = 'msg error';
+    btn.disabled = false;
+    return;
+  }
+ 
+  msg.textContent = isEn
+    ? 'Registration complete! Please check your email to confirm your account.'
+    : '登録完了！確認メールをお送りしました。メールを確認してください。';
+  msg.className = 'msg success';
+  btn.disabled = false;
+}
+ 
+// ── GOOGLE ──
+async function handleGoogle() {
+  const { data, error } = await db.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/app' }
+  });
+  if (error) alert(error.message);
+}
+ 
+// ── FORGOT PASSWORD ──
+async function forgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  const isEn = document.body.classList.contains('en');
+  if (!email) {
+    alert(isEn ? 'Please enter your email address first.' : 'メールアドレスを入力してください。');
+    return;
+  }
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/app'
+  });
+  if (!error) {
+    alert(isEn ? 'Password reset email sent!' : 'パスワードリセットメールを送りました！');
+  }
+}
+ 
+// ── LANG ──
+function setLang(lang) {
+  document.body.classList.toggle('en', lang === 'en');
+  document.querySelectorAll('.lang-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
+  });
+  localStorage.setItem('hoheto_lang', lang);
+}
+const savedLang = localStorage.getItem('hoheto_lang');
+if (savedLang === 'en') setLang('en');
+ 
+// ── AUTO REDIRECT IF LOGGED IN ──
+db.auth.getSession().then(({ data: { session } }) => {
+  if (session) window.location.href = '/app';
+});
+</script>
+</body>
+</html>
