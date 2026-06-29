@@ -1,5 +1,3 @@
-
-Hoheto main · HTML
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -1141,6 +1139,66 @@ function setLang(lang) {
 // Restore language preference
 const savedLangApp = localStorage.getItem('hoheto_lang');
 if (savedLangApp === 'en') setLang('en');
+</script>
+ 
+<!-- Supabase Auth -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
+const { createClient } = supabase;
+const authDb = createClient(SUPABASE_URL, SUPABASE_KEY);
+ 
+// ── 認証チェック ──
+async function checkAuth() {
+  const { data: { session } } = await authDb.auth.getSession();
+  if (!session) {
+    // 未ログインならloginへ
+    window.location.href = '/login';
+    return;
+  }
+ 
+  // ログイン済み：ユーザー情報を表示
+  const user = session.user;
+  const email = user.email || '';
+  const handle = email.split('@')[0];
+ 
+  // アバターとハンドル名を更新
+  const avatar = document.querySelector('.avatar');
+  if (avatar) {
+    avatar.textContent = handle.charAt(0).toUpperCase();
+    avatar.title = email;
+  }
+ 
+  // ログアウトボタンを追加
+  const headerRight = document.querySelector('.header-right');
+  if (headerRight && !document.getElementById('logout-btn')) {
+    const btn = document.createElement('button');
+    btn.id = 'logout-btn';
+    btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid var(--rule);background:none;color:var(--ink4);cursor:pointer;transition:all 0.15s;';
+    btn.innerHTML = '<span data-lang="ja" class="inl">ログアウト</span><span data-lang="en" class="inl">Sign Out</span>';
+    btn.onmouseover = () => { btn.style.borderColor = 'var(--red)'; btn.style.color = 'var(--red)'; };
+    btn.onmouseout = () => { btn.style.borderColor = 'var(--rule)'; btn.style.color = 'var(--ink4)'; };
+    btn.onclick = handleLogout;
+    headerRight.insertBefore(btn, headerRight.firstChild);
+  }
+}
+ 
+// ── ログアウト ──
+async function handleLogout() {
+  await authDb.auth.signOut();
+  window.location.href = '/login';
+}
+ 
+// 認証チェック実行
+checkAuth();
+ 
+// セッション変化を監視
+authDb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_OUT') {
+    window.location.href = '/login';
+  }
+});
 </script>
 </body>
 </html>
