@@ -73,12 +73,14 @@ header {
 .view-btn:hover:not(.active) { color: var(--ink2); }
  
 .header-right {
-  display: flex; align-items: center; gap: 12px;
+  display: flex; align-items: center; gap: 6px;
+  flex-shrink: 0;
 }
 .growth-badge {
   font-family: 'Inconsolata', monospace;
-  font-size: 0.72rem; color: var(--teal);
-  letter-spacing: 0.08em;
+  font-size: 0.65rem; color: var(--teal);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 .avatar {
   width: 28px; height: 28px;
@@ -393,18 +395,14 @@ header {
  
 /* ── LANG SWITCHER ── */
 .lang-switcher {
-  position: fixed;
-  top: 12px;
-  right: 60px;
-  z-index: 300;
   display: flex;
   gap: 0;
 }
 .lang-btn {
   font-family: 'Inconsolata', monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  padding: 4px 10px;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
   border: 1px solid var(--rule);
   background: var(--paper);
   color: var(--ink4);
@@ -442,18 +440,14 @@ body.en [data-lang="ja"].inline { display: none; }
   </div>
  
   <div class="header-right">
-    <span class="growth-badge">
-    <span data-lang="ja" class="inline">🌿 二葉（7投稿）</span>
-    <span data-lang="en" class="inline">🌿 Second Leaf (7 posts)</span>
-  </span>
+    <div class="lang-switcher">
+      <button class="lang-btn active" onclick="setLang('ja')">JP</button>
+      <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+    <span class="growth-badge" id="growth-badge">🌿</span>
     <div class="avatar">H</div>
   </div>
 </header>
- 
-<div class="lang-switcher">
-  <button class="lang-btn active" onclick="setLang('ja')">JP</button>
-  <button class="lang-btn" onclick="setLang('en')">EN</button>
-</div>
  
 <div class="app">
  
@@ -501,26 +495,6 @@ body.en [data-lang="ja"].inline { display: none; }
             <span class="meta-label">タグ</span>
             <input type="text" class="meta-input" id="ed-tags" placeholder="旅, 記憶, 孤独…">
           </div>
-         <div class="meta-field" style="width:100%;margin-top:8px">
-  <span class="meta-label">画像</span>
-  <div id="img-upload-area" 
-    style="border:1px dashed var(--rule);padding:12px;text-align:center;cursor:pointer;background:var(--paper2);"
-    onclick="document.getElementById('img-file-input').click()">
-    <input type="file" id="img-file-input" accept="image/*" 
-      style="display:none" onchange="handleImageSelect(event)">
-    <span id="img-upload-label" 
-      style="font-family:'Inconsolata',monospace;font-size:0.72rem;color:var(--ink4)">
-      画像をクリックして選択
-    </span>
-    <img id="img-preview" 
-      style="display:none;max-width:100%;max-height:120px;margin-top:8px;">
-  </div>
-  <button id="img-remove-btn" onclick="removeImage()" 
-    style="display:none;font-family:'Inconsolata',monospace;font-size:0.65rem;
-    color:var(--red);border:none;background:none;cursor:pointer;margin-top:4px;">
-    ✕ 画像を削除
-  </button>
-</div>
           <div class="meta-field">
             <span class="meta-label">熱量</span>
             <div class="heat-selector" id="heat-selector">
