@@ -501,6 +501,26 @@ body.en [data-lang="ja"].inline { display: none; }
             <span class="meta-label">タグ</span>
             <input type="text" class="meta-input" id="ed-tags" placeholder="旅, 記憶, 孤独…">
           </div>
+         <div class="meta-field" style="width:100%;margin-top:8px">
+  <span class="meta-label">画像</span>
+  <div id="img-upload-area" 
+    style="border:1px dashed var(--rule);padding:12px;text-align:center;cursor:pointer;background:var(--paper2);"
+    onclick="document.getElementById('img-file-input').click()">
+    <input type="file" id="img-file-input" accept="image/*" 
+      style="display:none" onchange="handleImageSelect(event)">
+    <span id="img-upload-label" 
+      style="font-family:'Inconsolata',monospace;font-size:0.72rem;color:var(--ink4)">
+      画像をクリックして選択
+    </span>
+    <img id="img-preview" 
+      style="display:none;max-width:100%;max-height:120px;margin-top:8px;">
+  </div>
+  <button id="img-remove-btn" onclick="removeImage()" 
+    style="display:none;font-family:'Inconsolata',monospace;font-size:0.65rem;
+    color:var(--red);border:none;background:none;cursor:pointer;margin-top:4px;">
+    ✕ 画像を削除
+  </button>
+</div>
           <div class="meta-field">
             <span class="meta-label">熱量</span>
             <div class="heat-selector" id="heat-selector">
