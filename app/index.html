@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoheto — ほへと</title>
+<script>
+// グローバル変数（最優先で宣言）
+window.selectedKwId = null;
+window.currentHeat = 3;
+window.keywords = [];
+window.resonances = [];
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
  
@@ -643,14 +650,9 @@ var mapTags = [
 // STATE
 // ══════════════════════════════════════════════════
  
-const resonances = [
-  { id:'r1', kwId:'1', title:'神保町の古本屋', user:'@akiko', conn:'root', shared:'本・記憶' },
-  { id:'r2', kwId:'1', title:'活字の匂い', user:'@kenji', conn:'branch', shared:'本' },
-  { id:'r3', kwId:'2', title:'深夜3時の音楽', user:'@sato', conn:'trunk', shared:'深夜・孤独' },
-  { id:'r4', kwId:'4', title:'匂いの記憶', user:'@miki', conn:'root', shared:'旅・記憶・匂い' },
-];
+var resonances = [];
  
-let selectedKwId = keywords[0].id;
+// selectedKwId declared globally above
 var currentHeat = 2;
 var forestFilter = 'all';
 var forestSelectedId = null;
@@ -1132,7 +1134,7 @@ window.addEventListener('resize',()=>{
 });
  
 renderKwList();
-selectKw(keywords[0].id);
+if (keywords.length > 0) selectKw(keywords[0].id);
 updateForestStats();
 </script>
  
@@ -1167,6 +1169,10 @@ if (savedLangApp === 'en') setLang('en');
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── Supabase初期化（一箇所のみ）──
+// グローバル変数への参照を確保
+if (typeof selectedKwId === 'undefined') var selectedKwId = null;
+if (typeof currentHeat === 'undefined') var currentHeat = 3;
+if (typeof keywords === 'undefined') var keywords = [];
 const _SB_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
 const _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
 const _db = supabase.createClient(_SB_URL, _SB_KEY);
