@@ -588,6 +588,7 @@ body.en [data-lang="ja"].inline { display: none; }
  
 <div class="toast" id="toast"></div>
  
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ══════════════════════════════════════════════════
 // SUPABASE
@@ -598,10 +599,12 @@ const { createClient: _createClient } = supabase;
 const _db = _createClient(_SUPABASE_URL, _SUPABASE_KEY);
 let _currentUser = null;
  
+ 
+ 
 // ══════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════
-let keywords = [];
+var keywords = [];
  
 const resonances = [
   { id:'r1', kwId:'1', title:'神保町の古本屋', user:'@akiko', conn:'root', shared:'本・記憶' },
@@ -611,15 +614,15 @@ const resonances = [
 ];
  
 let selectedKwId = keywords[0].id;
-let currentHeat = 2;
-let forestFilter = 'all';
-let forestSelectedId = null;
-let forestPositions = {};
-let forestDrag = null, forestPanning = false;
-let forestOx = 0, forestOy = 0, forestScale = 1;
-let mapPositions = {};
-let mapDrag = null, mapPanning = false;
-let mapOx = 0, mapOy = 0, mapScale = 1;
+var currentHeat = 2;
+var forestFilter = 'all';
+var forestSelectedId = null;
+var forestPositions = {};
+var forestDrag = null, forestPanning = false;
+var forestOx = 0, forestOy = 0, forestScale = 1;
+var mapPositions = {};
+var mapDrag = null, mapPanning = false;
+var mapOx = 0, mapOy = 0, mapScale = 1;
  
 // ══════════════════════════════════════════════════
 // VIEW SWITCHING
@@ -1006,7 +1009,7 @@ function initMap() {
     </div>`).join('');
 }
  
-let highlightedTag=null;
+var highlightedTag=null;
 function highlightTag(id){highlightedTag=id===highlightedTag?null:id;drawMap();}
  
 function getDepth(id){let d=0,t=mapTags.find(x=>x.id===id);while(t&&t.parent){d++;t=mapTags.find(x=>x.id===t.parent);}return d;}
@@ -1145,7 +1148,7 @@ if (savedLangApp === 'en') setLang('en');
 </script>
  
 <!-- Supabase Auth -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+ 
 <script>
 const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
