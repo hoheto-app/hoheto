@@ -589,13 +589,59 @@ body.en [data-lang="ja"].inline { display: none; }
 <div class="toast" id="toast"></div>
  
 <script>
+// ── グローバル変数（最初に宣言）──
+var keywords = [];
+var selectedKwId = null;
+var currentHeat = 3;
+var forestFilter = 'all';
+var forestSelectedId = null;
+var forestPositions = {};
+var forestDrag = null;
+var forestPanning = false;
+var forestOx = 0, forestOy = 0, forestScale = 1;
+var mapPositions = {};
+var mapPanning = false;
+var mapOx = 0, mapOy = 0, mapScale = 1;
+var highlightedTag = null;
+var drag = null;
+var linkCount = 0;
+var forestPanSx, forestPanSy, forestPanOx, forestPanOy;
+var mpSx, mpSy, mpOx, mpOy;
+ 
+// forestUsers と mapTags（森林浴・すん用）
+var forestUsers = [
+  { id:'u1', name:'Hayato', handle:'@hayato', growth:7, emoji:'🌿', keywords:['京都','本','孤独','旅','記憶'], theme:'消えゆくものへの眼差し' },
+  { id:'u2', name:'Akiko', handle:'@akiko', growth:12, emoji:'🍃', keywords:['本','珈琲','雨の日','記憶'], theme:'消えゆくものへの眼差し' },
+  { id:'u3', name:'Kenji', handle:'@kenji', growth:3, emoji:'🌱', keywords:['音楽','深夜','孤独'], theme:'孤独の豊かさ' },
+  { id:'u4', name:'Yuki', handle:'@yuki', growth:28, emoji:'🌲', keywords:['余白','静けさ','京都','写真'], theme:'余白の美学' },
+  { id:'u5', name:'Sato', handle:'@sato', growth:52, emoji:'🌳', keywords:['哲学','孤独','言葉','深夜'], theme:'孤独の豊かさ' },
+  { id:'u6', name:'Miki', handle:'@miki', growth:7, emoji:'🌿', keywords:['旅','記憶','匂い','場所'], theme:'消えゆくものへの眼差し' },
+  { id:'u7', name:'Hana', handle:'@hana', growth:18, emoji:'🍃', keywords:['余白','静けさ','言葉','詩'], theme:'余白の美学' },
+  { id:'u8', name:'Ryo', handle:'@ryo', growth:35, emoji:'🌲', keywords:['山','孤独','記憶','歩く'], theme:'孤独の豊かさ' },
+];
+ 
+var mapTags = [
+  {id:'t1',name:'孤独',parent:null,users:284},
+  {id:'t2',name:'静かな孤独',parent:'t1',users:89},
+  {id:'t3',name:'雑踏の孤独',parent:'t1',users:112},
+  {id:'t4',name:'甘い孤独',parent:'t1',users:67},
+  {id:'t5',name:'図書館の孤独',parent:'t2',users:38},
+  {id:'t6',name:'耳の孤独',parent:'t3',users:21},
+  {id:'t7',name:'深夜の耳',parent:'t6',users:4},
+  {id:'t8',name:'記憶',parent:null,users:312},
+  {id:'t9',name:'旅の記憶',parent:'t8',users:145},
+  {id:'t10',name:'匂いの記憶',parent:'t8',users:88},
+  {id:'t11',name:'音楽の記憶',parent:'t8',users:203},
+  {id:'t12',name:'幼少期の音楽',parent:'t11',users:119},
+  {id:'t13',name:'消えた曲',parent:'t11',users:31},
+];
+ 
  
  
  
 // ══════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════
-var keywords = [];
  
 const resonances = [
   { id:'r1', kwId:'1', title:'神保町の古本屋', user:'@akiko', conn:'root', shared:'本・記憶' },
@@ -740,16 +786,7 @@ function deleteKw() {
 // ══════════════════════════════════════════════════
 // VIEW B: FOREST
 // ══════════════════════════════════════════════════
-const forestUsers = [
-  { id:'u1', name:'Hayato', handle:'@hayato', growth:7, emoji:'🌿', keywords:['京都','本','孤独','旅','記憶'], theme:'消えゆくものへの眼差し' },
-  { id:'u2', name:'Akiko', handle:'@akiko', growth:12, emoji:'🍃', keywords:['本','珈琲','雨の日','記憶'], theme:'消えゆくものへの眼差し' },
-  { id:'u3', name:'Kenji', handle:'@kenji', growth:3, emoji:'🌱', keywords:['音楽','深夜','孤独'], theme:'孤独の豊かさ' },
-  { id:'u4', name:'Yuki', handle:'@yuki', growth:28, emoji:'🌲', keywords:['余白','静けさ','京都','写真'], theme:'余白の美学' },
-  { id:'u5', name:'Sato', handle:'@sato', growth:52, emoji:'🌳', keywords:['哲学','孤独','言葉','深夜'], theme:'孤独の豊かさ' },
-  { id:'u6', name:'Miki', handle:'@miki', growth:7, emoji:'🌿', keywords:['旅','記憶','匂い','場所'], theme:'消えゆくものへの眼差し' },
-  { id:'u7', name:'Hana', handle:'@hana', growth:18, emoji:'🍃', keywords:['余白','静けさ','言葉','詩'], theme:'余白の美学' },
-  { id:'u8', name:'Ryo', handle:'@ryo', growth:35, emoji:'🌲', keywords:['山','孤独','記憶','歩く'], theme:'孤独の豊かさ' },
-];
+// forestUsers declared globally above
  
 function calcConn(a, b) {
   const shared = a.keywords.filter(k => b.keywords.includes(k));
@@ -959,21 +996,7 @@ document.getElementById('forest-canvas').addEventListener('wheel',e=>{
 // ══════════════════════════════════════════════════
 // VIEW C: MAP (tag genealogy)
 // ══════════════════════════════════════════════════
-const mapTags = [
-  {id:'t1',name:'孤独',parent:null,users:284},
-  {id:'t2',name:'静かな孤独',parent:'t1',users:89},
-  {id:'t3',name:'雑踏の孤独',parent:'t1',users:112},
-  {id:'t4',name:'甘い孤独',parent:'t1',users:67},
-  {id:'t5',name:'図書館の孤独',parent:'t2',users:38},
-  {id:'t6',name:'耳の孤独',parent:'t3',users:21},
-  {id:'t7',name:'深夜の耳',parent:'t6',users:4},
-  {id:'t8',name:'記憶',parent:null,users:312},
-  {id:'t9',name:'旅の記憶',parent:'t8',users:145},
-  {id:'t10',name:'匂いの記憶',parent:'t8',users:88},
-  {id:'t11',name:'音楽の記憶',parent:'t8',users:203},
-  {id:'t12',name:'幼少期の音楽',parent:'t11',users:119},
-  {id:'t13',name:'消えた曲',parent:'t11',users:31},
-];
+// mapTags declared globally above
  
 function initMap() {
   const canvas=document.getElementById('map-canvas');
@@ -1285,4 +1308,3 @@ _db.auth.onAuthStateChange((event, session) => {
  
 </body>
 </html>
- 
