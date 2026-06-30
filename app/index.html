@@ -406,6 +406,42 @@ header {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
  
+/* POST DETAIL MODAL */
+.post-detail-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(26,21,16,0.55);
+  z-index: 800;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.post-detail-overlay.show { display: flex; }
+.post-detail-card {
+  position: relative;
+  width: 100%; max-width: 480px;
+  max-height: 80vh; overflow-y: auto;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 32px 28px 28px;
+}
+.post-detail-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; cursor: pointer;
+  font-size: 1.2rem; line-height: 1; color: var(--ink4);
+  font-family: 'Inconsolata', monospace;
+}
+.post-detail-close:hover { color: var(--ink); }
+.post-detail-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.post-detail-tags span {
+  font-family: 'Inconsolata', monospace; font-size: 0.62rem;
+  padding: 2px 8px; border: 0.5px solid var(--rule); color: var(--teal);
+}
+.post-detail-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 14px; line-height: 1.6; }
+.post-detail-body {
+  font-size: 0.9rem; line-height: 2; color: var(--ink2);
+  white-space: pre-wrap;
+}
+ 
 /* ── LANG SWITCHER ── */
 .lang-switcher {
   display: flex;
@@ -623,6 +659,16 @@ body.en [data-lang="ja"].inline { display: none; }
  
 <div class="toast" id="toast"></div>
  
+<!-- 投稿詳細モーダル：すん・回廊で見出しをクリックすると静かに開く -->
+<div class="post-detail-overlay" id="post-detail-overlay" onclick="if(event.target===this) closePostDetail()">
+  <div class="post-detail-card">
+    <button class="post-detail-close" onclick="closePostDetail()" aria-label="閉じる">×</button>
+    <div id="post-detail-tags" class="post-detail-tags"></div>
+    <div id="post-detail-title" class="post-detail-title"></div>
+    <div id="post-detail-body" class="post-detail-body"></div>
+  </div>
+</div>
+ 
 <script>
 // ── STATE ──
 var keywords = [];
@@ -753,7 +799,7 @@ function renderResonances() {
     return;
   }
   list.innerHTML = related.map(r => `
-    <div class="res-item">
+    <div class="res-item" onclick="openPostDetail('${r.id}')">
       <div class="res-kw">${esc(r.title)}</div>
       <span class="res-conn conn-${r.conn}">${connLabel(r.conn)}</span>
       <div style="font-size:0.65rem;color:var(--ink4);margin-top:4px;font-family:'Inconsolata',monospace">「${esc(r.shared)}」</div>
@@ -1087,7 +1133,7 @@ async function highlightTag(id){
     return;
   }
   bodyEl.innerHTML = items.map(h => `
-    <div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:0.5px solid var(--rule)">
+    <div onclick="openPostDetail('${h.id}')" style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:0.5px solid var(--rule);cursor:pointer">
       <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px;background:${h.mine?'var(--ink3)':'transparent'}"></span>
       <span style="font-size:0.82rem;color:${h.mine?'var(--ink)':'var(--ink3)'}">${esc(h.title)}</span>
     </div>`).join('');
@@ -1293,6 +1339,7 @@ if (savedLangApp === 'en') setLang('en');
     resonances = Object.values(byKeyword).map(function(item) {
       return {
         kwId: kwId,
+        id: item.id,
         title: item.title,
         conn: item.sharedTags.length >= 2 ? 'trunk' : 'branch',
         shared: item.sharedTags.join('・')
@@ -1525,17 +1572,43 @@ if (savedLangApp === 'en') setLang('en');
   async function fetchTagHeadlinesFromDb(tagId) {
     if (mapTagHeadlines[tagId]) return mapTagHeadlines[tagId];
     var res = await _db.from('keyword_tags')
-      .select('keywords(title, user_id, status)')
+      .select('keywords(id, title, user_id, status)')
       .eq('tag_id', tagId)
       .limit(30);
     if (res.error) { console.error('fetchTagHeadlines:', res.error); return []; }
     var items = (res.data || [])
       .map(function(row) { return row.keywords; })
       .filter(function(k) { return k && k.status === 'published' && k.title; })
-      .map(function(k) { return { title: k.title, mine: k.user_id === _currentUser.id }; });
+      .map(function(k) { return { id: k.id, title: k.title, mine: k.user_id === _currentUser.id }; });
     mapTagHeadlines[tagId] = items;
     return items;
   }
+ 
+  // ── 投稿詳細：すん・回廊で見出しをクリックした時に開く ──
+  // RLSにより、自分の投稿（下書き含む）か、他者の公開投稿のみ取得できる
+  async function openPostDetailFromDb(keywordId) {
+    var res = await _db.from('keywords')
+      .select('title, body, keyword_tags(tags(name))')
+      .eq('id', keywordId)
+      .maybeSingle();
+    var overlay = document.getElementById('post-detail-overlay');
+    if (res.error || !res.data) {
+      console.error('openPostDetail:', res.error);
+      showToast('表示できませんでした');
+      return;
+    }
+    var k = res.data;
+    var tags = (k.keyword_tags || []).map(function(kt) { return kt.tags && kt.tags.name; }).filter(Boolean);
+    document.getElementById('post-detail-tags').innerHTML = tags.map(function(t) { return '<span>' + esc(t) + '</span>'; }).join('');
+    document.getElementById('post-detail-title').textContent = k.title || '';
+    document.getElementById('post-detail-body').textContent = k.body || '';
+    overlay.classList.add('show');
+  }
+  function closePostDetailModal() {
+    document.getElementById('post-detail-overlay').classList.remove('show');
+  }
+  window.openPostDetail = openPostDetailFromDb;
+  window.closePostDetail = closePostDetailModal;
  
   window.loadMapTags = loadMapTagsFromDb;
   window.fetchTagHeadlines = fetchTagHeadlinesFromDb;
