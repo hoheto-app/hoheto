@@ -478,8 +478,8 @@ body.en [data-lang="ja"].inline { display: none; }
   </button>
         <div class="tool-sep"></div>
         <button class="tool-btn primary" onclick="publish()">
-    <span data-lang="ja" class="inline">公開する</span>
-    <span data-lang="en" class="inline">Publish</span>
+    <span data-lang="ja" class="inline">そっと置く</span>
+    <span data-lang="en" class="inline">Place quietly</span>
   </button>
         <div class="tool-sep"></div>
         <button class="tool-btn" onclick="deleteKw()" style="color:var(--red);border-color:var(--red)">
@@ -488,12 +488,12 @@ body.en [data-lang="ja"].inline { display: none; }
   </button>
       </div>
       <div class="editor-scroll">
-        <input type="text" class="editor-title" id="ed-title" placeholder="キーワードを植えてください…">
-        <textarea class="editor-body" id="ed-body" placeholder="なぜこれに関心があるのか、どんなことを感じているのか、じっくりと書いてください。邪魔されない、あなただけの空間です。"></textarea>
+        <input type="text" class="editor-title" id="ed-title" placeholder="今、心の中にあるもの">
+        <textarea class="editor-body" id="ed-body" placeholder="誰かに読まれることより、まず自分が書きたいことを。"></textarea>
         <div class="editor-meta">
           <div class="meta-field">
             <span class="meta-label">タグ</span>
-            <input type="text" class="meta-input" id="ed-tags" placeholder="旅, 記憶, 孤独…">
+            <input type="text" class="meta-input" id="ed-tags" placeholder="この関心は、何と繋がっていますか">
           </div>
           <div class="meta-field" style="width:100%;margin-top:8px">
             <span class="meta-label">画像</span>
@@ -766,7 +766,7 @@ function saveDraft() {
  
 function publish() {
   saveCurrentKw('published');
-  showToast('公開しました — 回廊へ出ました');
+  showToast('そっと置きました — 回廊へ出ました');
 }
  
 function saveCurrentKw(status) {
@@ -1187,11 +1187,11 @@ function setLang(lang) {
   const title = document.getElementById('ed-title');
   const body = document.getElementById('ed-body');
   const tags = document.getElementById('ed-tags');
-  if (title) title.placeholder = lang === 'ja' ? 'キーワードを植えてください…' : 'Plant your keyword…';
+  if (title) title.placeholder = lang === 'ja' ? '今、心の中にあるもの' : 'What is on your mind right now';
   if (body) body.placeholder = lang === 'ja'
-    ? 'なぜこれに関心があるのか、どんなことを感じているのか、じっくりと書いてください。邪魔されない、あなただけの空間です。'
-    : 'Write about why this interests you, what you feel. This is your quiet space, uninterrupted.';
-  if (tags) tags.placeholder = lang === 'ja' ? 'タグ（カンマ区切り）例: 旅, 記憶, 孤独…' : 'Tags (comma separated) e.g. travel, memory, solitude…';
+    ? '誰かに読まれることより、まず自分が書きたいことを。'
+    : 'Write first for yourself, not to be read.';
+  if (tags) tags.placeholder = lang === 'ja' ? 'この関心は、何と繋がっていますか' : 'What is this interest connected to';
  
   localStorage.setItem('hoheto_lang', lang);
 }
@@ -1322,7 +1322,7 @@ if (savedLangApp === 'en') setLang('en');
  
       await loadKeywords();
       selectedKwId = kwId;
-      showToast(status === 'published' ? '公開しました 🌿' : '下書きを保存しました');
+      showToast(status === 'published' ? 'そっと置きました 🌿' : '下書きを保存しました');
  
     } catch(e) {
       console.error('saveKwToDb exception:', e);
@@ -1392,3 +1392,4 @@ if (savedLangApp === 'en') setLang('en');
  
 </body>
 </html>
+ 
