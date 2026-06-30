@@ -441,6 +441,22 @@ header {
   font-size: 0.9rem; line-height: 2; color: var(--ink2);
   white-space: pre-wrap;
 }
+.post-detail-resonance {
+  margin-top: 24px; padding-top: 18px;
+  border-top: 0.5px solid var(--rule2);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+}
+.tane-btn {
+  font-family: 'Inconsolata', monospace; font-size: 0.72rem;
+  letter-spacing: 0.1em; padding: 7px 18px;
+  background: var(--gold2); color: var(--paper);
+  border: none; cursor: pointer; transition: background 0.15s;
+}
+.tane-btn:hover { background: var(--gold); }
+.tane-done {
+  font-family: 'Inconsolata', monospace; font-size: 0.68rem;
+  color: var(--ink4); letter-spacing: 0.08em;
+}
  
 /* ── LANG SWITCHER ── */
 .lang-switcher {
@@ -666,6 +682,7 @@ body.en [data-lang="ja"].inline { display: none; }
     <div id="post-detail-tags" class="post-detail-tags"></div>
     <div id="post-detail-title" class="post-detail-title"></div>
     <div id="post-detail-body" class="post-detail-body"></div>
+    <div id="post-detail-resonance" class="post-detail-resonance"></div>
   </div>
 </div>
  
@@ -1586,9 +1603,10 @@ if (savedLangApp === 'en') setLang('en');
  
   // ── 投稿詳細：すん・回廊で見出しをクリックした時に開く ──
   // RLSにより、自分の投稿（下書き含む）か、他者の公開投稿のみ取得できる
+  var _detailOwnerId = null;
   async function openPostDetailFromDb(keywordId) {
     var res = await _db.from('keywords')
-      .select('title, body, keyword_tags(tags(name))')
+      .select('user_id, title, body, keyword_tags(tags(name))')
       .eq('id', keywordId)
       .maybeSingle();
     var overlay = document.getElementById('post-detail-overlay');
@@ -1598,17 +1616,102 @@ if (savedLangApp === 'en') setLang('en');
       return;
     }
     var k = res.data;
+    _detailOwnerId = k.user_id;
     var tags = (k.keyword_tags || []).map(function(kt) { return kt.tags && kt.tags.name; }).filter(Boolean);
     document.getElementById('post-detail-tags').innerHTML = tags.map(function(t) { return '<span>' + esc(t) + '</span>'; }).join('');
     document.getElementById('post-detail-title').textContent = k.title || '';
     document.getElementById('post-detail-body').textContent = k.body || '';
     overlay.classList.add('show');
+    loadResonanceSection(keywordId);
   }
   function closePostDetailModal() {
     document.getElementById('post-detail-overlay').classList.remove('show');
   }
   window.openPostDetail = openPostDetailFromDb;
   window.closePostDetail = closePostDetailModal;
+ 
+  // ── 種：五進法で静かに積み上がる（5種→1芽、5芽→1双葉） ──
+  // 自分の投稿には置けない。一つの投稿につき一人一回まで。
+  async function loadResonanceSection(keywordId) {
+    var countRes = await _db.from('resonances')
+      .select('*', { count: 'exact', head: true })
+      .eq('keyword_id', keywordId);
+    var total = countRes.count || 0;
+ 
+    var mineRes = await _db.from('resonances')
+      .select('user_id')
+      .eq('keyword_id', keywordId)
+      .eq('user_id', _currentUser.id)
+      .maybeSingle();
+    var alreadyPlaced = !!mineRes.data;
+    var isOwner = _detailOwnerId === _currentUser.id;
+ 
+    renderResonanceUI(keywordId, total, alreadyPlaced, isOwner);
+  }
+ 
+  function buildGrowthSvg(seedsRem, sproutsRem, leaves) {
+    var parts = [];
+    var x = 10;
+    var leafCount = Math.min(leaves, 8); // 表示は最大8つまで（数は出さない前提なので近似でよい）
+    for (var i = 0; i < leafCount; i++) {
+      var lx = x; x += 26;
+      parts.push(
+        '<line x1="' + lx + '" y1="34" x2="' + lx + '" y2="14" stroke="#3B6D11" stroke-width="2"/>' +
+        '<ellipse cx="' + (lx - 6) + '" cy="14" rx="7" ry="4.2" fill="#639922" transform="rotate(-20 ' + (lx - 6) + ' 14)"/>' +
+        '<ellipse cx="' + (lx + 6) + '" cy="14" rx="7" ry="4.2" fill="#639922" transform="rotate(20 ' + (lx + 6) + ' 14)"/>'
+      );
+    }
+    for (var j = 0; j < sproutsRem; j++) {
+      var sx = x; x += 18;
+      parts.push(
+        '<line x1="' + sx + '" y1="34" x2="' + sx + '" y2="22" stroke="#3B6D11" stroke-width="1.8"/>' +
+        '<circle cx="' + sx + '" cy="20" r="3.5" fill="#639922"/>'
+      );
+    }
+    for (var k = 0; k < seedsRem; k++) {
+      var gx = x + (k % 3) * 7; var gy = 30 + (k % 2) * 3;
+      var rot = (k * 41) % 50 - 25;
+      parts.push('<ellipse cx="' + gx + '" cy="' + gy + '" rx="2.2" ry="2.8" fill="#D4C29A" transform="rotate(' + rot + ' ' + gx + ' ' + gy + ')"/>');
+    }
+    var width = Math.max(x + 30, 80);
+    return '<svg width="' + width + '" height="40" viewBox="0 0 ' + width + ' 40">' +
+      '<line x1="6" y1="34" x2="' + (width - 6) + '" y2="34" stroke="var(--rule)" stroke-width="1"/>' +
+      parts.join('') + '</svg>';
+  }
+ 
+  function renderResonanceUI(keywordId, total, alreadyPlaced, isOwner) {
+    var container = document.getElementById('post-detail-resonance');
+    var leaves = Math.floor(total / 25);
+    var sproutsRem = Math.floor((total % 25) / 5);
+    var seedsRem = total % 5;
+    var svg = buildGrowthSvg(seedsRem, sproutsRem, leaves);
+ 
+    var actionHtml;
+    if (isOwner) {
+      actionHtml = ''; // 自分の投稿には何も出さない
+    } else if (alreadyPlaced) {
+      actionHtml = '<div class="tane-done">🌱 そっと置きました</div>';
+    } else {
+      actionHtml = '<button class="tane-btn" id="tane-btn">種を置く</button>';
+    }
+ 
+    container.innerHTML = svg + actionHtml;
+ 
+    var btn = document.getElementById('tane-btn');
+    if (btn) {
+      btn.onclick = function() { placeSeed(keywordId); };
+    }
+  }
+ 
+  async function placeSeed(keywordId) {
+    var ins = await _db.from('resonances').insert({ keyword_id: keywordId, user_id: _currentUser.id });
+    if (ins.error) {
+      console.error('placeSeed:', ins.error);
+      showToast('置けませんでした');
+      return;
+    }
+    loadResonanceSection(keywordId);
+  }
  
   window.loadMapTags = loadMapTagsFromDb;
   window.fetchTagHeadlines = fetchTagHeadlinesFromDb;
