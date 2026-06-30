@@ -738,7 +738,11 @@ function selectKw(id) {
     window._currentImageUrl = null;
   }
   renderKwList();
-  renderResonances();
+  if (window.loadResonances) {
+    window.loadResonances(id);
+  } else {
+    renderResonances();
+  }
 }
  
 function renderResonances() {
@@ -751,9 +755,8 @@ function renderResonances() {
   list.innerHTML = related.map(r => `
     <div class="res-item">
       <div class="res-kw">${esc(r.title)}</div>
-      <div class="res-user">${r.user}</div>
       <span class="res-conn conn-${r.conn}">${connLabel(r.conn)}</span>
-      <div style="font-size:0.65rem;color:var(--ink4);margin-top:4px;font-family:'Inconsolata',monospace">「${r.shared}」</div>
+      <div style="font-size:0.65rem;color:var(--ink4);margin-top:4px;font-family:'Inconsolata',monospace">「${esc(r.shared)}」</div>
     </div>`).join('');
 }
  
@@ -1258,6 +1261,47 @@ if (savedLangApp === 'en') setLang('en');
   var _SB_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
   var _db = supabase.createClient(_SB_URL, _SB_KEY);
   var _currentUser = null;
+ 
+  // ── 回廊：同じタグを持つ他者の公開投稿を取得 ──
+  // 「関心が先、人は後から静かに現れる」ため、誰が書いたかは前面に出さない。
+  async function loadResonancesFromDb(kwId) {
+    const kw = keywords.find(function(k) { return k.id === kwId; });
+    if (!kw || !kw.tags.length) { resonances = []; renderResonances(); return; }
+ 
+    var tagRes = await _db.from('tags').select('id, name').in('name', kw.tags);
+    if (tagRes.error) { console.error('loadResonances(tags):', tagRes.error); resonances = []; renderResonances(); return; }
+    var tagIds = (tagRes.data || []).map(function(t) { return t.id; });
+    if (!tagIds.length) { resonances = []; renderResonances(); return; }
+ 
+    var ktRes = await _db.from('keyword_tags')
+      .select('tag_id, tags(name), keywords(id, title, user_id, status)')
+      .in('tag_id', tagIds);
+    if (ktRes.error) { console.error('loadResonances(keyword_tags):', ktRes.error); resonances = []; renderResonances(); return; }
+ 
+    var byKeyword = {};
+    (ktRes.data || []).forEach(function(row) {
+      var other = row.keywords;
+      if (!other || other.status !== 'published') return;
+      if (other.id === kwId) return;              // 自分が今編集中の投稿自身は除く
+      if (other.user_id === _currentUser.id) return; // 自分の他の投稿も回廊には出さない
+      if (!byKeyword[other.id]) {
+        byKeyword[other.id] = { id: other.id, title: other.title, sharedTags: [] };
+      }
+      if (row.tags && row.tags.name) byKeyword[other.id].sharedTags.push(row.tags.name);
+    });
+ 
+    resonances = Object.values(byKeyword).map(function(item) {
+      return {
+        kwId: kwId,
+        title: item.title,
+        conn: item.sharedTags.length >= 2 ? 'trunk' : 'branch',
+        shared: item.sharedTags.join('・')
+      };
+    });
+    renderResonances();
+  }
+ 
+  window.loadResonances = loadResonancesFromDb;
  
   // ── 成長バッジ：公開した投稿数だけを基準に静かに育つ。数字は表示しない ──
   var GROWTH_STAGES = [
