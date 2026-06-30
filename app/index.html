@@ -1259,6 +1259,25 @@ if (savedLangApp === 'en') setLang('en');
   var _db = supabase.createClient(_SB_URL, _SB_KEY);
   var _currentUser = null;
  
+  // ── 成長バッジ：公開した投稿数だけを基準に静かに育つ。数字は表示しない ──
+  var GROWTH_STAGES = [
+    { max: 0,  emoji: '🌰', label: '種' },
+    { max: 2,  emoji: '🌱', label: '芽' },
+    { max: 5,  emoji: '🌿', label: '二葉' },
+    { max: 10, emoji: '🍃', label: '本葉' },
+    { max: 20, emoji: '🌲', label: '若木' },
+    { max: Infinity, emoji: '🌳', label: '大樹' }
+  ];
+  function updateGrowthBadge() {
+    var publishedCount = keywords.filter(function(k) { return k.status === 'published'; }).length;
+    var stage = GROWTH_STAGES.find(function(s) { return publishedCount <= s.max; }) || GROWTH_STAGES[GROWTH_STAGES.length - 1];
+    var badge = document.getElementById('growth-badge');
+    if (badge) {
+      badge.textContent = stage.emoji;
+      badge.title = stage.label;
+    }
+  }
+ 
   async function loadKeywords() {
     if (!_currentUser) return;
     var result = await _db
@@ -1280,6 +1299,7 @@ if (savedLangApp === 'en') setLang('en');
       };
     });
     renderKwList();
+    updateGrowthBadge();
     if (keywords.length > 0) selectKw(keywords[0].id);
     else {
       selectedKwId = null;
