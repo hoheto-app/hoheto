@@ -594,6 +594,15 @@ body.en [data-lang="ja"].inline { display: none; }
     <span data-lang="en" class="inline">Tag Genealogy</span>
   </div>
       <div id="map-tag-list"></div>
+      <div style="height:1px;background:var(--rule);margin:14px 0"></div>
+      <div class="ml-title" id="map-selected-title">
+        <span data-lang="ja" class="inline">タグをクリック</span>
+        <span data-lang="en" class="inline">Click a tag</span>
+      </div>
+      <div id="map-selected-body" style="font-size:0.78rem;color:var(--ink3);line-height:1.9">
+        <span data-lang="ja" class="inline">見出しが現れます</span>
+        <span data-lang="en" class="inline">Headlines will appear</span>
+      </div>
     </div>
   </div>
  
@@ -621,21 +630,10 @@ var forestUsers = [
   { id:'u8', name:'Ryo', handle:'@ryo', growth:35, emoji:'🌲', keywords:['山','孤独','記憶','歩く'], theme:'孤独の豊かさ' },
 ];
  
-var mapTags = [
-  {id:'t1',name:'孤独',parent:null,users:284},
-  {id:'t2',name:'静かな孤独',parent:'t1',users:89},
-  {id:'t3',name:'雑踏の孤独',parent:'t1',users:112},
-  {id:'t4',name:'甘い孤独',parent:'t1',users:67},
-  {id:'t5',name:'図書館の孤独',parent:'t2',users:38},
-  {id:'t6',name:'耳の孤独',parent:'t3',users:21},
-  {id:'t7',name:'深夜の耳',parent:'t6',users:4},
-  {id:'t8',name:'記憶',parent:null,users:312},
-  {id:'t9',name:'旅の記憶',parent:'t8',users:145},
-  {id:'t10',name:'匂いの記憶',parent:'t8',users:88},
-  {id:'t11',name:'音楽の記憶',parent:'t8',users:203},
-  {id:'t12',name:'幼少期の音楽',parent:'t11',users:119},
-  {id:'t13',name:'消えた曲',parent:'t11',users:31},
-];
+// すんのタグ系譜：Supabaseから取得した実データが入る（読み込み前は空）
+// 各要素: {id, name, parent(=表示上の親タグID。自分が使っていない祖先はnullとして扱う), weight(0〜1, 自分の投稿数に基づく濃淡)}
+var mapTags = [];
+var mapTagHeadlines = {}; // tagId -> [{title, mine}]
  
  
  
@@ -662,7 +660,13 @@ function switchView(v) {
   document.getElementById('view-' + v).classList.add('active');
   document.getElementById('btn-' + v).classList.add('active');
   if (v === 'forest') { initForest(); drawForest(); }
-  if (v === 'map') { initMap(); drawMap(); }
+  if (v === 'map') {
+    if (window.loadMapTags) {
+      window.loadMapTags().then(() => { initMap(); drawMap(); });
+    } else {
+      initMap(); drawMap();
+    }
+  }
 }
  
 // ══════════════════════════════════════════════════
@@ -1021,19 +1025,51 @@ function initMap() {
       layout(c.id,childX,cy,spread*0.6);
     });
   }
-  const rh=H/(roots.length+1);
-  roots.forEach((r,i)=>layout(r.id,80,rh*(i+1),80));
+  if (roots.length) {
+    const rh=H/(roots.length+1);
+    roots.forEach((r,i)=>layout(r.id,80,rh*(i+1),80));
+  }
  
-  // tag list
+  // tag list（件数は出さず、濃淡だけで賑わいを示す）
   const list=document.getElementById('map-tag-list');
+  if (!mapTags.length) {
+    list.innerHTML = '<div style="font-size:0.78rem;color:var(--ink4);line-height:1.9">'
+      + 'まだタグがありません。植えた言葉にタグを添えると、ここに根が伸びはじめます。'
+      + '</div>';
+    return;
+  }
   list.innerHTML=mapTags.filter(t=>!t.parent).map(t=>`
     <div class="map-tag-item" onclick="highlightTag('${t.id}')">
-      ${t.name}<span class="map-tag-count">${t.users}</span>
+      ${esc(t.name)}
+      <span class="map-tag-count" style="opacity:${0.3+0.6*(t.weight||0)}">●</span>
     </div>`).join('');
 }
  
 var highlightedTag=null;
-function highlightTag(id){highlightedTag=id===highlightedTag?null:id;drawMap();}
+async function highlightTag(id){
+  highlightedTag = id===highlightedTag ? null : id;
+  drawMap();
+  const titleEl=document.getElementById('map-selected-title');
+  const bodyEl=document.getElementById('map-selected-body');
+  if (!highlightedTag) {
+    titleEl.textContent='タグをクリック';
+    bodyEl.innerHTML='見出しが現れます';
+    return;
+  }
+  const tag=mapTags.find(t=>t.id===highlightedTag);
+  titleEl.textContent=(tag?tag.name:'') + 'の見出し';
+  bodyEl.innerHTML='<span style="color:var(--ink4)">…</span>';
+  const items = await (window.fetchTagHeadlines ? window.fetchTagHeadlines(highlightedTag) : []);
+  if (!items.length) {
+    bodyEl.innerHTML = '<span style="color:var(--ink4)">まだ見出しがありません</span>';
+    return;
+  }
+  bodyEl.innerHTML = items.map(h => `
+    <div style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:0.5px solid var(--rule)">
+      <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px;background:${h.mine?'var(--ink3)':'transparent'}"></span>
+      <span style="font-size:0.82rem;color:${h.mine?'var(--ink)':'var(--ink3)'}">${esc(h.title)}</span>
+    </div>`).join('');
+}
  
 function getDepth(id){let d=0,t=mapTags.find(x=>x.id===id);while(t&&t.parent){d++;t=mapTags.find(x=>x.id===t.parent);}return d;}
  
@@ -1077,12 +1113,13 @@ function drawMap() {
   mapTags.forEach(t=>{
     const p=mapPositions[t.id];if(!p) return;
     const depth=getDepth(t.id);
-    const r=Math.max(6,14-depth*2)+(t.users/284)*8;
+    const w=t.weight||0;
+    const r=Math.max(6,14-depth*2)+w*8;
     const hl=highlightedTag===t.id;
     const isRoot=!t.parent;
  
     ctx.beginPath();ctx.arc(p.x,p.y,r,0,Math.PI*2);
-    ctx.fillStyle=hl?'#c4a050':isRoot?'#9a7a2a':'#cec6b0';
+    ctx.fillStyle=hl?'#c4a050':`rgba(154,122,42,${0.18+0.55*w})`;
     ctx.strokeStyle=isRoot?'#9a7a2a':'#b0a890';
     ctx.lineWidth=isRoot?1.5:0.5;
     ctx.fill();ctx.stroke();
@@ -1092,12 +1129,6 @@ function drawMap() {
     ctx.fillStyle=hl?'#5a3a0a':isRoot?'#2a2010':'#5a5040';
     ctx.textAlign='left';ctx.textBaseline='middle';
     ctx.fillText(t.name,p.x+r+5,p.y);
- 
-    if(t.users<=5){
-      ctx.beginPath();ctx.arc(p.x,p.y,r+4,0,Math.PI*2);
-      ctx.strokeStyle='rgba(140,60,30,0.4)';ctx.lineWidth=1;
-      ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
-    }
   });
   ctx.restore();
 }
@@ -1357,6 +1388,75 @@ if (savedLangApp === 'en') setLang('en');
     }
   }
  
+  // ── すん：タグ系譜の取得 ──
+  // 方針：自分が公開した投稿に使ったタグだけを表示する（個人軸が基本）。
+  // 濃淡（weight）は自分の投稿数のみを基準にし、他者の人気度や件数は出さない。
+  async function loadMapTagsFromDb() {
+    if (!_currentUser) return;
+ 
+    // 1. 自分の公開済みキーワードIDを取得
+    var kwRes = await _db.from('keywords')
+      .select('id')
+      .eq('user_id', _currentUser.id)
+      .eq('status', 'published');
+    if (kwRes.error) { console.error('loadMapTags(keywords):', kwRes.error); mapTags = []; return; }
+    var kwIds = (kwRes.data || []).map(function(k) { return k.id; });
+    if (!kwIds.length) { mapTags = []; mapTagHeadlines = {}; return; }
+ 
+    // 2. それらに紐づくタグ（系譜情報つき）を取得
+    var ktRes = await _db.from('keyword_tags')
+      .select('keyword_id, tags(id, name, parent_id)')
+      .in('keyword_id', kwIds);
+    if (ktRes.error) { console.error('loadMapTags(keyword_tags):', ktRes.error); mapTags = []; return; }
+ 
+    // 3. タグごとの自分の投稿数を集計
+    var countByTag = {};
+    var tagMeta = {};
+    (ktRes.data || []).forEach(function(row) {
+      var tag = row.tags;
+      if (!tag) return;
+      tagMeta[tag.id] = tag;
+      countByTag[tag.id] = (countByTag[tag.id] || 0) + 1;
+    });
+ 
+    var usedIds = Object.keys(tagMeta);
+    var maxCount = Math.max.apply(null, usedIds.map(function(id) { return countByTag[id]; }).concat([1]));
+ 
+    // 4. 自分が使っていない祖先タグは表示上の親から外し、ルート扱いにする
+    mapTags = usedIds.map(function(id) {
+      var t = tagMeta[id];
+      var parent = (t.parent_id && tagMeta[t.parent_id]) ? t.parent_id : null;
+      return {
+        id: t.id,
+        name: t.name,
+        parent: parent,
+        weight: countByTag[id] / maxCount
+      };
+    });
+ 
+    mapTagHeadlines = {}; // タグクリック時に都度取得するのでここではクリアのみ
+  }
+ 
+  // ── すん：タグをクリックした時の見出し取得 ──
+  // 自分の投稿だけでなく、同じタグを持つ他者の公開投稿も静かに見える（誰が書いたかより先に内容が見える距離感）
+  async function fetchTagHeadlinesFromDb(tagId) {
+    if (mapTagHeadlines[tagId]) return mapTagHeadlines[tagId];
+    var res = await _db.from('keyword_tags')
+      .select('keywords(title, user_id, status)')
+      .eq('tag_id', tagId)
+      .limit(30);
+    if (res.error) { console.error('fetchTagHeadlines:', res.error); return []; }
+    var items = (res.data || [])
+      .map(function(row) { return row.keywords; })
+      .filter(function(k) { return k && k.status === 'published' && k.title; })
+      .map(function(k) { return { title: k.title, mine: k.user_id === _currentUser.id }; });
+    mapTagHeadlines[tagId] = items;
+    return items;
+  }
+ 
+  window.loadMapTags = loadMapTagsFromDb;
+  window.fetchTagHeadlines = fetchTagHeadlinesFromDb;
+ 
   // 既存関数を上書き
   window.saveDraft = function() { saveKwToDb('draft'); };
   window.publish   = function() { saveKwToDb('published'); };
@@ -1392,4 +1492,3 @@ if (savedLangApp === 'en') setLang('en');
  
 </body>
 </html>
- 
