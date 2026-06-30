@@ -1385,7 +1385,7 @@ if (savedLangApp === 'en') setLang('en');
     var title = document.getElementById('ed-title').value.trim();
     var body = document.getElementById('ed-body').value.trim();
     var tagsRaw = document.getElementById('ed-tags').value;
-    var tags = tagsRaw.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+    var tags = tagsRaw.split(/[,、，\s]+/).map(function(t) { return t.trim(); }).filter(Boolean);
     if (!title) { document.getElementById('ed-title').focus(); return; }
  
     var heat = window.currentHeat || 3;
