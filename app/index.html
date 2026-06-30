@@ -149,6 +149,19 @@ header {
   cursor: pointer;
   background: var(--paper);
   transition: all 0.15s;
+  display: flex;
+  gap: 10px;
+}
+.kw-card-thumb {
+  width: 36px; height: 36px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border: 0.5px solid var(--rule2);
+  background: var(--paper2);
+}
+.kw-card-body {
+  flex: 1;
+  min-width: 0;
 }
 .kw-card:hover, .kw-card.active {
   border-color: var(--gold2);
@@ -680,14 +693,20 @@ function renderKwList() {
     div.className = 'kw-card' + (kw.id === selectedKwId ? ' active' : '');
     const dots = Array.from({length:5}, (_,i) =>
       `<div class="heat-dot ${i<kw.heat?'on':''}"></div>`).join('');
+    const thumb = kw.image_url
+      ? `<img class="kw-card-thumb" src="${esc(kw.image_url)}" alt="">`
+      : '';
     div.innerHTML = `
-      <div class="kw-card-title">${esc(kw.title)}</div>
-      <div class="kw-card-tags">${kw.tags.slice(0,3).join(' · ')}</div>
-      <div class="kw-card-meta">
-        <span class="kw-card-status status-${kw.status === 'published' ? 'pub' : 'draft'}">
-          ${kw.status === 'published' ? '公開' : '下書き'}
-        </span>
-        <div class="heat-dots">${dots}</div>
+      ${thumb}
+      <div class="kw-card-body">
+        <div class="kw-card-title">${esc(kw.title)}</div>
+        <div class="kw-card-tags">${kw.tags.slice(0,3).join(' · ')}</div>
+        <div class="kw-card-meta">
+          <span class="kw-card-status status-${kw.status === 'published' ? 'pub' : 'draft'}">
+            ${kw.status === 'published' ? '公開' : '下書き'}
+          </span>
+          <div class="heat-dots">${dots}</div>
+        </div>
       </div>`;
     div.onclick = () => selectKw(kw.id);
     list.appendChild(div);
