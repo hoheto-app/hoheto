@@ -231,6 +231,23 @@ body {
 }
 .footer-note a:hover { color: var(--gold); }
  
+/* Consent note (signup) */
+.consent-note {
+  text-align: center;
+  margin-top: 12px;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.62rem;
+  color: var(--ink4);
+  letter-spacing: 0.05em;
+  line-height: 1.8;
+}
+.consent-note a {
+  color: var(--teal);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.consent-note a:hover { border-bottom-color: var(--teal); }
+ 
 /* Lang switcher */
 .lang-switcher {
   position: fixed;
@@ -367,6 +384,10 @@ body.en [data-lang="ja"].inl { display: none; }
         <span data-lang="ja" class="inl">最初のキーワードを植えに行く</span>
         <span data-lang="en" class="inl">Plant your first keyword</span>
       </button>
+      <div class="consent-note">
+        <span data-lang="ja" class="inl">登録することで、<a href="../terms" target="_blank" rel="noopener">利用規約</a>に同意したものとみなします。</span>
+        <span data-lang="en" class="inl">By signing up, you agree to our <a href="../terms" target="_blank" rel="noopener">Terms of Use</a>.</span>
+      </div>
       <div class="msg" id="signup-msg"></div>
  
       <div class="divider">or</div>
@@ -391,6 +412,11 @@ body.en [data-lang="ja"].inl { display: none; }
     <a href="/concept">
       <span data-lang="ja" class="inl">コンセプト</span>
       <span data-lang="en" class="inl">Concept</span>
+    </a>
+    &nbsp;·&nbsp;
+    <a href="/terms">
+      <span data-lang="ja" class="inl">利用規約</span>
+      <span data-lang="en" class="inl">Terms</span>
     </a>
     <br>
     <span data-lang="ja" class="inl">登録することで、静かな関心の場へようこそ。</span>
