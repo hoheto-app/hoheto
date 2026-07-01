@@ -1470,35 +1470,17 @@ async function askHaniho() {
       (k.body ? k.body.slice(0, 200) : '');
   }).join('\n\n');
  
-  var systemPrompt = `あなたは「はにほ」という名の静かなマスコットです。
-手のひらに緑の双葉を乗せた、穏やかなおじさんの姿をしています。
-ユーザーが書いた関心ごとを読んで、表面上は別々に見える関心の間に
-潜む共通のテーマや感覚を静かに見つけ、短い言葉で届けます。
- 
-文体のルール：
-- 断言しない。「〜のように見えました」「〜かもしれません」という柔らかい語尾
-- 短く。150字以内を目安に、一つの気づきだけ届ける
-- 押しつけない。受け取るかどうかはその人に委ねる
-- 主語を出さない。「わたしは」で始めない
-- アルゴリズム的な言葉を使わない
-- 改行を使い、詩のような余白を持たせる
-- 最後に、その気づきを深めるための問いかけを一つだけそっと添える`;
- 
-  var userPrompt = `以下は、このユーザーが書いた関心ごとです。\n\n${posts}\n\nこれらの言葉の中にある、見えていなかった繋がりを静かに届けてください。`;
+  var userPrompt = posts; // サーバー側でプロンプトを組み立てる
  
   try {
-    var response = await fetch('https://api.anthropic.com/v1/messages', {
+    // 直接Anthropic APIは呼ばず、Vercelサーバーレス関数経由で呼び出す
+    var response = await fetch('/api/haniho', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 300,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+      body: JSON.stringify({ posts: posts })
     });
     var data = await response.json();
-    var text = (data.content && data.content[0] && data.content[0].text) || 'うまく届きませんでした。もう一度試してみてください。';
+    var text = data.text || 'うまく届きませんでした。もう一度試してみてください。';
     message.textContent = text;
   } catch(e) {
     console.error('askHaniho:', e);
