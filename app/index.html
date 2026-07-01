@@ -748,6 +748,40 @@ function switchView(v) {
 // ══════════════════════════════════════════════════
 // VIEW A: WRITE
 // ══════════════════════════════════════════════════
+// 五進法で成長段階をSVGに変換（カード用・小さいサイズ）
+function seedSvgSmall(total) {
+  if (!total) return '';
+  var leaves = Math.floor(total / 25);
+  var sprouts = Math.floor((total % 25) / 5);
+  var seeds = total % 5;
+  var parts = [];
+  var x = 4;
+  for (var i = 0; i < Math.min(leaves, 4); i++) {
+    var lx = x; x += 10;
+    parts.push(
+      '<line x1="'+lx+'" y1="13" x2="'+lx+'" y2="6" stroke="#3B6D11" stroke-width="1.5"/>'+
+      '<ellipse cx="'+(lx-3)+'" cy="6" rx="3.5" ry="2.2" fill="#639922" transform="rotate(-20 '+(lx-3)+' 6)"/>'+
+      '<ellipse cx="'+(lx+3)+'" cy="6" rx="3.5" ry="2.2" fill="#639922" transform="rotate(20 '+(lx+3)+' 6)"/>'
+    );
+  }
+  for (var j = 0; j < Math.min(sprouts, 5); j++) {
+    var sx = x; x += 8;
+    parts.push(
+      '<line x1="'+sx+'" y1="13" x2="'+sx+'" y2="7" stroke="#3B6D11" stroke-width="1.3"/>'+
+      '<circle cx="'+sx+'" cy="6" r="2.2" fill="#639922"/>'
+    );
+  }
+  for (var k = 0; k < Math.min(seeds, 5); k++) {
+    var gx = x + k * 5; var gy = 11 + (k % 2);
+    var rot = (k * 41) % 50 - 25;
+    parts.push('<ellipse cx="'+gx+'" cy="'+gy+'" rx="1.5" ry="2" fill="#D4C29A" transform="rotate('+rot+' '+gx+' '+gy+')"/>');
+  }
+  var w = Math.max(x + (seeds > 0 ? seeds * 5 + 4 : 4), 20);
+  return '<svg width="'+w+'" height="16" viewBox="0 0 '+w+' 16" style="display:inline-block;vertical-align:middle">'+
+    '<line x1="2" y1="13" x2="'+(w-2)+'" y2="13" stroke="var(--rule)" stroke-width="0.8"/>'+
+    parts.join('')+'</svg>';
+}
+ 
 function renderKwList() {
   const list = document.getElementById('kw-list');
   list.innerHTML = '';
@@ -759,6 +793,7 @@ function renderKwList() {
     const thumb = kw.image_url
       ? `<img class="kw-card-thumb" src="${esc(kw.image_url)}" alt="">`
       : '';
+    const seedIcon = kw.status === 'published' ? seedSvgSmall(kw.seeds) : '';
     div.innerHTML = `
       ${thumb}
       <div class="kw-card-body">
@@ -768,7 +803,10 @@ function renderKwList() {
           <span class="kw-card-status status-${kw.status === 'published' ? 'pub' : 'draft'}">
             ${kw.status === 'published' ? '公開' : '下書き'}
           </span>
-          <div class="heat-dots">${dots}</div>
+          <div style="display:flex;align-items:center;gap:5px">
+            ${seedIcon}
+            <div class="heat-dots">${dots}</div>
+          </div>
         </div>
       </div>`;
     div.onclick = () => selectKw(kw.id);
@@ -1403,9 +1441,24 @@ if (savedLangApp === 'en') setLang('en');
         heat: k.heat || 3,
         status: k.status || 'draft',
         image_url: k.image_url || null,
-        date: new Date(k.created_at).toLocaleDateString('ja-JP')
+        date: new Date(k.created_at).toLocaleDateString('ja-JP'),
+        seeds: 0
       };
     });
+ 
+    // 公開済み投稿の resonance 件数をまとめて取得
+    var publishedIds = keywords.filter(function(k) { return k.status === 'published'; }).map(function(k) { return k.id; });
+    if (publishedIds.length) {
+      var resResult = await _db.from('resonances').select('keyword_id').in('keyword_id', publishedIds);
+      if (!resResult.error) {
+        var countMap = {};
+        (resResult.data || []).forEach(function(row) {
+          countMap[row.keyword_id] = (countMap[row.keyword_id] || 0) + 1;
+        });
+        keywords.forEach(function(k) { k.seeds = countMap[k.id] || 0; });
+      }
+    }
+ 
     renderKwList();
     updateGrowthBadge();
     if (keywords.length > 0) selectKw(keywords[0].id);
@@ -1711,6 +1764,7 @@ if (savedLangApp === 'en') setLang('en');
       return;
     }
     loadResonanceSection(keywordId);
+    loadKeywords(); // 投稿者側のカード表示も更新（自分が種を置いた場合を含む）
   }
  
   window.loadMapTags = loadMapTagsFromDb;
