@@ -394,6 +394,38 @@ header {
 .empty-hint .em { font-size: 2rem; margin-bottom: 10px; opacity: 0.3; }
 .empty-hint p { font-size: 0.8rem; line-height: 2; }
  
+/* タグサジェスト */
+.tag-suggestions {
+  display: none;
+  position: absolute;
+  top: 100%; left: 0;
+  width: 220px;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-top: none;
+  z-index: 300;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.tag-suggestions.show { display: block; }
+.tag-sug-item {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.76rem; padding: 7px 12px;
+  cursor: pointer; color: var(--ink2);
+  border-bottom: 0.5px solid var(--rule2);
+  transition: background 0.12s;
+}
+.tag-sug-item:hover, .tag-sug-item.active {
+  background: var(--paper2); color: var(--teal);
+}
+.tag-sug-new {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem; padding: 7px 12px;
+  cursor: pointer; color: var(--ink4);
+  font-style: italic;
+}
+.tag-sug-new:hover { background: var(--paper2); color: var(--gold); }
+ 
 /* TOAST */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -556,9 +588,14 @@ body.en [data-lang="ja"].inline { display: none; }
         <input type="text" class="editor-title" id="ed-title" placeholder="今、心の中にあるもの">
         <textarea class="editor-body" id="ed-body" placeholder="誰かに読まれることより、まず自分が書きたいことを。"></textarea>
         <div class="editor-meta">
-          <div class="meta-field">
+          <div class="meta-field" style="position:relative;">
             <span class="meta-label">タグ</span>
-            <input type="text" class="meta-input" id="ed-tags" placeholder="この関心は、何と繋がっていますか">
+            <input type="text" class="meta-input" id="ed-tags"
+              placeholder="この関心は、何と繋がっていますか"
+              oninput="onTagInput(event)"
+              onkeydown="onTagKeydown(event)"
+              autocomplete="off">
+            <div id="tag-suggestions" class="tag-suggestions"></div>
           </div>
           <div class="meta-field" style="width:100%;margin-top:8px">
             <span class="meta-label">画像</span>
@@ -1285,6 +1322,91 @@ mapCanvas.addEventListener('wheel',e=>{
 // ══════════════════════════════════════════════════
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
  
+// ── タグサジェスト ──
+var _suggestTimer = null;
+var _suggestIndex = -1;
+ 
+function getLastTag(val) {
+  // カンマ・全角スペース・半角スペース区切りで最後の入力中タグを取得
+  var parts = val.split(/[,、，\s]+/);
+  return parts[parts.length - 1].trim();
+}
+ 
+function replaceLastTag(val, newTag) {
+  var parts = val.split(/[,、，\s]+/).filter(Boolean);
+  parts[parts.length - 1] = newTag;
+  return parts.join('、') + '、';
+}
+ 
+async function onTagInput(e) {
+  clearTimeout(_suggestTimer);
+  _suggestTimer = setTimeout(async function() {
+    var val = document.getElementById('ed-tags').value;
+    var last = getLastTag(val);
+    var box = document.getElementById('tag-suggestions');
+    if (last.length < 1) { box.className = 'tag-suggestions'; return; }
+ 
+    if (!window._sbForTags) return;
+    var res = await window._sbForTags.from('tags')
+      .select('id, name')
+      .ilike('name', last + '%')
+      .order('name')
+      .limit(8);
+    if (res.error || !res.data) { box.className = 'tag-suggestions'; return; }
+ 
+    _suggestIndex = -1;
+    var items = res.data.filter(function(t) { return t.name !== last; });
+    var html = items.map(function(t, i) {
+      return '<div class="tag-sug-item" data-name="' + esc(t.name) + '" onclick="selectSuggest(\'' + esc(t.name) + '\')">' + esc(t.name) + '</div>';
+    }).join('');
+ 
+    // 既存タグと完全一致しない場合「新しく作る」を表示
+    var exact = res.data.find(function(t) { return t.name === last; });
+    if (!exact) {
+      html += '<div class="tag-sug-new" onclick="selectSuggest(\'' + esc(last) + '\')">「' + esc(last) + '」を新しく作る</div>';
+    }
+ 
+    box.innerHTML = html;
+    box.className = html ? 'tag-suggestions show' : 'tag-suggestions';
+  }, 200);
+}
+ 
+function onTagKeydown(e) {
+  var box = document.getElementById('tag-suggestions');
+  var items = box.querySelectorAll('.tag-sug-item');
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _suggestIndex = Math.min(_suggestIndex + 1, items.length - 1);
+    items.forEach(function(el, i) { el.classList.toggle('active', i === _suggestIndex); });
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _suggestIndex = Math.max(_suggestIndex - 1, -1);
+    items.forEach(function(el, i) { el.classList.toggle('active', i === _suggestIndex); });
+  } else if (e.key === 'Enter' && _suggestIndex >= 0) {
+    e.preventDefault();
+    var active = items[_suggestIndex];
+    if (active) selectSuggest(active.dataset.name);
+  } else if (e.key === 'Escape') {
+    box.className = 'tag-suggestions';
+  }
+}
+ 
+function selectSuggest(tagName) {
+  var input = document.getElementById('ed-tags');
+  input.value = replaceLastTag(input.value, tagName);
+  document.getElementById('tag-suggestions').className = 'tag-suggestions';
+  _suggestIndex = -1;
+  input.focus();
+}
+ 
+// サジェストボックスを外側クリックで閉じる
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#ed-tags') && !e.target.closest('#tag-suggestions')) {
+    var box = document.getElementById('tag-suggestions');
+    if (box) box.className = 'tag-suggestions';
+  }
+});
+ 
 function showToast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('show');
@@ -1777,6 +1899,7 @@ if (savedLangApp === 'en') setLang('en');
   }
  
   window.loadMapTags = loadMapTagsFromDb;
+  window._sbForTags = _db;
   window.fetchTagHeadlines = fetchTagHeadlinesFromDb;
  
   // 既存関数を上書き
