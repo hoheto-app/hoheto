@@ -426,6 +426,34 @@ header {
 }
 .tag-sug-new:hover { background: var(--paper2); color: var(--gold); }
  
+/* タグ系譜質問パネル */
+.tag-lineage-panel {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 12px;
+  background: var(--paper2);
+  border: 0.5px solid var(--rule);
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.72rem;
+  color: var(--ink3);
+  line-height: 1.7;
+}
+.tag-lineage-panel.show { display: block; }
+.tag-lineage-btn {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem; padding: 3px 10px;
+  border: 0.5px solid var(--rule);
+  background: var(--paper); color: var(--ink2);
+  cursor: pointer; transition: all 0.15s;
+}
+.tag-lineage-btn:hover { border-color: var(--teal); color: var(--teal); }
+.tag-lineage-skip {
+  font-size: 0.65rem; color: var(--ink4);
+  cursor: pointer; text-decoration: underline;
+  background: none; border: none;
+  font-family: 'Inconsolata', monospace;
+}
+ 
 /* TOAST */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -596,6 +624,10 @@ body.en [data-lang="ja"].inline { display: none; }
               onkeydown="onTagKeydown(event)"
               autocomplete="off">
             <div id="tag-suggestions" class="tag-suggestions"></div>
+            <div id="tag-lineage-panel" class="tag-lineage-panel">
+              <div id="tag-lineage-question"></div>
+              <div id="tag-lineage-options" style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;"></div>
+            </div>
           </div>
           <div class="meta-field" style="width:100%;margin-top:8px">
             <span class="meta-label">画像</span>
@@ -1376,7 +1408,7 @@ async function onTagInput(e) {
     // 既存タグと完全一致しない場合「新しく作る」を表示
     var exact = res.data.find(function(t) { return t.name === last; });
     if (!exact) {
-      html += '<div class="tag-sug-new" onclick="selectSuggest(\'' + esc(last) + '\')">「' + esc(last) + '」を新しく作る</div>';
+      html += '<div class="tag-sug-new" onclick="selectSuggest(\'' + esc(last) + '\', true)">「' + esc(last) + '」を新しく作る</div>';
     }
  
     box.innerHTML = html;
@@ -1404,12 +1436,69 @@ function onTagKeydown(e) {
   }
 }
  
-function selectSuggest(tagName) {
+// 系譜質問用の状態
+var _pendingNewTag = null;    // 新しく作ろうとしているタグ名
+var _pendingParentId = null;  // 選ばれた親タグID（nullなら独立）
+ 
+function selectSuggest(tagName, isNew) {
   var input = document.getElementById('ed-tags');
   input.value = replaceLastTag(input.value, tagName);
   document.getElementById('tag-suggestions').className = 'tag-suggestions';
   _suggestIndex = -1;
-  input.focus();
+ 
+  if (isNew) {
+    // 新しく作る場合だけ系譜を尋ねる
+    _pendingNewTag = tagName;
+    _pendingParentId = null;
+    showLineageQuestion(tagName);
+  } else {
+    hideLineageQuestion();
+    input.focus();
+  }
+}
+ 
+async function showLineageQuestion(newTagName) {
+  var panel = document.getElementById('tag-lineage-panel');
+  var question = document.getElementById('tag-lineage-question');
+  var options = document.getElementById('tag-lineage-options');
+ 
+  // 既存タグを最大6件取得して親候補として提示
+  if (!window._sbForTags) { hideLineageQuestion(); return; }
+  var res = await window._sbForTags.from('tags')
+    .select('id, name')
+    .neq('name', newTagName)
+    .order('name')
+    .limit(6);
+  if (res.error || !res.data || !res.data.length) { hideLineageQuestion(); return; }
+ 
+  question.textContent = '「' + newTagName + '」は、どこから来ていますか？';
+  options.innerHTML =
+    res.data.map(function(t) {
+      return '<button class="tag-lineage-btn" onclick="selectParentTag(\'' + esc(t.id) + '\',\'' + esc(t.name) + '\')">' + esc(t.name) + '</button>';
+    }).join('') +
+    '<button class="tag-lineage-skip" onclick="selectParentTag(null,null)">独立したタグにする</button>';
+ 
+  panel.className = 'tag-lineage-panel show';
+}
+ 
+function hideLineageQuestion() {
+  document.getElementById('tag-lineage-panel').className = 'tag-lineage-panel';
+  _pendingNewTag = null;
+  _pendingParentId = null;
+}
+ 
+function selectParentTag(parentId, parentName) {
+  _pendingParentId = parentId;
+  var panel = document.getElementById('tag-lineage-panel');
+  if (parentName) {
+    panel.innerHTML = '<span style="color:var(--teal)">✓ 「' + esc(parentName) + '」から派生するタグとして登録します</span>';
+  } else {
+    panel.innerHTML = '<span style="color:var(--ink4)">独立したタグとして登録します</span>';
+  }
+  setTimeout(function() {
+    hideLineageQuestion();
+    document.getElementById('ed-tags').focus();
+  }, 1200);
 }
  
 // サジェストボックスを外側クリックで閉じる
@@ -1657,13 +1746,20 @@ if (savedLangApp === 'en') setLang('en');
       var tagResult = await _db.from('tags').select('id').eq('name', name).maybeSingle();
       var tagData = tagResult.data;
       if (!tagData) {
-        var newTagResult = await _db.from('tags').insert({ name: name, created_by: _currentUser.id }).select().maybeSingle();
+        // 新規タグ：系譜質問で選ばれた親IDがあれば設定する
+        var parentId = (_pendingNewTag === name && _pendingParentId) ? _pendingParentId : null;
+        var newTagRow = { name: name, created_by: _currentUser.id };
+        if (parentId) newTagRow.parent_id = parentId;
+        var newTagResult = await _db.from('tags').insert(newTagRow).select().maybeSingle();
         tagData = newTagResult.data;
       }
       if (tagData) {
         await _db.from('keyword_tags').insert({ keyword_id: kwId, tag_id: tagData.id });
       }
     }
+    // 使用後にクリア
+    _pendingNewTag = null;
+    _pendingParentId = null;
   }
  
   async function uploadImage(file, kwId) {
