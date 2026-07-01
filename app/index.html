@@ -454,6 +454,47 @@ header {
   font-family: 'Inconsolata', monospace;
 }
  
+/* HANIHO MODAL */
+.haniho-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(26,21,16,0.55);
+  z-index: 800;
+  align-items: center; justify-content: center;
+  padding: 24px;
+}
+.haniho-overlay.show { display: flex; }
+.haniho-card {
+  position: relative;
+  width: 100%; max-width: 440px;
+  background: var(--paper2);
+  border: 1px solid var(--rule);
+  padding: 28px 28px 24px;
+}
+.haniho-close {
+  position: absolute; top: 10px; right: 12px;
+  background: none; border: none; cursor: pointer;
+  font-size: 1.2rem; color: var(--ink4);
+  font-family: 'Inconsolata', monospace;
+}
+.haniho-close:hover { color: var(--ink); }
+.haniho-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.haniho-body { display: flex; flex-direction: column; gap: 16px; }
+.haniho-btn {
+  font-family: 'Inconsolata', monospace; font-size: 0.75rem;
+  letter-spacing: 0.1em; padding: 10px 16px;
+  background: var(--ink); color: var(--paper);
+  border: none; cursor: pointer; transition: background 0.15s;
+  align-self: flex-start;
+}
+.haniho-btn:hover { background: var(--ink2); }
+.haniho-btn:disabled { background: var(--rule); cursor: not-allowed; }
+ 
 /* TOAST */
 .toast {
   position: fixed; bottom: 20px; left: 50%;
@@ -554,7 +595,7 @@ body.en [data-lang="ja"].inline { display: none; }
 <!-- HEADER -->
 <header>
   <div style="display:flex;align-items:center;gap:10px">
-      <img src="../mascot.png" alt="Hoheto" style="height:36px;width:auto;opacity:0.9">
+      <img src="../mascot.png" alt="Hoheto" style="height:36px;width:auto;opacity:0.9;cursor:pointer;" onclick="openHaniho()" title="はにほに聞く">
       <div class="logo"><span class="at">@</span>ゐroh<span class="at">@</span></div>
     </div>
  
@@ -751,6 +792,29 @@ body.en [data-lang="ja"].inline { display: none; }
     </div>
   </div>
  
+</div>
+ 
+<!-- はにほモーダル：Hoheto+ユーザーが自分の関心の橋かけを受け取る場所 -->
+<div class="haniho-overlay" id="haniho-overlay" onclick="if(event.target===this) closeHaniho()">
+  <div class="haniho-card">
+    <button class="haniho-close" onclick="closeHaniho()" aria-label="閉じる">×</button>
+    <div class="haniho-header">
+      <img src="../mascot.png" alt="はにほ" style="height:48px;width:auto;opacity:0.9;">
+      <div>
+        <div style="font-size:0.72rem;font-family:'Inconsolata',monospace;color:var(--ink4);letter-spacing:0.1em;">はにほより</div>
+        <div style="font-size:1rem;font-weight:700;margin-top:2px;">あなたの関心を読んでいました</div>
+      </div>
+    </div>
+    <div id="haniho-body" class="haniho-body">
+      <div id="haniho-message" style="white-space:pre-wrap;line-height:2;font-size:0.92rem;color:var(--ink2);"></div>
+      <button id="haniho-btn" class="haniho-btn" onclick="askHaniho()">
+        はにほに橋をかけてもらう
+      </button>
+      <div id="haniho-loading" style="display:none;font-family:'Inconsolata',monospace;font-size:0.72rem;color:var(--ink4);text-align:center;padding:20px 0;">
+        はにほが静かに読んでいます…
+      </div>
+    </div>
+  </div>
 </div>
  
 <div class="toast" id="toast"></div>
@@ -1366,6 +1430,85 @@ mapCanvas.addEventListener('wheel',e=>{
 // UTILS
 // ══════════════════════════════════════════════════
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+ 
+// ── はにほ：自分の関心の橋かけ ──
+function openHaniho() {
+  var overlay = document.getElementById('haniho-overlay');
+  var message = document.getElementById('haniho-message');
+  var btn = document.getElementById('haniho-btn');
+  var loading = document.getElementById('haniho-loading');
+  // 初期状態にリセット
+  message.textContent = '';
+  btn.style.display = 'inline-block';
+  btn.disabled = false;
+  loading.style.display = 'none';
+  overlay.classList.add('show');
+}
+ 
+function closeHaniho() {
+  document.getElementById('haniho-overlay').classList.remove('show');
+}
+ 
+async function askHaniho() {
+  var btn = document.getElementById('haniho-btn');
+  var loading = document.getElementById('haniho-loading');
+  var message = document.getElementById('haniho-message');
+ 
+  if (!keywords || !keywords.length) {
+    message.textContent = 'まだ言葉が植えられていません。\nいくつか書いてから、また来てください。';
+    return;
+  }
+ 
+  btn.style.display = 'none';
+  loading.style.display = 'block';
+  message.textContent = '';
+ 
+  // 最新10件の投稿(タイトル・本文・タグ)をまとめてプロンプトに渡す
+  var posts = keywords.slice(0, 10).map(function(k) {
+    return '【' + k.title + '】\n' +
+      (k.tags.length ? 'タグ: ' + k.tags.join('、') + '\n' : '') +
+      (k.body ? k.body.slice(0, 200) : '');
+  }).join('\n\n');
+ 
+  var systemPrompt = `あなたは「はにほ」という名の静かなマスコットです。
+手のひらに緑の双葉を乗せた、穏やかなおじさんの姿をしています。
+ユーザーが書いた関心ごとを読んで、表面上は別々に見える関心の間に
+潜む共通のテーマや感覚を静かに見つけ、短い言葉で届けます。
+ 
+文体のルール：
+- 断言しない。「〜のように見えました」「〜かもしれません」という柔らかい語尾
+- 短く。150字以内を目安に、一つの気づきだけ届ける
+- 押しつけない。受け取るかどうかはその人に委ねる
+- 主語を出さない。「わたしは」で始めない
+- アルゴリズム的な言葉を使わない
+- 改行を使い、詩のような余白を持たせる
+- 最後に、その気づきを深めるための問いかけを一つだけそっと添える`;
+ 
+  var userPrompt = `以下は、このユーザーが書いた関心ごとです。\n\n${posts}\n\nこれらの言葉の中にある、見えていなかった繋がりを静かに届けてください。`;
+ 
+  try {
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 300,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+    var data = await response.json();
+    var text = (data.content && data.content[0] && data.content[0].text) || 'うまく届きませんでした。もう一度試してみてください。';
+    message.textContent = text;
+  } catch(e) {
+    console.error('askHaniho:', e);
+    message.textContent = 'はにほが少し疲れているようです。\nまた後で試してみてください。';
+  }
+ 
+  loading.style.display = 'none';
+  btn.style.display = 'inline-block';
+  btn.disabled = false;
+}
  
 // ── タグサジェスト ──
 var _suggestTimer = null;
