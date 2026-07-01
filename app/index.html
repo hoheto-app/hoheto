@@ -1188,9 +1188,18 @@ async function highlightTag(id){
     return;
   }
   bodyEl.innerHTML = items.map(h => `
-    <div onclick="openPostDetail('${h.id}')" style="display:flex;align-items:flex-start;gap:6px;padding:6px 0;border-bottom:0.5px solid var(--rule);cursor:pointer">
-      <span style="width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:7px;background:${h.mine?'var(--ink3)':'transparent'}"></span>
-      <span style="font-size:0.82rem;color:${h.mine?'var(--ink)':'var(--ink3)'}">${esc(h.title)}</span>
+    <div onclick="openPostDetail('${h.id}')" style="
+      display:flex; align-items:flex-start; gap:8px;
+      padding:7px 8px; margin-bottom:3px; cursor:pointer;
+      border-left: 2px solid ${h.mine ? 'var(--gold2)' : 'transparent'};
+      background: ${h.mine ? 'rgba(196,160,80,0.06)' : 'transparent'};
+    ">
+      <span style="
+        font-family:'Inconsolata',monospace; font-size:0.55rem;
+        letter-spacing:0.05em; color:${h.mine ? 'var(--gold)' : 'var(--ink4)'};
+        flex-shrink:0; margin-top:3px; white-space:nowrap;
+      ">${h.mine ? '自分' : 'ひと'}</span>
+      <span style="font-size:0.82rem; color:${h.mine ? 'var(--ink)' : 'var(--ink3)'}; line-height:1.6">${esc(h.title)}</span>
     </div>`).join('');
 }
  
