@@ -308,45 +308,56 @@ header {
 ══════════════════════════════════ */
 #view-forest {
   position: relative;
-  background: #080b06;
+  background: #030a04;
+  cursor: grab;
+  user-select: none;
 }
+#view-forest.grabbing { cursor: grabbing; }
 #forest-canvas {
   position: absolute; top: 0; left: 0;
-  width: calc(100% - 200px); height: 100%;
+  width: 100%; height: 100%;
 }
+/* 凡例オーバーレイ */
 .forest-legend {
-  position: absolute; right: 0; top: 0; bottom: 0;
-  width: 200px;
-  background: rgba(8,11,6,0.96);
-  border-left: 1px solid #1a2018;
-  padding: 16px 14px; overflow-y: auto;
+  position: absolute; top: 8px; right: 10px;
+  background: rgba(4,10,4,0.82);
+  border: 0.5px solid rgba(40,70,30,0.4);
+  padding: 8px 12px;
+  pointer-events: none;
 }
-.forest-legend::-webkit-scrollbar { width: 3px; }
 .fl-title {
   font-family: 'Inconsolata', monospace;
-  font-size: 0.6rem; letter-spacing: 0.2em;
-  color: #c4943a; text-transform: uppercase; margin-bottom: 12px;
+  font-size: 0.58rem; letter-spacing: 0.18em;
+  color: #c4943a; text-transform: uppercase; margin-bottom: 7px;
 }
-.fl-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
-.fl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 4px; }
-.fl-label { font-size: 0.75rem; color: #a09080; line-height: 1.7; }
-.fl-label strong { display: block; font-size: 0.78rem; color: #c8c0b0; font-weight: 700; margin-bottom: 1px; }
-.forest-controls {
-  position: absolute; bottom: 14px; left: 14px;
-  display: flex; gap: 6px;
+.fl-item { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+.fl-dot { width: 16px; height: 2px; flex-shrink: 0; border-radius: 1px; }
+.fl-label { font-family: 'Inconsolata', monospace; font-size: 0.65rem; color: #a09080; }
+/* 操作ヒント */
+.forest-hint {
+  position: absolute; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Inconsolata', monospace; font-size: 0.6rem;
+  color: rgba(140,180,140,0.45); letter-spacing: 0.1em;
+  pointer-events: none; white-space: nowrap;
 }
-.fc-btn {
-  font-family: 'Inconsolata', monospace; font-size: 0.65rem;
-  padding: 5px 10px; background: rgba(8,11,6,0.9);
-  border: 1px solid #1a2018; color: #5a5040;
-  cursor: pointer; transition: all 0.15s; letter-spacing: 0.1em;
+/* タグ選択パネル */
+.forest-tag-panel {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(3,8,3,0.96);
+  border-top: 0.5px solid rgba(50,110,30,0.4);
+  padding: 10px 16px;
+  display: none;
 }
-.fc-btn:hover, .fc-btn.active { border-color: #c4943a; color: #c4943a; }
-.forest-stats {
-  position: absolute; bottom: 14px; right: 214px;
-  font-family: 'Inconsolata', monospace; font-size: 0.62rem;
-  color: #3a3828; letter-spacing: 0.1em;
+.forest-tag-panel.show { display: block; }
+.forest-tag-title {
+  font-family: 'Inconsolata', monospace; font-size: 0.8rem;
+  margin-bottom: 4px;
 }
+.forest-tag-conn { font-size: 0.7rem; color: #4a7a2a; margin-bottom: 3px; }
+.forest-tag-hl { font-size: 0.75rem; color: #5a8a3a; line-height: 1.9; }
+.forest-controls { display: none; }
+.forest-stats { display: none; }
  
 /* ══════════════════════════════════
    VIEW C: 地図（MAP）
@@ -729,45 +740,22 @@ body.en [data-lang="ja"].inline { display: none; }
   <div id="view-forest" class="view-panel">
     <canvas id="forest-canvas"></canvas>
     <div class="forest-legend">
-      <div class="fl-title">
-    <span data-lang="ja" class="inline">つながりの深さ</span>
-    <span data-lang="en" class="inline">Depth of Connection</span>
-  </div>
-      <div class="fl-item">
-        <div class="fl-dot" style="background:#8B4513"></div>
-        <div class="fl-label"><strong style="color:#c47a3a"><span data-lang="ja" class="inline">根</span><span data-lang="en" class="inline">Root</span></strong><span data-lang="ja" class="inline">本質が同じ。AIが深層を読んで判定。</span><span data-lang="en" class="inline">Same essence. AI reads the depth.</span></div>
-      </div>
-      <div class="fl-item">
-        <div class="fl-dot" style="background:#6B8E23"></div>
-        <div class="fl-label"><strong style="color:#8ab83a"><span data-lang="ja" class="inline">幹</span><span data-lang="en" class="inline">Trunk</span></strong><span data-lang="ja" class="inline">大きなテーマが共鳴。</span><span data-lang="en" class="inline">Shared themes resonate.</span></div>
-      </div>
-      <div class="fl-item">
-        <div class="fl-dot" style="background:#4a9a7a"></div>
-        <div class="fl-label"><strong style="color:#6ab89a"><span data-lang="ja" class="inline">枝</span><span data-lang="en" class="inline">Branch</span></strong><span data-lang="ja" class="inline">具体的な興味が重なる。</span><span data-lang="en" class="inline">Specific interests overlap.</span></div>
-      </div>
-      <div class="fl-item">
-        <div class="fl-dot" style="background:#4a7a3a"></div>
-        <div class="fl-label"><strong style="color:#6a9a5a"><span data-lang="ja" class="inline">葉</span><span data-lang="en" class="inline">Leaf</span></strong><span data-lang="ja" class="inline">偶然の細かい一致。</span><span data-lang="en" class="inline">Coincidental small matches.</span></div>
-      </div>
-      <div style="height:1px;background:#1a2018;margin:12px 0"></div>
-      <div class="fl-title">成長</div>
-      <div style="font-size:0.72rem;color:#6a6050;line-height:2.2">
-        <span data-lang="ja">🌰 種<br>🌱 芽<br>🌿 二葉<br>🍃 本葉<br>🌲 若木<br>🌳 大樹</span>
-        <span data-lang="en">🌰 Seed<br>🌱 Sprout<br>🌿 Seedling<br>🍃 Young Leaf<br>🌲 Sapling<br>🌳 Tree</span>
-      </div>
-      <div style="height:1px;background:#1a2018;margin:12px 0"></div>
-      <div class="fl-title" id="forest-selected-title">木をクリック</div>
-      <div id="forest-selected-body" style="font-size:0.72rem;color:#6a6050;line-height:1.9">
-        クリックするとつながりの詳細が表示されます
-      </div>
+      <div class="fl-title">つながり</div>
+      <div class="fl-item"><div class="fl-dot" style="background:rgba(220,170,50,0.9)"></div><div class="fl-label">根（系譜）</div></div>
+      <div class="fl-item"><div class="fl-dot" style="background:rgba(100,230,60,0.85)"></div><div class="fl-label">幹（よく共鳴）</div></div>
+      <div class="fl-item"><div class="fl-dot" style="background:rgba(40,210,160,0.7);height:1px;border-top:1px dashed rgba(40,210,160,0.7)"></div><div class="fl-label">枝（共鳴）</div></div>
+      <div class="fl-item"><div class="fl-dot" style="background:transparent;border-top:1px dotted rgba(100,190,100,0.6);height:1px"></div><div class="fl-label">葉（かすか）</div></div>
     </div>
-    <div class="forest-controls">
-      <button class="fc-btn active" id="fc-all" onclick="setForestFilter('all')"><span data-lang='ja' class='inline'>全て</span><span data-lang='en' class='inline'>All</span></button>
-      <button class="fc-btn" id="fc-root" onclick="setForestFilter('root')"><span data-lang='ja' class='inline'>根</span><span data-lang='en' class='inline'>Root</span></button>
-      <button class="fc-btn" id="fc-trunk" onclick="setForestFilter('trunk')"><span data-lang='ja' class='inline'>幹</span><span data-lang='en' class='inline'>Trunk</span></button>
-      <button class="fc-btn" id="fc-branch" onclick="setForestFilter('branch')"><span data-lang='ja' class='inline'>枝</span><span data-lang='en' class='inline'>Branch</span></button>
-      <button class="fc-btn" id="fc-leaf" onclick="setForestFilter('leaf')"><span data-lang='ja' class='inline'>葉</span><span data-lang='en' class='inline'>Leaf</span></button>
+    <div class="forest-hint">← ドラッグで歩く　|　スクロールで奥へ →</div>
+    <div class="forest-tag-panel" id="forest-tag-panel">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div class="forest-tag-title" id="forest-tag-title"></div>
+        <div id="forest-tag-dist" style="font-family:'Inconsolata',monospace;font-size:0.6rem;color:rgba(140,180,140,0.5);"></div>
+      </div>
+      <div class="forest-tag-conn" id="forest-tag-conn"></div>
+      <div class="forest-tag-hl" id="forest-tag-hl"></div>
     </div>
+    <div class="forest-controls"></div>
     <div class="forest-stats" id="forest-stats"></div>
   </div>
  
@@ -862,11 +850,14 @@ var mapTagHeadlines = {}; // tagId -> [{title, mine}]
  
  
  
-var forestFilter = 'all';
-var forestSelectedId = null;
-var forestPositions = {};
-var forestDrag = null, forestPanning = false;
-var forestOx = 0, forestOy = 0, forestScale = 1;
+// ── 森林浴 3D ──
+var F3 = {
+  camX: 0, camZ: 0, fl: 350,
+  trees: [], edges: [], tagPos: {}, sel: null,
+  drag: false, dragSX: 0, dragSCamX: 0,
+  velX: 0, lastMX: 0, lastMT: 0,
+  frame: 0, raf: null, loaded: false,
+};
 var mapPositions = {};
 var mapDrag = null, mapPanning = false;
 var mapOx = 0, mapOy = 0, mapScale = 1;
@@ -879,7 +870,13 @@ function switchView(v) {
   document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + v).classList.add('active');
   document.getElementById('btn-' + v).classList.add('active');
-  if (v === 'forest') { initForest(); drawForest(); }
+  if (v === 'forest') {
+    if (window.loadForestData) {
+      window.loadForestData().then(function(){ forest3DInit(); forest3DStart(); });
+    } else {
+      forest3DInit(); forest3DStart();
+    }
+  }
   if (v === 'map') {
     if (window.loadMapTags) {
       window.loadMapTags().then(() => { initMap(); drawMap(); });
@@ -1066,215 +1063,373 @@ function deleteKw() {
 }
  
 // ══════════════════════════════════════════════════
-// VIEW B: FOREST
+// VIEW B: FOREST (3D)
 // ══════════════════════════════════════════════════
  
+var forestUsers = []; // 後方互換のため残す
  
-function calcConn(a, b) {
-  const shared = a.keywords.filter(k => b.keywords.includes(k));
-  const sameTheme = a.theme === b.theme;
-  if (sameTheme && shared.length >= 2) return { level:'root', shared };
-  if (sameTheme || shared.length >= 2) return { level:'trunk', shared };
-  if (shared.length === 1) return { level:'branch', shared };
-  return null;
+// ── 3D透視投影フォレスト ──
+var _f3RV = function(a,b){ return a+Math.random()*(b-a); };
+var _f3ECOLOR = {root:'rgba(220,170,50,',trunk:'rgba(100,230,60,',branch:'rgba(40,210,160,',leaf:'rgba(100,190,100,'};
+var _f3EWIDTH = {root:2.4,trunk:1.6,branch:1.1,leaf:0.7};
+var _f3EDASH  = {root:[],trunk:[],branch:[5,4],leaf:[2,4]};
+var _f3EDIST  = {root:200,trunk:380,branch:600,leaf:950};
+ 
+function _f3Layout(tags, edges){
+  if(!tags.length) return {};
+  var pos = {};
+  pos[tags[0].id] = {x:0, z:400};
+  var visited = new Set([tags[0].id]);
+  var queue = [tags[0].id];
+  while(queue.length){
+    var cur = queue.shift();
+    edges.forEach(function(e){
+      var nb = e.a===cur?e.b:e.b===cur?e.a:null;
+      if(!nb||visited.has(nb)) return;
+      visited.add(nb);
+      var dx = (_f3RV(0,1)-0.5)*700;
+      var dz = _f3EDIST[e.type]*(0.7+_f3RV(0,0.6));
+      pos[nb] = { x:(pos[cur]?pos[cur].x:0)+dx, z:(pos[cur]?pos[cur].z:400)+dz };
+      queue.push(nb);
+    });
+  }
+  // 未配置タグを端に
+  tags.forEach(function(t){
+    if(!pos[t.id]) pos[t.id] = {x:_f3RV(-1500,1500), z:_f3RV(300,3000)};
+  });
+  return pos;
 }
  
-const forestConns = [];
-for (let i = 0; i < forestUsers.length; i++)
-  for (let j = i+1; j < forestUsers.length; j++) {
-    const c = calcConn(forestUsers[i], forestUsers[j]);
-    if (c) forestConns.push({ a:forestUsers[i].id, b:forestUsers[j].id, ...c });
+function forest3DInit(){
+  var canvas = document.getElementById('forest-canvas');
+  if(!canvas) return;
+  var tags = F3.tags || [];
+  var edges = F3.edges || [];
+  F3.tagPos = _f3Layout(tags, edges);
+  F3.trees = [];
+  F3.camX = 0; F3.camZ = 0;
+ 
+  // タグのある木
+  tags.forEach(function(tag){
+    var p = F3.tagPos[tag.id]||{x:0,z:500};
+    F3.trees.push({
+      tag:tag, wx:p.x+_f3RV(-35,35), wz:p.z,
+      wTrunkH:_f3RV(120,185), wCrownR:_f3RV(58,92),
+      wob:_f3RV(0,Math.PI*2), gspd:_f3RV(0.006,0.013), gphs:_f3RV(0,Math.PI*2),
+      mine:tag.mine||false, glowI:0, _sx:0,_sy:0,_sr:0,_sc:0,_vis:false
+    });
+  });
+  // 背景の飾り木
+  for(var i=0;i<100;i++){
+    F3.trees.push({
+      tag:null, wx:_f3RV(-2500,2500), wz:_f3RV(80,6000),
+      wTrunkH:_f3RV(80,220), wCrownR:_f3RV(38,98),
+      wob:_f3RV(0,Math.PI*2), gspd:_f3RV(0.006,0.013), gphs:_f3RV(0,Math.PI*2),
+      mine:false, glowI:0, _sx:0,_sy:0,_sr:0,_sc:0,_vis:false
+    });
   }
  
-function initForest() {
-  const canvas = document.getElementById('forest-canvas');
-  const W = canvas.offsetWidth, H = canvas.offsetHeight;
-  const cx = W/2, cy = H/2;
-  forestUsers.forEach((u,i) => {
-    if (!forestPositions[u.id]) {
-      const angle = (i/forestUsers.length)*Math.PI*2;
-      const r = Math.min(W,H)*0.3;
-      forestPositions[u.id] = {
-        x: cx + Math.cos(angle)*r + (Math.random()-.5)*50,
-        y: cy + Math.sin(angle)*r + (Math.random()-.5)*50
-      };
-    }
-  });
+  // マウス/タッチイベント登録（一度だけ）
+  if(!F3._eventsAttached){
+    F3._eventsAttached = true;
+    var vf = document.getElementById('view-forest');
+    var fc = document.getElementById('forest-canvas');
+ 
+    fc.addEventListener('mousedown',function(e){
+      F3.drag=true; F3.dragSX=e.clientX; F3.dragSCamX=F3.camX;
+      F3.velX=0; F3.lastMX=e.clientX; F3.lastMT=Date.now();
+      vf.classList.add('grabbing');
+    });
+    window.addEventListener('mousemove',function(e){
+      if(!F3.drag) return;
+      var now=Date.now(),dt=now-F3.lastMT||1;
+      F3.velX=(F3.lastMX-e.clientX)/dt*16;
+      F3.lastMX=e.clientX; F3.lastMT=now;
+      F3.camX=F3.dragSCamX+(F3.dragSX-e.clientX)*(F3.camZ/F3.fl*0.5+0.8);
+    });
+    window.addEventListener('mouseup',function(e){
+      if(!F3.drag) return;
+      F3.drag=false; vf.classList.remove('grabbing');
+      (function inertia(){
+        if(Math.abs(F3.velX)<0.5) return;
+        F3.camX+=F3.velX; F3.velX*=0.90;
+        requestAnimationFrame(inertia);
+      })();
+    });
+    fc.addEventListener('click',function(e){
+      if(Math.abs(e.clientX-F3.dragSX)>6) return;
+      var rect=fc.getBoundingClientRect();
+      var mx=e.clientX-rect.left, my=e.clientY-rect.top;
+      var hit=null;
+      var sorted=[].concat(F3.trees).sort(function(a,b){return (a.wz-F3.camZ)-(b.wz-F3.camZ);});
+      sorted.forEach(function(t){
+        if(!t.tag||!t._vis||hit) return;
+        if(Math.hypot(mx-t._sx,my-t._sy)<t._sr) hit=t.tag;
+      });
+      F3.sel = (hit&&F3.sel&&F3.sel.id===hit.id)?null:hit;
+      forest3DShowPanel();
+    });
+    fc.addEventListener('wheel',function(e){
+      e.preventDefault();
+      F3.camZ=Math.max(0,F3.camZ+e.deltaY*0.85);
+      forest3DUpdateDist();
+    },{passive:false});
+    // タッチ
+    var _tSX=0,_tSCamX=0,_tSCamZ=0,_tPrev=[];
+    fc.addEventListener('touchstart',function(e){
+      _tSX=e.touches[0].clientX; _tSCamX=F3.camX; _tSCamZ=F3.camZ;
+      _tPrev=[].slice.call(e.touches);
+    },{passive:true});
+    fc.addEventListener('touchmove',function(e){
+      if(e.touches.length===1){
+        F3.camX=_tSCamX+(_tSX-e.touches[0].clientX)*(F3.camZ/F3.fl*0.5+0.8);
+      } else if(e.touches.length===2&&_tPrev.length===2){
+        var dy=((e.touches[0].clientY+e.touches[1].clientY)/2)-
+                ((_tPrev[0].clientY+_tPrev[1].clientY)/2);
+        F3.camZ=Math.max(0,_tSCamZ-dy*4);
+      }
+      _tPrev=[].slice.call(e.touches);
+    },{passive:true});
+  }
 }
  
-function levelColorF(level) {
-  const map = {
-    root: ['rgba(139,69,19,', 'rgba(196,122,58,'],
-    trunk: ['rgba(107,142,35,', 'rgba(138,184,58,'],
-    branch: ['rgba(74,154,122,', 'rgba(106,184,154,'],
-    leaf: ['rgba(74,122,58,', 'rgba(106,154,90,'],
-  };
-  return map[level];
+function forest3DProject(wx,wz){
+  var relZ=wz-F3.camZ;
+  if(relZ<20) return null;
+  var canvas=document.getElementById('forest-canvas');
+  if(!canvas) return null;
+  var W=canvas.offsetWidth, H=canvas.offsetHeight;
+  var HORIZON=H*0.10;
+  var sc=F3.fl/relZ;
+  var sx=((wx-F3.camX)*sc)+W/2;
+  var sy=HORIZON+(H-HORIZON)*F3.fl/relZ;
+  return {sx:sx,sy:sy,sc:sc,relZ:relZ,W:W,H:H,HORIZON:HORIZON};
 }
  
-function treeR(u) { return 12 + Math.min(u.growth,50)*0.45; }
+function forest3DDrawTree(ctx,t){
+  var p=forest3DProject(t.wx,t.wz);
+  if(!p){ t._vis=false; return; }
+  var crownR=t.wCrownR*p.sc;
+  if(crownR<1.2){ t._vis=false; return; }
+  if(p.sx<-crownR*5||p.sx>p.W+crownR*5){ t._vis=false; return; }
+  t._vis=true;
+  var trunkH=t.wTrunkH*p.sc;
+  var wob=Math.sin(F3.frame*0.009+t.wob)*Math.min(1.8,p.sc)*0.7;
+  var topX=p.sx+wob*0.3, topY=p.sy-trunkH;
+  var isSel=F3.sel&&t.tag&&F3.sel.id===t.tag.id;
+  var dimmed=F3.sel&&!isSel;
+  var pulse=(Math.sin(F3.frame*t.gspd+t.gphs)+1)/2;
+  t.glowI=t.mine?0.28+pulse*0.66:pulse*0.22;
+  var fog=Math.max(0,Math.min(1,1-p.relZ/4000));
+  var nearFade=Math.min(1,(p.relZ-20)/150);
+  var alpha=fog*nearFade*(dimmed?0.12:1);
+  ctx.globalAlpha=alpha;
  
-function drawForest() {
-  const canvas = document.getElementById('forest-canvas');
-  if (!canvas.offsetWidth) return;
-  const dpr = window.devicePixelRatio||1;
-  canvas.width = canvas.offsetWidth*dpr;
-  canvas.height = canvas.offsetHeight*dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr,dpr);
-  const W = canvas.offsetWidth, H = canvas.offsetHeight;
-  ctx.clearRect(0,0,W,H);
-  ctx.save();
-  ctx.translate(forestOx, forestOy);
-  ctx.scale(forestScale, forestScale);
+  var lc=crownR<8?1:Math.min(4,Math.floor(crownR/22)+1);
+  var ls=crownR*0.72;
  
-  // ground glow
-  forestUsers.forEach(u => {
-    const p = forestPositions[u.id]; if(!p) return;
-    const r = treeR(u);
-    const g = ctx.createRadialGradient(p.x,p.y+r,0,p.x,p.y+r,r*2);
-    g.addColorStop(0,'rgba(42,90,42,0.12)'); g.addColorStop(1,'transparent');
-    ctx.beginPath(); ctx.ellipse(p.x,p.y+r,r*2,r*0.6,0,0,Math.PI*2);
-    ctx.fillStyle=g; ctx.fill();
-  });
+  if(t.glowI>0.14&&!dimmed&&crownR>4){
+    var cy=topY-ls*(lc-1)*0.4;
+    var gc=ctx.createRadialGradient(topX,cy,0,topX,cy,crownR*3.2);
+    gc.addColorStop(0,t.mine?'rgba(240,210,80,'+(t.glowI*0.48)+')':'rgba(100,230,80,'+(t.glowI*0.32)+')');
+    gc.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.beginPath();ctx.arc(topX,cy,crownR*3.2,0,Math.PI*2);ctx.fillStyle=gc;ctx.fill();
+  }
  
-  // connections
-  forestConns.forEach(c => {
-    if (forestFilter!=='all' && c.level!==forestFilter) return;
-    const pa=forestPositions[c.a], pb=forestPositions[c.b]; if(!pa||!pb) return;
-    const sel = forestSelectedId && (c.a===forestSelectedId||c.b===forestSelectedId);
-    const alpha = sel?0.9:(forestSelectedId?0.08:0.45);
-    const col = levelColorF(c.level);
-    const w = {root:2.5,trunk:1.8,branch:1.2,leaf:0.7}[c.level];
-    const ra=treeR(forestUsers.find(u=>u.id===c.a));
-    const rb=treeR(forestUsers.find(u=>u.id===c.b));
+  var tw=Math.max(1,trunkH*0.05),twT=Math.max(0.5,tw*0.35);
+  ctx.beginPath();
+  ctx.moveTo(p.sx-tw,p.sy);ctx.lineTo(p.sx+tw,p.sy);
+  ctx.lineTo(topX+twT,topY);ctx.lineTo(topX-twT,topY);
+  ctx.closePath();
+  var tg=ctx.createLinearGradient(p.sx-tw,0,p.sx+tw,0);
+  tg.addColorStop(0,'rgba(45,28,10,0.96)');tg.addColorStop(0.45,'rgba(72,46,18,0.93)');tg.addColorStop(1,'rgba(38,24,8,0.96)');
+  ctx.fillStyle=tg;ctx.fill();
+  ctx.strokeStyle='rgba(88,56,22,'+(fog*0.7)+')';ctx.lineWidth=0.5;ctx.stroke();
+  if(tw>2){ctx.beginPath();ctx.ellipse(p.sx,p.sy,tw*2,tw*0.5,0,0,Math.PI*2);ctx.fillStyle='rgba(50,32,10,0.6)';ctx.fill();}
  
-    ctx.beginPath();
-    if (c.level==='root') {
-      ctx.moveTo(pa.x,pa.y+ra*0.8);
-      ctx.quadraticCurveTo((pa.x+pb.x)/2, Math.max(pa.y+ra,pb.y+rb)+50, pb.x,pb.y+rb*0.8);
+  for(var l=0;l<lc;l++){
+    var lr=crownR*(1.0-l*0.22);
+    var lx=topX+wob*(0.12*l), ly=topY-l*ls;
+    var gb=1+t.glowI*1.1+(isSel?0.6:0);
+    var cg=ctx.createRadialGradient(lx-lr*0.2,ly-lr*0.25,0,lx,ly,lr);
+    if(t.mine){
+      cg.addColorStop(0,'rgba('+Math.min(255,Math.round(155*gb))+','+Math.min(255,Math.round(205*gb))+','+Math.min(255,Math.round(35*gb))+',0.94)');
+      cg.addColorStop(0.55,'rgba('+Math.min(255,Math.round(75*gb))+','+Math.min(255,Math.round(135*gb))+','+Math.min(255,Math.round(18*gb))+',0.87)');
+      cg.addColorStop(1,'rgba(10,28,5,0.78)');
     } else {
-      ctx.moveTo(pa.x,pa.y-ra*0.3);
-      ctx.bezierCurveTo(pa.x+(pb.x-pa.x)*0.3,pa.y-ra,pb.x-(pb.x-pa.x)*0.3,pb.y-rb,pb.x,pb.y-rb*0.3);
+      cg.addColorStop(0,'rgba('+Math.min(255,Math.round(40*gb))+','+Math.min(255,Math.round(118*gb))+','+Math.min(255,Math.round(24*gb))+',0.92)');
+      cg.addColorStop(0.55,'rgba('+Math.min(255,Math.round(24*gb))+','+Math.min(255,Math.round(82*gb))+','+Math.min(255,Math.round(15*gb))+',0.85)');
+      cg.addColorStop(1,'rgba(5,18,4,0.76)');
     }
-    ctx.strokeStyle=col[0]+alpha+')';
-    ctx.lineWidth=w*(sel?2:1);
-    c.level==='leaf'?ctx.setLineDash([3,3]):ctx.setLineDash([]);
-    ctx.stroke(); ctx.setLineDash([]);
-  });
- 
-  // trees
-  forestUsers.forEach(u => {
-    const p=forestPositions[u.id]; if(!p) return;
-    const r=treeR(u);
-    const isSel=u.id===forestSelectedId;
-    const isConn=forestSelectedId&&forestConns.some(c=>(c.a===forestSelectedId||c.b===forestSelectedId)&&(c.a===u.id||c.b===u.id));
-    ctx.globalAlpha=forestSelectedId?(isSel||isConn?1:0.2):1;
- 
-    ctx.beginPath(); ctx.moveTo(p.x,p.y+r*0.8); ctx.lineTo(p.x,p.y);
-    ctx.strokeStyle='#5a3a1a'; ctx.lineWidth=Math.max(2,r*0.12); ctx.lineCap='round'; ctx.stroke();
- 
-    const layers=Math.min(3,Math.floor(u.growth/8)+1);
-    for(let l=0;l<layers;l++){
-      const lr=r*(1-l*0.22), ly=p.y-r*0.2-l*r*0.28;
-      const g=ctx.createRadialGradient(p.x,ly,0,p.x,ly,lr);
-      g.addColorStop(0,isSel?'#5a9a7a':'#3a7a4a');
-      g.addColorStop(1,isSel?'#2a6a4a':'#1a4a2a');
-      ctx.beginPath(); ctx.arc(p.x,ly,lr,0,Math.PI*2);
-      ctx.fillStyle=g; ctx.fill();
-    }
- 
-    if (isSel) {
-      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,r*2.5);
-      g.addColorStop(0,'rgba(196,148,58,0.25)'); g.addColorStop(1,'transparent');
-      ctx.beginPath(); ctx.arc(p.x,p.y,r*2.5,0,Math.PI*2);
-      ctx.fillStyle=g; ctx.fill();
-    }
- 
-    ctx.font=`${Math.max(12,r*0.55)}px serif`;
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(u.emoji,p.x,p.y-r*0.2);
-    ctx.font=`${Math.max(9,r*0.3)}px 'Inconsolata',monospace`;
-    ctx.fillStyle=isSel?'#c4943a':'#4a4030';
-    ctx.fillText(u.handle,p.x,p.y+r*1.3);
-    ctx.globalAlpha=1;
-  });
-  ctx.restore();
-}
- 
-function getForestUserAt(cx,cy) {
-  const wx=(cx-forestOx)/forestScale, wy=(cy-forestOy)/forestScale;
-  let found=null, minD=Infinity;
-  forestUsers.forEach(u=>{
-    const p=forestPositions[u.id]; if(!p) return;
-    const r=treeR(u);
-    const d=Math.hypot(wx-p.x,wy-p.y);
-    if(d<r*1.6&&d<minD){minD=d;found=u;}
-  });
-  return found;
-}
- 
-function setForestFilter(f) {
-  forestFilter=f;
-  document.querySelectorAll('.fc-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('fc-'+f).classList.add('active');
-  drawForest();
-}
- 
-function updateForestSelectedPanel(u) {
-  const titleEl=document.getElementById('forest-selected-title');
-  const bodyEl=document.getElementById('forest-selected-body');
-  if(!u){titleEl.textContent='木をクリック';bodyEl.textContent='クリックするとつながりの詳細が表示されます';return;}
-  titleEl.textContent=u.name+'の木';
-  const conns=forestConns.filter(c=>c.a===u.id||c.b===u.id);
-  const order=['root','trunk','branch','leaf'];
-  conns.sort((a,b)=>order.indexOf(a.level)-order.indexOf(b.level));
-  const lmap={root:'根',trunk:'幹',branch:'枝',leaf:'葉'};
-  const lcol={root:'#c47a3a',trunk:'#8ab83a',branch:'#6ab89a',leaf:'#6a9a5a'};
-  bodyEl.innerHTML=conns.map(c=>{
-    const other=forestUsers.find(x=>x.id===(c.a===u.id?c.b:c.a));
-    return `<div style="margin-bottom:8px;padding:6px 8px;border:0.5px solid #1a2018">
-      <div style="font-size:0.65rem;color:${lcol[c.level]};font-family:'Inconsolata',monospace;margin-bottom:2px">${lmap[c.level]}でつながる</div>
-      <div style="font-size:0.75rem;color:#a09080">${other.handle}</div>
-      ${c.shared.length?`<div style="font-size:0.65rem;color:#5a5040;font-style:italic">「${c.shared.join('・')}」</div>`:''}
-    </div>`;
-  }).join('') || '<div style="font-size:0.72rem;color:#4a4030">まだつながりがありません</div>';
-}
- 
-// forest events
-document.getElementById('forest-canvas').addEventListener('mousedown', e=>{
-  const r=e.currentTarget.getBoundingClientRect();
-  const cx=e.clientX-r.left,cy=e.clientY-r.top;
-  const u=getForestUserAt(cx,cy);
-  if(u){forestDrag={id:u.id,sx:cx,sy:cy,ox:forestPositions[u.id].x,oy:forestPositions[u.id].y};}
-  else{forestPanning=true;forestPanSx=cx;forestPanSy=cy;forestPanOx=forestOx;forestPanOy=forestOy;}
-});
-var forestPanSx,forestPanSy,forestPanOx,forestPanOy;
-document.getElementById('forest-canvas').addEventListener('mousemove',e=>{
-  const r=e.currentTarget.getBoundingClientRect();
-  const cx=e.clientX-r.left,cy=e.clientY-r.top;
-  if(forestDrag){forestPositions[forestDrag.id].x=forestDrag.ox+(cx-forestDrag.sx)/forestScale;forestPositions[forestDrag.id].y=forestDrag.oy+(cy-forestDrag.sy)/forestScale;drawForest();}
-  else if(forestPanning){forestOx=forestPanOx+(cx-forestPanSx);forestOy=forestPanOy+(cy-forestPanSy);drawForest();}
-});
-document.getElementById('forest-canvas').addEventListener('mouseup',e=>{
-  const r=e.currentTarget.getBoundingClientRect();
-  const cx=e.clientX-r.left,cy=e.clientY-r.top;
-  if(forestDrag&&Math.hypot(cx-forestDrag.sx,cy-forestDrag.sy)<5){
-    forestSelectedId=forestSelectedId===forestDrag.id?null:forestDrag.id;
-    updateForestSelectedPanel(forestSelectedId?forestUsers.find(u=>u.id===forestSelectedId):null);
-    drawForest();
+    ctx.beginPath();ctx.ellipse(lx,ly,lr,lr*0.83,wob*0.005,0,Math.PI*2);ctx.fillStyle=cg;ctx.fill();
   }
-  forestDrag=null;forestPanning=false;
-});
-document.getElementById('forest-canvas').addEventListener('wheel',e=>{
-  e.preventDefault();
-  const r=e.currentTarget.getBoundingClientRect();
-  const cx=e.clientX-r.left,cy=e.clientY-r.top;
-  const d=e.deltaY>0?0.9:1.1;
-  forestOx=cx-(cx-forestOx)*d;forestOy=cy-(cy-forestOy)*d;
-  forestScale=Math.max(0.3,Math.min(3,forestScale*d));drawForest();
-},{passive:false});
  
+  if(t.tag&&crownR>18&&(isSel||t.glowI>0.55)){
+    var na=isSel?1:(t.glowI-0.55)*2.2;
+    ctx.globalAlpha=alpha*na;
+    var topLy=topY-(lc-1)*ls, topLr=crownR*(1.0-(lc-1)*0.22);
+    var ty=topLy-topLr*1.05;
+    ctx.font=Math.max(9,Math.round(crownR*0.52))+'px serif';
+    ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillText(t.tag.name,topX+1,ty+1);
+    ctx.fillStyle=t.mine?'#f5d860':'#7aee60';ctx.fillText(t.tag.name,topX,ty);
+  }
+  ctx.globalAlpha=1;
+  t._sx=topX; t._sy=topY-(lc*ls*0.4); t._sr=crownR*1.6; t._sc=p.sc;
+}
+ 
+function forest3DDrawEdges(ctx){
+  var edges=F3.edges||[];
+  edges.forEach(function(e){
+    var ta=F3.trees.find(function(t){return t.tag&&t.tag.id===e.a;});
+    var tb=F3.trees.find(function(t){return t.tag&&t.tag.id===e.b;});
+    if(!ta||!tb||!ta._vis||!tb._vis) return;
+    var isSel=F3.sel&&(F3.sel.id===e.a||F3.sel.id===e.b);
+    var alpha=F3.sel?(isSel?0.9:0.03):0.42;
+    ctx.globalAlpha=alpha;
+    ctx.strokeStyle=_f3ECOLOR[e.type]+'1)';
+    ctx.lineWidth=_f3EWIDTH[e.type]*(isSel?2:1)*((ta._sc+tb._sc)*0.5);
+    ctx.setLineDash(_f3EDASH[e.type]);
+    var mx=(ta._sx+tb._sx)/2, my=(ta._sy+tb._sy)/2-20;
+    ctx.beginPath();ctx.moveTo(ta._sx,ta._sy);ctx.quadraticCurveTo(mx,my,tb._sx,tb._sy);ctx.stroke();
+    if(isSel){
+      ctx.setLineDash([]);
+      var lbl={root:'根',trunk:'幹',branch:'枝',leaf:'葉'}[e.type];
+      ctx.font='11px serif';ctx.textAlign='center';
+      ctx.fillStyle=_f3ECOLOR[e.type]+'1)';ctx.fillText(lbl,mx,my-5);
+    }
+    ctx.setLineDash([]);ctx.globalAlpha=1;
+  });
+}
+ 
+function forest3DRender(){
+  var canvas=document.getElementById('forest-canvas');
+  if(!canvas||!document.getElementById('view-forest').classList.contains('active')){
+    F3.raf=null;return;
+  }
+  var dpr=window.devicePixelRatio||1;
+  var W=canvas.offsetWidth,H=canvas.offsetHeight;
+  if(canvas.width!==Math.round(W*dpr)||canvas.height!==Math.round(H*dpr)){
+    canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);
+  }
+  var ctx=canvas.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,W,H);
+  var skyH=H*0.10;
+ 
+  // 空
+  var sky=ctx.createLinearGradient(0,0,0,skyH);
+  sky.addColorStop(0,'#6ab4d8');sky.addColorStop(0.5,'#9ecba0');sky.addColorStop(1,'rgba(120,168,100,0)');
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,skyH);
+  for(var i=0;i<4;i++){
+    var sg=ctx.createRadialGradient(W*(0.12+i*0.26),skyH*0.25,0,W*(0.12+i*0.26),skyH*0.25,W*0.16);
+    sg.addColorStop(0,'rgba(255,252,240,'+(0.20+Math.sin(F3.frame*0.002+i)*0.03)+')');
+    sg.addColorStop(1,'rgba(255,252,240,0)');
+    ctx.fillStyle=sg;ctx.fillRect(0,0,W,skyH);
+  }
+  // 遠景ヘイズ
+  var haze=ctx.createLinearGradient(0,skyH,0,skyH+35);
+  haze.addColorStop(0,'rgba(12,28,10,0.85)');haze.addColorStop(1,'rgba(12,28,10,0)');
+  ctx.fillStyle=haze;ctx.fillRect(0,skyH,W,35);
+  // 地面
+  var gnd=ctx.createLinearGradient(0,skyH,0,H);
+  gnd.addColorStop(0,'#0c1c08');gnd.addColorStop(0.07,'#090e04');gnd.addColorStop(1,'#040804');
+  ctx.fillStyle=gnd;ctx.fillRect(0,skyH,W,H-skyH);
+ 
+  // 奥から手前の順にソートして描画
+  var sorted=[].concat(F3.trees).sort(function(a,b){return (b.wz-F3.camZ)-(a.wz-F3.camZ);});
+  sorted.forEach(function(t){forest3DDrawTree(ctx,t);});
+  forest3DDrawEdges(ctx);
+ 
+  // 木漏れ日
+  for(var s=0;s<5;s++){
+    var sx=W*(0.08+s*0.22)+Math.sin(F3.frame*0.004+s)*5;
+    var lsg=ctx.createLinearGradient(sx,skyH*0.8,sx+14,H*0.74);
+    lsg.addColorStop(0,'rgba(210,240,180,'+(0.020+Math.sin(F3.frame*0.005+s*1.3)*0.008)+')');
+    lsg.addColorStop(1,'rgba(210,240,180,0)');
+    ctx.beginPath();ctx.moveTo(sx,skyH*0.8);ctx.lineTo(sx+12,H*0.74);ctx.lineTo(sx+26,H*0.74);ctx.lineTo(sx+12,skyH*0.8);ctx.closePath();ctx.fillStyle=lsg;ctx.fill();
+  }
+  // 左右フェード
+  var fl=ctx.createLinearGradient(0,0,65,0);
+  fl.addColorStop(0,'rgba(3,10,4,0.92)');fl.addColorStop(1,'rgba(3,10,4,0)');
+  ctx.fillStyle=fl;ctx.fillRect(0,0,65,H);
+  var fr=ctx.createLinearGradient(W-65,0,W,0);
+  fr.addColorStop(0,'rgba(3,10,4,0)');fr.addColorStop(1,'rgba(3,10,4,0.92)');
+  ctx.fillStyle=fr;ctx.fillRect(W-65,0,65,H);
+  // 周辺暗化
+  var vig=ctx.createRadialGradient(W/2,H*0.55,H*0.08,W/2,H*0.55,W*0.82);
+  vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.52)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
+ 
+  F3.frame++;
+  F3.raf=requestAnimationFrame(forest3DRender);
+}
+ 
+function forest3DStart(){
+  if(F3.raf) cancelAnimationFrame(F3.raf);
+  F3.raf=requestAnimationFrame(forest3DRender);
+}
+ 
+function forest3DShowPanel(){
+  var panel=document.getElementById('forest-tag-panel');
+  var titleEl=document.getElementById('forest-tag-title');
+  var connEl=document.getElementById('forest-tag-conn');
+  var hlEl=document.getElementById('forest-tag-hl');
+  var distEl=document.getElementById('forest-tag-dist');
+  if(!F3.sel){ panel.classList.remove('show'); return; }
+  titleEl.textContent=F3.sel.name+(F3.sel.mine?'　（あなたの関心の木）':'');
+  titleEl.style.color=F3.sel.mine?'#c4943a':'#5aaa3a';
+  var wp=F3.tagPos[F3.sel.id];
+  var rz=wp?wp.z-F3.camZ:0;
+  distEl.textContent=rz>50?'あと'+Math.round(rz)+'m先':rz>-100?'（いまここ）':'（通り過ぎた）';
+  var lbl={root:'根',trunk:'幹',branch:'枝',leaf:'葉'};
+  var edges=F3.edges||[];
+  var conns=edges.filter(function(e){return e.a===F3.sel.id||e.b===F3.sel.id;});
+  var tags=F3.tags||[];
+  connEl.innerHTML=conns.map(function(e){
+    var oid=e.a===F3.sel.id?e.b:e.a;
+    var ot=tags.find(function(t){return t.id===oid;});
+    return '<span style="color:'+{root:'#d4a830',trunk:'#58e630',branch:'#20d0a0',leaf:'#58be58'}[e.type]+';font-size:11px;cursor:pointer;" onclick="forest3DWalkTo('+oid+')">'+(ot?ot.name:'?')+'（'+lbl[e.type]+'）→</span>';
+  }).join('　');
+  hlEl.innerHTML=(F3.sel.hl||[]).map(function(h){return '<span>'+esc(h)+'</span>';}).join('<br>');
+  panel.classList.add('show');
+}
+ 
+function forest3DUpdateDist(){
+  if(!F3.sel) return;
+  var wp=F3.tagPos[F3.sel.id];
+  if(!wp) return;
+  var rz=wp.z-F3.camZ;
+  var distEl=document.getElementById('forest-tag-dist');
+  if(distEl) distEl.textContent=rz>50?'あと'+Math.round(rz)+'m先':rz>-100?'（いまここ）':'（通り過ぎた）';
+}
+ 
+window.forest3DWalkTo=function(tagId){
+  var wp=F3.tagPos[tagId];
+  if(!wp) return;
+  var targetZ=wp.z-180, targetX=wp.x;
+  var startZ=F3.camZ, startX=F3.camX;
+  var step=0;
+  (function ani(){
+    step++;
+    var t=Math.min(1,step/45);
+    var e=t<0.5?2*t*t:(1-Math.pow(-2*t+2,2)/2);
+    F3.camZ=startZ+(targetZ-startZ)*e;
+    F3.camX=startX+(targetX-startX)*e;
+    if(step<45) requestAnimationFrame(ani);
+  })();
+  F3.sel=null;
+  var panel=document.getElementById('forest-tag-panel');
+  if(panel) panel.classList.remove('show');
+};
+ 
+// 旧API後方互換（switchViewから呼ばれないよう空関数にする）
+function initForest(){}
+function drawForest(){}
+function setForestFilter(){}
+function updateForestStats(){
+  if(F3.tags) document.getElementById('forest-stats').textContent=(F3.tags.length||0)+'本の木';
+}
 // ══════════════════════════════════════════════════
 // VIEW C: MAP (tag genealogy)
 // ══════════════════════════════════════════════════
@@ -2200,6 +2355,100 @@ if (savedLangApp === 'en') setLang('en');
  
   window.loadMapTags = loadMapTagsFromDb;
   window._sbForTags = _db;
+ 
+  // ── 森林浴：タグ・親子関係・共起データをSupabaseから取得 ──
+  async function loadForestDataFromDb() {
+    // 1. 全タグを取得
+    var tagRes = await _db.from('tags').select('id, name, parent_id, created_by').order('name');
+    if (tagRes.error) { console.error('loadForest(tags):', tagRes.error); return; }
+    var allTags = tagRes.data || [];
+ 
+    // 2. 自分のタグIDセットを取得（mineフラグ用）
+    var myKwRes = await _db.from('keywords').select('id').eq('user_id', _currentUser.id).eq('status','published');
+    var myKwIds = (myKwRes.data||[]).map(function(k){return k.id;});
+    var myTagIds = new Set();
+    if(myKwIds.length){
+      var myKtRes = await _db.from('keyword_tags').select('tag_id').in('keyword_id', myKwIds);
+      (myKtRes.data||[]).forEach(function(r){myTagIds.add(r.tag_id);});
+    }
+ 
+    // 3. 公開済みkeyword_tagsを取得して共起ペアを計算
+    var ktRes = await _db.from('keyword_tags')
+      .select('keyword_id, tag_id, keywords(status)')
+      .limit(2000);
+    var cooccur = {}; // 'a-b' -> count
+    var byKw = {};
+    (ktRes.data||[]).forEach(function(r){
+      if(!r.keywords||r.keywords.status!=='published') return;
+      if(!byKw[r.keyword_id]) byKw[r.keyword_id] = [];
+      byKw[r.keyword_id].push(r.tag_id);
+    });
+    Object.values(byKw).forEach(function(tids){
+      for(var i=0;i<tids.length;i++){
+        for(var j=i+1;j<tids.length;j++){
+          var a=Math.min(tids[i],tids[j]), b=Math.max(tids[i],tids[j]);
+          var key=a+'-'+b;
+          cooccur[key]=(cooccur[key]||0)+1;
+        }
+      }
+    });
+ 
+    // 4. タグのhl(見出し)を取得（自分の公開投稿から）
+    var hlMap = {};
+    if(myKwIds.length){
+      var hlRes = await _db.from('keyword_tags')
+        .select('tag_id, keywords(title)')
+        .in('keyword_id', myKwIds);
+      (hlRes.data||[]).forEach(function(r){
+        if(!r.keywords||!r.keywords.title) return;
+        if(!hlMap[r.tag_id]) hlMap[r.tag_id] = [];
+        if(hlMap[r.tag_id].length < 3) hlMap[r.tag_id].push(r.keywords.title);
+      });
+    }
+ 
+    // 5. タグオブジェクト構築
+    var tagMap = {};
+    allTags.forEach(function(t){
+      tagMap[t.id] = {
+        id: t.id, name: t.name,
+        mine: myTagIds.has(t.id),
+        hl: hlMap[t.id] || [],
+      };
+    });
+ 
+    // 6. エッジ構築（根=parent_id、幹/枝/葉=共起頻度）
+    var edges = [];
+    // 根：parent_id
+    allTags.forEach(function(t){
+      if(t.parent_id && tagMap[t.parent_id]){
+        edges.push({a:t.id, b:t.parent_id, type:'root'});
+      }
+    });
+    // 幹・枝・葉：共起
+    Object.keys(cooccur).forEach(function(key){
+      var parts=key.split('-');
+      var a=parseInt(parts[0]),b=parseInt(parts[1]);
+      if(!tagMap[a]||!tagMap[b]) return;
+      // 既にroot edgeがある場合はスキップ
+      var alreadyRoot=edges.some(function(e){
+        return e.type==='root'&&((e.a===a&&e.b===b)||(e.a===b&&e.b===a));
+      });
+      if(alreadyRoot) return;
+      var cnt=cooccur[key];
+      var type=cnt>=5?'trunk':cnt>=2?'branch':'leaf';
+      edges.push({a:a, b:b, type:type});
+    });
+ 
+    // 7. F3に格納（タグが少なすぎる場合は表示できるものだけ使う）
+    var usedTagIds = new Set();
+    edges.forEach(function(e){ usedTagIds.add(e.a); usedTagIds.add(e.b); });
+    allTags.forEach(function(t){ usedTagIds.add(t.id); }); // 全タグ表示
+ 
+    F3.tags = Object.values(tagMap).filter(function(t){ return usedTagIds.has(t.id); });
+    F3.edges = edges;
+  }
+ 
+  window.loadForestData = loadForestDataFromDb;
   window.fetchTagHeadlines = fetchTagHeadlinesFromDb;
  
   // 既存関数を上書き
