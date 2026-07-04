@@ -934,10 +934,14 @@ body.en [data-lang="ja"].inline { display: none; }
       </div>
     </div>
     <div id="haniho-body" class="haniho-body">
+      <div id="haniho-counter" style="font-family:'Inconsolata',monospace;font-size:0.65rem;color:var(--ink4);text-align:right;margin-bottom:6px;"></div>
       <div id="haniho-message" style="white-space:pre-wrap;line-height:2;font-size:0.92rem;color:var(--ink2);"></div>
       <button id="haniho-btn" class="haniho-btn" onclick="askHaniho()">
         はにほに橋をかけてもらう
       </button>
+      <div id="haniho-prem-link" style="display:none;text-align:center;margin-top:8px;">
+        <button onclick="closeHaniho();openPremiumModal();" style="font-family:'Inconsolata',monospace;font-size:0.72rem;color:var(--gold);background:none;border:none;cursor:pointer;text-decoration:underline;">Hoheto+で無制限に →</button>
+      </div>
       <div id="haniho-loading" style="display:none;font-family:'Inconsolata',monospace;font-size:0.72rem;color:var(--ink4);text-align:center;padding:20px 0;">
         はにほが静かに読んでいます…
       </div>
@@ -1834,16 +1838,77 @@ mapCanvas.addEventListener('wheel',e=>{
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
  
 // ── はにほ：自分の関心の橋かけ ──
+var _hanihoUsage = { count: 0, month: '', loaded: false };
+var HANIHO_FREE_LIMIT = 3;
+ 
+async function loadHanihoUsage() {
+  if (!window._currentUserForHaniho) return;
+  var res = await window._dbForHaniho.from('profiles')
+    .select('haniho_count, haniho_reset_at')
+    .eq('id', window._currentUserForHaniho.id)
+    .maybeSingle();
+  if (res.data) {
+    var now = new Date();
+    var resetAt = res.data.haniho_reset_at ? new Date(res.data.haniho_reset_at) : null;
+    var sameMonth = resetAt &&
+      resetAt.getFullYear() === now.getFullYear() &&
+      resetAt.getMonth() === now.getMonth();
+    _hanihoUsage.count = sameMonth ? (res.data.haniho_count || 0) : 0;
+    _hanihoUsage.month = now.getFullYear() + '-' + now.getMonth();
+    _hanihoUsage.loaded = true;
+  }
+}
+ 
+async function incrementHanihoUsage() {
+  if (!window._currentUserForHaniho) return;
+  var now = new Date();
+  await window._dbForHaniho.from('profiles').update({
+    haniho_count: _hanihoUsage.count + 1,
+    haniho_reset_at: now.toISOString()
+  }).eq('id', window._currentUserForHaniho.id);
+  _hanihoUsage.count++;
+}
+ 
+function hanihoRemainingText() {
+  if (window._isPremium) return '';
+  var remaining = HANIHO_FREE_LIMIT - _hanihoUsage.count;
+  if (remaining <= 0) return '今月の橋かけは使い切りました';
+  return '今月はあと' + remaining + '回使えます';
+}
+ 
 function openHaniho() {
   var overlay = document.getElementById('haniho-overlay');
   var message = document.getElementById('haniho-message');
   var btn = document.getElementById('haniho-btn');
   var loading = document.getElementById('haniho-loading');
-  // 初期状態にリセット
+  var counter = document.getElementById('haniho-counter');
   message.textContent = '';
-  btn.style.display = 'inline-block';
-  btn.disabled = false;
   loading.style.display = 'none';
+ 
+  // 残回数表示を更新
+  if (counter) {
+    if (window._isPremium) {
+      counter.textContent = 'Hoheto+ 無制限';
+      counter.style.color = 'var(--gold2)';
+    } else {
+      var remaining = HANIHO_FREE_LIMIT - _hanihoUsage.count;
+      counter.textContent = hanihoRemainingText();
+      counter.style.color = remaining <= 1 ? 'var(--red)' : 'var(--ink4)';
+    }
+  }
+ 
+  // 無料で上限に達した場合
+  if (!window._isPremium && _hanihoUsage.count >= HANIHO_FREE_LIMIT) {
+    btn.style.display = 'none';
+    message.textContent = '今月の橋かけは使い切りました。\nHoheto+で無制限にはにほと話せます。';
+    var premLink = document.getElementById('haniho-prem-link');
+    if (premLink) premLink.style.display = 'block';
+  } else {
+    btn.style.display = 'inline-block';
+    btn.disabled = false;
+    var premLink = document.getElementById('haniho-prem-link');
+    if (premLink) premLink.style.display = 'none';
+  }
   overlay.classList.add('show');
 }
  
@@ -1856,6 +1921,13 @@ async function askHaniho() {
   var loading = document.getElementById('haniho-loading');
   var message = document.getElementById('haniho-message');
  
+  // 回数チェック
+  if (!window._isPremium && _hanihoUsage.count >= HANIHO_FREE_LIMIT) {
+    message.textContent = '今月の橋かけは使い切りました。\nHoheto+で無制限にはにほと話せます。';
+    btn.style.display = 'none';
+    return;
+  }
+ 
   if (!keywords || !keywords.length) {
     message.textContent = 'まだ言葉が植えられていません。\nいくつか書いてから、また来てください。';
     return;
@@ -1865,17 +1937,13 @@ async function askHaniho() {
   loading.style.display = 'block';
   message.textContent = '';
  
-  // 最新10件の投稿(タイトル・本文・タグ)をまとめてプロンプトに渡す
   var posts = keywords.slice(0, 10).map(function(k) {
     return '【' + k.title + '】\n' +
       (k.tags.length ? 'タグ: ' + k.tags.join('、') + '\n' : '') +
       (k.body ? k.body.slice(0, 200) : '');
   }).join('\n\n');
  
-  var userPrompt = posts; // サーバー側でプロンプトを組み立てる
- 
   try {
-    // 直接Anthropic APIは呼ばず、Vercelサーバーレス関数経由で呼び出す
     var response = await fetch('/api/haniho', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1884,14 +1952,33 @@ async function askHaniho() {
     var data = await response.json();
     var text = data.text || 'うまく届きませんでした。もう一度試してみてください。';
     message.textContent = text;
+ 
+    // 使用回数をインクリメント
+    await incrementHanihoUsage();
+ 
+    // 残回数表示を更新
+    var counter = document.getElementById('haniho-counter');
+    if (counter && !window._isPremium) {
+      var remaining = HANIHO_FREE_LIMIT - _hanihoUsage.count;
+      counter.textContent = remaining <= 0 ? '今月の橋かけは使い切りました' : '今月はあと' + remaining + '回使えます';
+      counter.style.color = remaining <= 1 ? 'var(--red)' : 'var(--ink4)';
+    }
+ 
   } catch(e) {
     console.error('askHaniho:', e);
     message.textContent = 'はにほが少し疲れているようです。\nまた後で試してみてください。';
   }
  
   loading.style.display = 'none';
-  btn.style.display = 'inline-block';
-  btn.disabled = false;
+  // 使い切った場合はボタンを隠す
+  if (!window._isPremium && _hanihoUsage.count >= HANIHO_FREE_LIMIT) {
+    btn.style.display = 'none';
+    var premLink = document.getElementById('haniho-prem-link');
+    if (premLink) premLink.style.display = 'block';
+  } else {
+    btn.style.display = 'inline-block';
+    btn.disabled = false;
+  }
 }
  
 // ── タグサジェスト ──
@@ -2751,6 +2838,9 @@ if (savedLangApp === 'en') setLang('en');
     loadKeywords(); // 投稿者側のカード表示も更新（自分が種を置いた場合を含む）
   }
  
+  // はにほの回数管理用にDBと現在ユーザーを公開
+  window._dbForHaniho = _db;
+ 
   window.loadMapTags = loadMapTagsFromDb;
   window._sbForTags = _db;
  
@@ -2870,8 +2960,10 @@ if (savedLangApp === 'en') setLang('en');
     var session = result.data.session;
     if (!session) { window.location.href = '/login'; return; }
     _currentUser = session.user;
+    window._currentUserForHaniho = _currentUser;
     updateHeader(_currentUser);
     loadKeywords();
+    loadHanihoUsage();
     updateForestStats();
   });
  
