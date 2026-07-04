@@ -1,6 +1,6 @@
-// api/stripe-webhook.js
-// Stripeからの支払い完了・解約通知を受け取り、Supabaseのis_premiumを更新する
- 
+// api/stripe-checkout.js
+// Hoheto+ の月額500円サブスクリプション決済セッションを作成する
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', 'https://hohe.to');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -18,6 +18,7 @@ export default async function handler(req, res) {
     const Stripe = (await import('stripe')).default;
     const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
+    // 既存の顧客を検索（重複作成防止）
     const existing = await stripe.customers.list({ email, limit: 1 });
     let customer;
     if (existing.data.length > 0) {
@@ -29,6 +30,7 @@ export default async function handler(req, res) {
       });
     }
 
+    // Checkout セッション作成
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,
       payment_method_types: ['card'],
