@@ -1,0 +1,61 @@
+// api/stripe-checkout.js
+// Hoheto+ の月額500円サブスクリプション決済セッションを作成する
+ 
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://hohe.to');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+ 
+  const { userId, email } = req.body;
+  if (!userId || !email) return res.status(400).json({ error: 'userId and email are required' });
+ 
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  if (!stripeKey) return res.status(500).json({ error: 'Stripe key not configured' });
+ 
+  try {
+    const Stripe = (await import('stripe')).default;
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
+ 
+    // 既存の顧客を検索（重複作成防止）
+    const existing = await stripe.customers.list({ email, limit: 1 });
+    let customer;
+    if (existing.data.length > 0) {
+      customer = existing.data[0];
+    } else {
+      customer = await stripe.customers.create({
+        email,
+        metadata: { supabase_user_id: userId }
+      });
+    }
+ 
+    // Checkout セッション作成
+    const session = await stripe.checkout.sessions.create({
+      customer: customer.id,
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [{
+        price_data: {
+          currency: 'jpy',
+          product_data: {
+            name: 'Hoheto+',
+            description: '関心がより深くつながる、Hohetoのプレミアムプラン。',
+          },
+          unit_amount: 500,
+          recurring: { interval: 'month' },
+        },
+        quantity: 1,
+      }],
+      success_url: 'https://hohe.to/app?premium=success',
+      cancel_url:  'https://hohe.to/app?premium=cancel',
+      metadata: { supabase_user_id: userId },
+    });
+ 
+    return res.status(200).json({ url: session.url });
+ 
+  } catch (e) {
+    console.error('stripe-checkout error:', e);
+    return res.status(500).json({ error: e.message });
+  }
+}
