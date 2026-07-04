@@ -45,11 +45,22 @@ export default async function handler(req, res) {
     // 支払い成功 → is_premium = true
     if (event.type === 'checkout.session.completed' ||
         event.type === 'invoice.payment_succeeded') {
-      const userId = event.data.object.metadata?.supabase_user_id ||
-                     event.data.object.customer_details?.email;
-      if (userId) {
+      const obj = event.data.object;
+      const userId = obj.metadata?.supabase_user_id;
+      const email = obj.customer_details?.email || obj.customer_email;
+ 
+      if (userId && userId.includes('-')) {
+        // UUIDが正しく渡されている場合
         await db.from('profiles').update({ is_premium: true }).eq('id', userId);
         console.log('Premium activated for:', userId);
+      } else if (email) {
+        // メールアドレスからauth.usersを検索
+        const { data: users } = await db.auth.admin.listUsers();
+        const user = (users?.users || []).find(u => u.email === email);
+        if (user) {
+          await db.from('profiles').update({ is_premium: true }).eq('id', user.id);
+          console.log('Premium activated for:', user.id, email);
+        }
       }
     }
  
@@ -58,10 +69,19 @@ export default async function handler(req, res) {
         event.type === 'invoice.payment_failed') {
       const customerId = event.data.object.customer;
       const customer = await stripe.customers.retrieve(customerId);
+      const email = customer.email;
       const userId = customer.metadata?.supabase_user_id;
-      if (userId) {
+ 
+      if (userId && userId.includes('-')) {
         await db.from('profiles').update({ is_premium: false }).eq('id', userId);
         console.log('Premium deactivated for:', userId);
+      } else if (email) {
+        const { data: users } = await db.auth.admin.listUsers();
+        const user = (users?.users || []).find(u => u.email === email);
+        if (user) {
+          await db.from('profiles').update({ is_premium: false }).eq('id', user.id);
+          console.log('Premium deactivated for:', user.id, email);
+        }
       }
     }
  
