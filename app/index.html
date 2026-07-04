@@ -943,6 +943,39 @@ body.en [data-lang="ja"].inline { display: none; }
   </div>
 </div>
  
+<!-- Hoheto+モーダル -->
+<div class="haniho-overlay" id="premium-overlay" onclick="if(event.target===this) closePremiumModal()">
+  <div class="haniho-card" style="max-width:400px;">
+    <button class="haniho-close" onclick="closePremiumModal()">×</button>
+    <div class="haniho-header">
+      <div style="font-size:1.4rem;">🌳</div>
+      <div>
+        <div style="font-family:'Inconsolata',monospace;font-size:0.7rem;color:var(--ink4);letter-spacing:0.1em;">Hoheto+</div>
+        <div style="font-size:1rem;font-weight:700;margin-top:2px;">森の奥まで</div>
+      </div>
+    </div>
+    <div style="font-size:0.85rem;line-height:2;color:var(--ink2);margin-bottom:20px;">
+      Hoheto+では、はにほのAI橋かけ機能が使えます。自分の関心の中に潜む、まだ見えていないつながりをはにほが静かに届けてくれます。
+    </div>
+    <div style="border:0.5px solid var(--rule);padding:14px 16px;margin-bottom:20px;background:var(--paper2);">
+      <div style="font-family:'Inconsolata',monospace;font-size:0.65rem;color:var(--ink4);margin-bottom:8px;letter-spacing:0.1em;">HOHETO+</div>
+      <div style="display:flex;flex-direction:column;gap:6px;font-size:0.82rem;color:var(--ink2);">
+        <div>🌿 はにほのAI橋かけ</div>
+        <div>🌲 森林浴のAI深度判定（近日）</div>
+        <div>🍃 種の成長通知（近日）</div>
+      </div>
+      <div style="margin-top:12px;font-family:'Inconsolata',monospace;font-size:1rem;color:var(--ink);font-weight:700;">¥500 <span style="font-size:0.65rem;font-weight:400;color:var(--ink4);">/ 月</span></div>
+    </div>
+    <button id="premium-checkout-btn" onclick="startCheckout()"
+      style="width:100%;font-family:'Inconsolata',monospace;font-size:0.78rem;letter-spacing:0.1em;padding:12px;background:var(--gold2);color:var(--paper);border:none;cursor:pointer;">
+      月額500円で登録する
+    </button>
+    <div style="text-align:center;margin-top:10px;font-family:'Inconsolata',monospace;font-size:0.62rem;color:var(--ink4);">
+      いつでも解約できます
+    </div>
+  </div>
+</div>
+ 
 <div class="toast" id="toast"></div>
  
 <!-- モバイル下部ナビ（植える画面用） -->
@@ -2082,6 +2115,24 @@ updateForestStats();
 </script>
  
 <script>
+function openPremiumModal() {
+  document.getElementById('premium-overlay').classList.add('show');
+}
+function closePremiumModal() {
+  document.getElementById('premium-overlay').classList.remove('show');
+}
+ 
+// 決済成功・キャンセルのURL判定
+(function(){
+  var params = new URLSearchParams(window.location.search);
+  if (params.get('premium') === 'success') {
+    showToast && showToast('Hoheto+へようこそ。森がさらに深くなります 🌳');
+    window.history.replaceState({}, '', '/app');
+  } else if (params.get('premium') === 'cancel') {
+    window.history.replaceState({}, '', '/app');
+  }
+})();
+ 
 // ── モバイル対応 ──
 var _isMobile = function(){ return window.innerWidth <= 680; };
  
@@ -2414,6 +2465,15 @@ if (savedLangApp === 'en') setLang('en');
     if (avatar) { avatar.textContent = handle.charAt(0).toUpperCase(); avatar.title = email; }
     var headerRight = document.querySelector('.header-right');
     if (headerRight && !document.getElementById('logout-btn')) {
+      // Hoheto+ボタン
+      var premBtn = document.createElement('button');
+      premBtn.id = 'premium-btn';
+      premBtn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.62rem;letter-spacing:0.08em;padding:4px 10px;border:1px solid #c4a050;background:none;color:#c4a050;cursor:pointer;display:none;';
+      premBtn.textContent = 'Hoheto+';
+      premBtn.onclick = function() { openPremiumModal(); };
+      headerRight.insertBefore(premBtn, headerRight.firstChild);
+ 
+      // ログアウトボタン
       var btn = document.createElement('button');
       btn.id = 'logout-btn';
       btn.style.cssText = 'font-family:Inconsolata,monospace;font-size:0.65rem;letter-spacing:0.1em;padding:4px 10px;border:1px solid #cec6b0;background:none;color:#9a8a70;cursor:pointer;';
@@ -2423,7 +2483,57 @@ if (savedLangApp === 'en') setLang('en');
       btn.onclick = async function() { await _db.auth.signOut(); window.location.href = '/login'; };
       headerRight.insertBefore(btn, headerRight.firstChild);
     }
+    // プレミアム状態を確認してボタン表示切替
+    checkPremiumStatus();
   }
+ 
+  async function checkPremiumStatus() {
+    if (!_currentUser) return;
+    var res = await _db.from('profiles').select('is_premium').eq('id', _currentUser.id).maybeSingle();
+    var isPremium = res.data && res.data.is_premium;
+    var premBtn = document.getElementById('premium-btn');
+    if (!premBtn) return;
+    if (isPremium) {
+      premBtn.textContent = 'Hoheto+ ✓';
+      premBtn.style.color = '#639922';
+      premBtn.style.borderColor = '#639922';
+      premBtn.style.display = 'inline-block';
+      premBtn.onclick = null; // 有料ユーザーはクリック不要
+      window._isPremium = true;
+    } else {
+      premBtn.textContent = 'Hoheto+';
+      premBtn.style.color = '#c4a050';
+      premBtn.style.borderColor = '#c4a050';
+      premBtn.style.display = 'inline-block';
+      premBtn.onclick = function() { openPremiumModal(); };
+      window._isPremium = false;
+    }
+  }
+ 
+  async function startCheckout() {
+    if (!_currentUser) return;
+    var btn = document.getElementById('premium-checkout-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '処理中…'; }
+    try {
+      var res = await fetch('/api/stripe-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: _currentUser.id, email: _currentUser.email })
+      });
+      var data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast('エラーが発生しました');
+        if (btn) { btn.disabled = false; btn.textContent = '月額500円で登録する'; }
+      }
+    } catch(e) {
+      console.error('checkout error:', e);
+      showToast('エラーが発生しました');
+      if (btn) { btn.disabled = false; btn.textContent = '月額500円で登録する'; }
+    }
+  }
+  window.startCheckout = startCheckout;
  
   // ── すん：タグ系譜の取得 ──
   // 方針：自分が公開した投稿に使ったタグだけを表示する（個人軸が基本）。
