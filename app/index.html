@@ -669,7 +669,7 @@ body.en [data-lang="ja"].inline { display: none; }
 .mob-nav-btn.active { color: var(--gold2); }
 .mob-nav-btn svg { opacity: 0.6; }
 .mob-nav-btn.active svg { opacity: 1; }
- 
+</style>
 </head>
 <body>
  
@@ -1982,76 +1982,61 @@ function mobileShowPanel(panel){
   var btnList   = document.getElementById('mob-btn-list');
   var btnEdit   = document.getElementById('mob-btn-edit');
   var btnCorr   = document.getElementById('mob-btn-corridor');
+  if(!sidebar||!editor||!resonance) return;
  
   // 全リセット
   sidebar.classList.remove('mobile-open');
-  if(editor)    editor.style.display   = 'none';
-  if(resonance) resonance.style.display = 'none';
+  editor.style.display   = 'none';
+  resonance.style.display = 'none';
   [btnList,btnEdit,btnCorr].forEach(function(b){ if(b) b.classList.remove('active'); });
  
   if(panel === 'list'){
     sidebar.classList.add('mobile-open');
-    if(editor) editor.style.display = 'flex';
+    editor.style.display = 'flex';
     if(btnList) btnList.classList.add('active');
   } else if(panel === 'edit'){
-    if(editor) editor.style.display = 'flex';
+    editor.style.display = 'flex';
     if(btnEdit) btnEdit.classList.add('active');
   } else if(panel === 'corridor'){
-    if(resonance){ resonance.style.display = 'block'; }
+    editor.style.display = 'flex'; // エディタも見えるように
+    resonance.style.display = 'block';
     if(btnCorr) btnCorr.classList.add('active');
   }
 }
  
-// ビュー切り替え時にモバイルナビの表示を制御
-var _origSwitchView = switchView;
-switchView = function(v){
-  _origSwitchView(v);
+// モバイルナビの表示制御（ビュータブのクリックに反応）
+function mobileOnViewChange(v){
   var nav = document.getElementById('mobile-bottom-nav');
   if(!nav) return;
-  if(v === 'write' && _isMobile()){
-    nav.classList.remove('hidden');
+  if(!_isMobile()){ nav.style.display='none'; return; }
+  if(v === 'write'){
+    nav.style.display = 'flex';
     mobileShowPanel('edit');
   } else {
-    nav.classList.add('hidden');
-    // 植える以外ではサイドバー等を元に戻す
-    if(_isMobile()){
-      var sidebar = document.querySelector('.kw-sidebar');
-      var editor  = document.querySelector('.editor-area');
-      var res     = document.querySelector('.resonance-panel');
-      if(sidebar) sidebar.classList.remove('mobile-open');
-      if(editor)  editor.style.display = '';
-      if(res)     res.style.display = '';
-    }
-  }
-};
- 
-// リサイズ時の対応
-window.addEventListener('resize', function(){
-  var nav = document.getElementById('mobile-bottom-nav');
-  if(!nav) return;
-  var writeActive = document.getElementById('view-write').classList.contains('active');
-  if(!_isMobile()){
-    nav.classList.add('hidden');
-    // デスクトップに戻ったらレイアウトをリセット
+    nav.style.display = 'none';
+    // 植える以外ではレイアウトをリセット
     var sidebar = document.querySelector('.kw-sidebar');
     var editor  = document.querySelector('.editor-area');
     var res     = document.querySelector('.resonance-panel');
-    if(sidebar){ sidebar.classList.remove('mobile-open'); sidebar.style.display = ''; }
+    if(sidebar){ sidebar.classList.remove('mobile-open'); sidebar.style.display=''; }
     if(editor)  editor.style.display = '';
     if(res)     res.style.display = '';
-  } else if(writeActive){
-    nav.classList.remove('hidden');
   }
-});
+}
  
-// 初期表示時（スマホでアクセスした場合）
-(function(){
+// ヘッダーのビューボタンにモバイル対応を追加（DOMContentLoaded後）
+document.addEventListener('DOMContentLoaded', function(){
+  ['write','forest','map'].forEach(function(v){
+    var btn = document.getElementById('btn-'+v);
+    if(btn) btn.addEventListener('click', function(){ mobileOnViewChange(v); });
+  });
+  // 初期表示
   if(_isMobile()){
     var nav = document.getElementById('mobile-bottom-nav');
-    if(nav) nav.classList.remove('hidden');
+    if(nav) nav.style.display = 'flex';
     mobileShowPanel('edit');
   }
-})();
+});
  
 function setLang(lang) {
   document.body.classList.toggle('en', lang === 'en');
