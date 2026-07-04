@@ -333,6 +333,49 @@ header {
 .fl-item { display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
 .fl-dot { width: 16px; height: 2px; flex-shrink: 0; border-radius: 1px; }
 .fl-label { font-family: 'Inconsolata', monospace; font-size: 0.65rem; color: #a09080; }
+/* 方向コントロール（Dパッド） */
+.forest-dpad {
+  position: absolute;
+  bottom: 20px; right: 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  z-index: 10;
+  opacity: 0.72;
+  pointer-events: auto;
+}
+.dpad-row {
+  display: flex; align-items: center; gap: 4px;
+}
+.dpad-middle { gap: 4px; }
+.dpad-center {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.06);
+  border: 0.5px solid rgba(255,255,255,0.12);
+}
+.dpad-btn {
+  width: 44px; height: 44px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 1px;
+  background: rgba(30,50,24,0.75);
+  border: 0.5px solid rgba(100,180,80,0.4);
+  border-radius: 10px;
+  color: rgba(160,230,120,0.9);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+  transition: background 0.1s;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.5rem; letter-spacing: 0.05em;
+}
+.dpad-btn:active { background: rgba(60,120,40,0.85); }
+.dpad-btn span { line-height: 1; }
+.dpad-up, .dpad-down { width: 44px; }
+ 
+/* デスクトップでは非表示 */
+@media (min-width: 681px) {
+  .forest-dpad { display: none; }
+}
+ 
 /* 操作ヒント */
 .forest-hint {
   position: absolute; bottom: 12px; left: 50%;
@@ -817,6 +860,31 @@ body.en [data-lang="ja"].inline { display: none; }
       <div class="fl-item"><div class="fl-dot" style="background:transparent;border-top:1px dotted rgba(100,190,100,0.6);height:1px"></div><div class="fl-label">葉（かすか）</div></div>
     </div>
     <div class="forest-hint" id="forest-hint">← ドラッグで歩く　|　スクロールで奥へ →</div>
+ 
+    <!-- 方向コントロール（スマホ用） -->
+    <div class="forest-dpad" id="forest-dpad">
+      <div class="dpad-row">
+        <button class="dpad-btn dpad-up" ontouchstart="f3DpadStart('up')" ontouchend="f3DpadStop()" onmousedown="f3DpadStart('up')" onmouseup="f3DpadStop()">
+          <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 4l7 12H3z" fill="currentColor"/></svg>
+          <span>奥</span>
+        </button>
+      </div>
+      <div class="dpad-row dpad-middle">
+        <button class="dpad-btn dpad-left" ontouchstart="f3DpadStart('left')" ontouchend="f3DpadStop()" onmousedown="f3DpadStart('left')" onmouseup="f3DpadStop()">
+          <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 10l12 7V3z" fill="currentColor"/></svg>
+        </button>
+        <div class="dpad-center"></div>
+        <button class="dpad-btn dpad-right" ontouchstart="f3DpadStart('right')" ontouchend="f3DpadStop()" onmousedown="f3DpadStart('right')" onmouseup="f3DpadStop()">
+          <svg width="20" height="20" viewBox="0 0 20 20"><path d="M16 10L4 3v14z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="dpad-row">
+        <button class="dpad-btn dpad-down" ontouchstart="f3DpadStart('down')" ontouchend="f3DpadStop()" onmousedown="f3DpadStart('down')" onmouseup="f3DpadStop()">
+          <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 16L3 4h14z" fill="currentColor"/></svg>
+          <span>手前</span>
+        </button>
+      </div>
+    </div>
     <div class="forest-tag-panel" id="forest-tag-panel">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
         <div class="forest-tag-title" id="forest-tag-title"></div>
@@ -942,6 +1010,26 @@ var mapTagHeadlines = {}; // tagId -> [{title, mine}]
  
  
  
+ 
+// ── 森林浴 方向パッド ──
+var _dpadTimer = null;
+var _dpadSpeed = { camX: 0, camZ: 0 };
+var DPAD_STEP = 18; // 1回の移動量
+ 
+function f3DpadStart(dir){
+  f3DpadStop();
+  function move(){
+    if(dir==='up')    F3.camZ = Math.max(0, F3.camZ + DPAD_STEP);
+    if(dir==='down')  F3.camZ = Math.max(0, F3.camZ - DPAD_STEP);
+    if(dir==='left')  F3.camX -= DPAD_STEP * (F3.camZ / F3.fl * 0.5 + 0.8);
+    if(dir==='right') F3.camX += DPAD_STEP * (F3.camZ / F3.fl * 0.5 + 0.8);
+  }
+  move(); // 即時1回
+  _dpadTimer = setInterval(move, 80); // 長押しで連続
+}
+function f3DpadStop(){
+  if(_dpadTimer){ clearInterval(_dpadTimer); _dpadTimer = null; }
+}
  
 // ── 森林浴 3D ──
 var F3 = {
