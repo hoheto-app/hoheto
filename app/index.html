@@ -732,6 +732,8 @@ body.en [data-lang="ja"].inline { display: none; }
   </div>
  
   <div class="header-right">
+    <a href="/terms" style="font-family:'Inconsolata',monospace;font-size:0.6rem;color:var(--ink4);text-decoration:none;letter-spacing:0.08em;display:none;" id="terms-link" class="header-sub-link">利用規約</a>
+    <a href="mailto:support@hohe.to" style="font-family:'Inconsolata',monospace;font-size:0.6rem;color:var(--ink4);text-decoration:none;letter-spacing:0.08em;display:none;" id="support-link" class="header-sub-link">サポート</a>
     <div class="lang-switcher">
       <button class="lang-btn active" onclick="setLang('ja')">JP</button>
       <button class="lang-btn" onclick="setLang('en')">EN</button>
@@ -2588,8 +2590,11 @@ if (savedLangApp === 'en') setLang('en');
       btn.onclick = async function() { await _db.auth.signOut(); window.location.href = '/login'; };
       headerRight.insertBefore(btn, headerRight.firstChild);
     }
-    // プレミアム状態を確認してボタン表示切替
-    checkPremiumStatus();
+    // 利用規約・サポートリンクを表示
+    var termsLink = document.getElementById('terms-link');
+    var supportLink = document.getElementById('support-link');
+    if (termsLink) termsLink.style.display = 'inline';
+    if (supportLink) supportLink.style.display = 'inline';
   }
  
   async function checkPremiumStatus() {
@@ -2985,4 +2990,3 @@ if (savedLangApp === 'en') setLang('en');
  
 </body>
 </html>
- 
