@@ -58,7 +58,6 @@ body {
  
 .rule { height: 1px; background: #cec6b5; margin: 0 auto 36px; width: 120px; }
  
-/* マスコット */
 .mascot-wrap {
   margin: 0 auto 36px;
   width: 100%;
@@ -203,6 +202,22 @@ body {
   color: #f5f0e4;
 }
 .lang-btn:first-child { border-right: none; }
+.login-link {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  padding: 5px 14px;
+  border: 1px solid #cec6b5;
+  border-left: none;
+  background: rgba(245,240,228,0.92);
+  color: #9a8a70;
+  text-decoration: none;
+  backdrop-filter: blur(4px);
+  transition: all 0.18s;
+  display: flex;
+  align-items: center;
+}
+.login-link:hover { color: #c4a060; }
 [data-lang="en"] { display: none; }
 body.en [data-lang="ja"] { display: none; }
 body.en [data-lang="en"] { display: block; }
@@ -213,10 +228,14 @@ body.en .iroha-en { display: block; }
 </head>
 <body>
  
-<!-- 言語切り替え -->
+<!-- 言語切り替え＋ログイン -->
 <div class="lang-switcher">
   <button class="lang-btn active" onclick="setLang('ja')">JP</button>
   <button class="lang-btn" onclick="setLang('en')">EN</button>
+  <a href="/login" class="login-link">
+    <span data-lang="ja">ログイン</span>
+    <span data-lang="en">Login</span>
+  </a>
 </div>
  
 <div class="wrap">
@@ -323,19 +342,16 @@ async function handleSubmit() {
 }
 </script>
  
- 
 <script>
 function setLang(lang) {
   document.body.classList.toggle('en', lang === 'en');
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
   });
-  // Update placeholder
   const input = document.getElementById('email-input');
   if (input) {
     input.placeholder = lang === 'ja' ? 'メールアドレス' : 'Email address';
   }
-  // Update submit button
   const btn = document.getElementById('submit-btn');
   if (btn && btn.textContent !== '送信中…' && btn.textContent !== 'Sending...') {
     btn.textContent = lang === 'ja' ? '通知を受け取る' : 'Notify me';
@@ -343,7 +359,6 @@ function setLang(lang) {
   localStorage.setItem('hoheto_lang', lang);
 }
  
-// Restore language preference
 const savedLang = localStorage.getItem('hoheto_lang');
 if (savedLang === 'en') setLang('en');
 </script>
