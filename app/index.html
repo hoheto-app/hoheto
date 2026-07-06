@@ -23,6 +23,9 @@
   --teal: #2a6a5a;
   --teal2: #4a9a8a;
   --red: #8a2a1a;
+  --canvas: #fefdf8;
+  --seal-red: #d9391b;
+  --seal-bg: #fdf6ec;
 }
  
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -127,7 +130,7 @@ header {
 .sidebar-label {
   font-family: 'Inconsolata', monospace;
   font-size: 0.62rem; letter-spacing: 0.2em;
-  color: var(--ink4); text-transform: uppercase;
+  color: var(--teal); text-transform: uppercase;
 }
 .new-btn {
   font-family: 'Inconsolata', monospace;
@@ -221,6 +224,46 @@ header {
 .editor-scroll::-webkit-scrollbar { width: 3px; }
 .editor-scroll::-webkit-scrollbar-thumb { background: var(--rule); }
  
+/* 書く場所を際立たせるキャンバス */
+.editor-canvas {
+  position: relative;
+  background: var(--canvas);
+  padding: 24px 28px;
+  border: 0.5px solid rgba(26,21,16,0.06);
+  box-shadow: 0 1px 3px rgba(26,21,16,0.05);
+  margin-bottom: 20px;
+}
+ 
+/* 雅印風の朱印 */
+.hoheto-seal {
+  position: absolute;
+  bottom: 14px; right: 14px;
+  width: 30px; height: 30px;
+  background: var(--seal-bg);
+  color: var(--seal-red);
+  font-size: 0.95rem;
+  font-weight: 900;
+  font-family: 'Noto Serif JP', serif;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0.9;
+  transform: rotate(-3deg);
+  box-shadow: inset 0 0 0 4px var(--seal-red);
+  clip-path: polygon(3% 4%, 97% 0%, 100% 96%, 5% 100%);
+  pointer-events: none;
+}
+ 
+/* メタ情報の折りたたみトグル */
+.meta-toggle {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.68rem;
+  color: var(--teal);
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+}
+.meta-toggle:hover { color: var(--teal2); }
+ 
 .editor-title {
   font-size: 1.6rem; font-weight: 700;
   border: none; background: none;
@@ -246,8 +289,12 @@ header {
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--rule2);
-  display: flex; gap: 16px; align-items: flex-start;
+  display: none;
+  gap: 16px; align-items: flex-start;
   flex-wrap: wrap;
+}
+.editor-meta.open {
+  display: flex;
 }
 .meta-field { display: flex; flex-direction: column; gap: 5px; }
 .meta-label {
@@ -782,9 +829,15 @@ body.en [data-lang="ja"].inline { display: none; }
   </button>
       </div>
       <div class="editor-scroll">
-        <input type="text" class="editor-title" id="ed-title" placeholder="今、心の中にあるもの">
-        <textarea class="editor-body" id="ed-body" placeholder="誰かに読まれることより、まず自分が書きたいことを。"></textarea>
-        <div class="editor-meta">
+        <div class="editor-canvas">
+          <input type="text" class="editor-title" id="ed-title" placeholder="今、心の中にあるもの">
+          <textarea class="editor-body" id="ed-body" placeholder="誰かに読まれることより、まず自分が書きたいことを。"></textarea>
+          <div class="hoheto-seal" id="hoheto-seal">置</div>
+        </div>
+ 
+        <div class="meta-toggle" id="meta-toggle" onclick="toggleMeta()">▸ この関心を育てる（タグ・画像・熱量・リンク）</div>
+ 
+        <div class="editor-meta" id="editor-meta">
           <div class="meta-field" style="position:relative;">
             <span class="meta-label">タグ</span>
             <input type="text" class="meta-input" id="ed-tags"
@@ -1229,6 +1282,7 @@ function selectKw(id) {
   renderKwList();
   _currentLinks = kw.links ? kw.links.slice() : [];
   renderLinksList();
+  toggleMeta(kw.tags.length > 0 || !!kw.image_url || (kw.links && kw.links.length > 0));
   if (window.loadResonances) {
     window.loadResonances(id);
   } else {
@@ -1263,6 +1317,16 @@ function setHeat(v) {
   });
 }
  
+// ── メタ情報（タグ・画像・熱量・リンク）の折りたたみ ──
+function toggleMeta(forceOpen) {
+  var meta = document.getElementById('editor-meta');
+  var toggle = document.getElementById('meta-toggle');
+  if (!meta) return;
+  var isOpen = forceOpen !== undefined ? forceOpen : !meta.classList.contains('open');
+  meta.classList.toggle('open', isOpen);
+  if (toggle) toggle.textContent = isOpen ? '▾ この関心を育てる' : '▸ この関心を育てる（タグ・画像・熱量・リンク）';
+}
+ 
 function newKeyword() {
   const id = Date.now().toString();
   keywords.unshift({ id, title:'', body:'', tags:[], heat:3, status:'draft', date:new Date().toLocaleDateString('ja-JP') });
@@ -1272,6 +1336,7 @@ function newKeyword() {
   document.getElementById('ed-body').value = '';
   document.getElementById('ed-tags').value = '';
   setHeat(3);
+  toggleMeta(false);
   document.getElementById('ed-title').focus();
   renderResonances();
 }
@@ -2966,6 +3031,7 @@ if (savedLangApp === 'en') setLang('en');
     if (typeof setHeat === "function") setHeat(3);
     renderKwList();
     renderResonances();
+    toggleMeta(false);
     document.getElementById('ed-title').focus();
   };
  
