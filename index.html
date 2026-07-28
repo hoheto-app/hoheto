@@ -12,9 +12,9 @@
 <link rel="apple-touch-icon" href="favicon.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400&display=swap');
- 
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
- 
+
 body {
   background: #f5f0e4;
   color: #1a1510;
@@ -30,13 +30,13 @@ body {
     rgba(180,160,120,0.12) 28px
   );
 }
- 
+
 .wrap {
   max-width: 560px;
   width: 100%;
   text-align: center;
 }
- 
+
 .symbol {
   font-size: clamp(2.8rem, 8vw, 5rem);
   font-weight: 900;
@@ -46,7 +46,7 @@ body {
   line-height: 1;
 }
 .symbol .at { color: #c4a060; }
- 
+
 .iroha {
   font-family: 'Inconsolata', monospace;
   font-size: 0.78rem;
@@ -55,9 +55,9 @@ body {
   margin-bottom: 36px;
 }
 .iroha .ho { color: #c4a060; font-weight: 600; }
- 
+
 .rule { height: 1px; background: #cec6b5; margin: 0 auto 36px; width: 120px; }
- 
+
 .mascot-wrap {
   margin: 0 auto 36px;
   width: 100%;
@@ -72,7 +72,7 @@ body {
   object-fit: contain;
   opacity: 0.92;
 }
- 
+
 .tagline {
   font-size: clamp(1rem, 3vw, 1.25rem);
   font-weight: 300;
@@ -88,72 +88,43 @@ body {
   margin-bottom: 16px;
   color: #1a1510;
 }
- 
-.coming {
+
+.status-label {
   font-family: 'Inconsolata', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.35em;
-  color: #8a7a60;
+  color: #6a8a6a;
   text-transform: uppercase;
   margin-bottom: 36px;
 }
- 
-.notify-form {
-  display: flex;
-  gap: 0;
-  max-width: 380px;
+
+.cta-wrap {
   margin: 0 auto 48px;
 }
-.notify-form input {
-  flex: 1;
-  background: rgba(255,255,255,0.7);
-  border: 1px solid #cec6b5;
-  border-right: none;
-  color: #1a1510;
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.88rem;
-  padding: 11px 16px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-.notify-form input:focus { border-color: #c4a060; }
-.notify-form input::placeholder { color: #a09080; }
-.notify-form button {
+.cta-btn {
+  display: inline-block;
   background: #c4a060;
   border: 1px solid #c4a060;
   color: #f5f0e4;
   font-family: 'Inconsolata', monospace;
-  font-size: 0.72rem;
+  font-size: 0.82rem;
   letter-spacing: 0.15em;
-  padding: 11px 20px;
+  padding: 13px 32px;
   cursor: pointer;
   transition: background 0.2s;
-  white-space: nowrap;
+  text-decoration: none;
 }
-.notify-form button:hover { background: #b09050; }
-.notify-form button:disabled { background: #cec6b5; border-color: #cec6b5; cursor: not-allowed; }
- 
-.thanks {
-  display: none;
+.cta-btn:hover { background: #b09050; }
+
+.cta-sub {
   font-family: 'Inconsolata', monospace;
-  font-size: 0.78rem;
-  color: #6a8a6a;
-  letter-spacing: 0.15em;
-  margin-bottom: 48px;
-  padding: 12px;
+  font-size: 0.68rem;
+  color: #9a8a70;
+  letter-spacing: 0.08em;
+  margin-top: 14px;
 }
- 
-.error-msg {
-  display: none;
-  font-family: 'Inconsolata', monospace;
-  font-size: 0.72rem;
-  color: #c05a3a;
-  letter-spacing: 0.1em;
-  margin-top: -36px;
-  margin-bottom: 36px;
-  padding: 8px;
-}
- 
+.cta-sub a { color: #6a8a6a; text-decoration: underline; }
+
 .gold-dots {
   display: flex;
   justify-content: center;
@@ -168,14 +139,14 @@ body {
 }
 .gold-dots span:nth-child(2) { opacity: 0.4; width: 4px; height: 4px; margin-top: 1px; }
 .gold-dots span:nth-child(3) { opacity: 0.25; width: 3px; height: 3px; margin-top: 1.5px; }
- 
+
 .footer {
   font-family: 'Inconsolata', monospace;
   font-size: 0.65rem;
   color: #cec6b5;
   letter-spacing: 0.2em;
 }
- 
+
 .lang-switcher {
   position: fixed;
   top: 16px;
@@ -227,7 +198,7 @@ body.en .iroha-en { display: block; }
 </style>
 </head>
 <body>
- 
+
 <!-- 言語切り替え＋ログイン -->
 <div class="lang-switcher">
   <button class="lang-btn active" onclick="setLang('ja')">JP</button>
@@ -237,27 +208,27 @@ body.en .iroha-en { display: block; }
     <span data-lang="en">Login</span>
   </a>
 </div>
- 
+
 <div class="wrap">
- 
+
   <div class="symbol">
     <span class="at">@</span>ゐroh<span class="at">@</span>
   </div>
- 
+
   <div class="iroha iroha-ja">
     い ろ は に <span class="ho">ほ へ と</span> ち り ぬ る を
   </div>
   <div class="iroha iroha-en">
     i · ro · ha · ni · <span class="ho">ho · he · to</span> · chi · ri · nu · ru · wo
   </div>
- 
+
   <div class="rule"></div>
- 
+
   <!-- マスコット -->
   <div class="mascot-wrap">
     <img src="mascot.png" alt="Hohetoマスコット — 種を手のひらに乗せるおじさん">
   </div>
- 
+
   <div class="tagline">
     <span data-lang="ja"><strong>関心が先にあり、<br>人は後から静かに現れる。</strong>
     古書店で、見知らぬ人が<br>
@@ -266,99 +237,43 @@ body.en .iroha-en { display: block; }
     Like the moment in an old bookshop<br>
     when a stranger reaches for the same book.</span>
   </div>
- 
-  <div class="coming">
-    <span data-lang="ja">Coming Soon</span>
-    <span data-lang="en">Coming Soon</span>
+
+  <div class="status-label">
+    <span data-lang="ja">Now Open</span>
+    <span data-lang="en">Now Open</span>
   </div>
- 
-  <div class="notify-form" id="form-wrap">
-    <input type="email" id="email-input" placeholder="メールアドレス">
-    <button id="submit-btn" onclick="handleSubmit()">通知を受け取る</button>
+
+  <div class="cta-wrap">
+    <a href="/login" class="cta-btn">
+      <span data-lang="ja">はじめる</span>
+      <span data-lang="en">Begin</span>
+    </a>
+    <div class="cta-sub">
+      <span data-lang="ja">アカウントをお持ちでない方も、こちらから始められます</span>
+      <span data-lang="en">New here? You can start from the same link.</span>
+    </div>
   </div>
- 
-  <div class="error-msg" id="error-msg"></div>
- 
-  <div class="thanks" id="thanks-msg">
-    <span data-lang="ja">ありがとうございます。開始時にお知らせします。</span>
-    <span data-lang="en">Thank you. We will notify you when we launch.</span>
-  </div>
- 
+
   <div class="gold-dots">
     <span></span><span></span><span></span>
   </div>
- 
+
   <div class="footer">
     <span data-lang="ja">HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; 関心の場 &nbsp;·&nbsp; 2026</span>
     <span data-lang="en">HOHETO &nbsp;·&nbsp; hohe.to &nbsp;·&nbsp; Personal Interest Field &nbsp;·&nbsp; 2026</span>
   </div>
- 
+
 </div>
- 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = 'https://kxaqkwjeuozdxqltbxex.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_hzA37qUV4Pw4338WS1CoJA_VJKoYPXB';
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
- 
-async function handleSubmit() {
-  const email = document.getElementById('email-input').value.trim();
-  const btn = document.getElementById('submit-btn');
-  const errorEl = document.getElementById('error-msg');
- 
-  if (!email || !email.includes('@')) {
-    document.getElementById('email-input').focus();
-    return;
-  }
- 
-  btn.disabled = true;
-  btn.textContent = '送信中…';
-  errorEl.style.display = 'none';
- 
-  try {
-    const { error } = await db.from('waitlist').insert({ email });
- 
-    if (error) {
-      errorEl.textContent = error.code === '23505'
-        ? 'このメールアドレスはすでに登録されています。'
-        : 'エラーが発生しました。もう一度お試しください。';
-      errorEl.style.display = 'block';
-      btn.disabled = false;
-      btn.textContent = '通知を受け取る';
-      return;
-    }
- 
-    document.getElementById('form-wrap').style.display = 'none';
-    errorEl.style.display = 'none';
-    document.getElementById('thanks-msg').style.display = 'block';
- 
-  } catch(e) {
-    errorEl.textContent = 'エラーが発生しました。もう一度お試しください。';
-    errorEl.style.display = 'block';
-    btn.disabled = false;
-    btn.textContent = '通知を受け取る';
-  }
-}
-</script>
- 
+
 <script>
 function setLang(lang) {
   document.body.classList.toggle('en', lang === 'en');
   document.querySelectorAll('.lang-btn').forEach(b => {
     b.classList.toggle('active', b.textContent.trim() === (lang === 'ja' ? 'JP' : 'EN'));
   });
-  const input = document.getElementById('email-input');
-  if (input) {
-    input.placeholder = lang === 'ja' ? 'メールアドレス' : 'Email address';
-  }
-  const btn = document.getElementById('submit-btn');
-  if (btn && btn.textContent !== '送信中…' && btn.textContent !== 'Sending...') {
-    btn.textContent = lang === 'ja' ? '通知を受け取る' : 'Notify me';
-  }
   localStorage.setItem('hoheto_lang', lang);
 }
- 
+
 const savedLang = localStorage.getItem('hoheto_lang');
 if (savedLang === 'en') setLang('en');
 </script>
