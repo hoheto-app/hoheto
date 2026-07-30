@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>はじめてのほへと — Hoheto</title>
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="mascot.png">
+<meta name="theme-color" content="#f5f0e4">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #f5f0e4;
+  color: #1a1510;
+  font-family: 'Noto Serif JP', serif;
+  min-height: 100vh;
+  padding: 60px 20px 80px;
+  background-image: repeating-linear-gradient(
+    0deg, transparent, transparent 27px,
+    rgba(180,160,120,0.12) 28px
+  );
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+header.page-head {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.mascot-small {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 20px;
+  opacity: 0.92;
+}
+.mascot-small img { width: 100%; height: auto; }
+
+h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.lead {
+  font-size: 0.88rem;
+  color: #6a5a40;
+  line-height: 2;
+  letter-spacing: 0.03em;
+}
+
+.rule {
+  height: 1px;
+  background: #cec6b5;
+  margin: 40px auto;
+  width: 100px;
+}
+
+.step {
+  display: flex;
+  gap: 20px;
+  padding: 26px 0;
+  border-bottom: 1px solid #ddd6c0;
+}
+.step:last-child { border-bottom: none; }
+
+.step-num {
+  flex-shrink: 0;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid #c4a060;
+  color: #c4a060;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.step-body { flex: 1; }
+
+.step-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.step-tag {
+  display: inline-block;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: #6a8a6a;
+  border: 0.5px solid #6a8a6a;
+  padding: 1px 8px;
+  margin-bottom: 8px;
+}
+
+.step-text {
+  font-size: 0.9rem;
+  line-height: 2;
+  color: #3a3020;
+}
+
+.cta-wrap {
+  text-align: center;
+  margin-top: 48px;
+}
+.cta-btn {
+  display: inline-block;
+  background: #c4a060;
+  border: 1px solid #c4a060;
+  color: #f5f0e4;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.82rem;
+  letter-spacing: 0.15em;
+  padding: 13px 32px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.cta-btn:hover { background: #b09050; }
+
+footer {
+  text-align: center;
+  margin-top: 60px;
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.65rem;
+  color: #cec6b5;
+  letter-spacing: 0.15em;
+}
+footer a { color: #9a8a70; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="page-head">
+    <div class="mascot-small"><img src="mascot.png" alt="はにほ"></div>
+    <h1>はじめてのほへと</h1>
+    <p class="lead">
+      むずかしいことはありません。<br>
+      関心のあることを、そっと書いて、置くだけです。
+    </p>
+  </header>
+
+  <div class="rule"></div>
+
+  <div class="character-intro" style="text-align:center;margin-bottom:48px;">
+    <div style="font-size:0.95rem;line-height:2.1;color:#3a3020;max-width:480px;margin:0 auto;">
+      種を手のひらに乗せているこの人が、<strong>はにほ</strong>です。<br>
+      ほへとに置かれた関心を、静かに読んでいる案内役。<br>
+      森の中で木の名前を教えてくれたり、気が向いたときに、まだ気づいていないつながりを橋渡ししてくれたりします。<br>
+      急かすことはありません。呼びたいときに、そっと呼んでください。
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="steps">
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <div class="step-tag">植える</div>
+        <div class="step-title">今、気になっていることを書く</div>
+        <div class="step-text">
+          「植える」画面で、心の中にあることを自由に書いてみてください。タグや画像、熱量は後からで大丈夫です。
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <div class="step-tag">そっと置く</div>
+        <div class="step-title">書き終えたら、そっと置く</div>
+        <div class="step-text">
+          誰かに評価されるためではなく、まず自分のために書くこと。書き終えたら「そっと置く」を押すと、回廊に出ていきます。下書きのまま残しておくこともできます。
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <div class="step-tag">森林浴</div>
+        <div class="step-title">木になった自分の関心を眺めにいく</div>
+        <div class="step-text">
+          置いた言葉は、森の中の木として静かに育っていきます。ドラッグで歩き、スクロールで奥へ進めます。同じ関心を持つ人の木も、根や枝でつながって見えてきます。
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <div class="step-tag">すん</div>
+        <div class="step-title">タグの系譜を俯瞰する</div>
+        <div class="step-text">
+          自分が使ってきたタグが、どうつながっているかを地図のように眺められます。タグをクリックすると、そこに集まった見出しが見えてきます。
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <div class="step-tag">はにほに聞く</div>
+        <div class="step-title">気が向いたら、はにほに橋をかけてもらう</div>
+        <div class="step-text">
+          ヘッダーの「はにほに聞く」から、自分の関心の中に潜む、まだ気づいていないつながりを、はにほが静かに届けてくれます(月3回まで無料)。
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="cta-wrap">
+    <a href="/login" class="cta-btn">はじめる</a>
+  </div>
+
+  <footer>
+    <a href="/">HOHETO</a> &nbsp;·&nbsp; <a href="/log">はにほ日誌</a> &nbsp;·&nbsp; hohe.to
+  </footer>
+</div>
+
+</body>
+</html>
