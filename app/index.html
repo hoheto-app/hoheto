@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hoheto — ほへと</title>
-<link rel="icon" type="image/png" href="../favicon.png">
-<link rel="apple-touch-icon" href="../favicon.png">
+<link rel="icon" href="../favicon.ico">
+<link rel="apple-touch-icon" href="../mascot.png">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;700;900&family=Inconsolata:wght@300;400;600&display=swap');
 
@@ -96,6 +96,47 @@ header {
   box-shadow: 0 1px 3px rgba(26,21,16,0.1);
 }
 .view-btn:hover:not(.active) { color: var(--ink2); }
+
+/* ══ VIEW D: ひろば（PLAZA） ══ */
+.plaza-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  padding: 24px;
+  overflow-y: auto;
+  height: 100%;
+  width: 100%;
+  align-content: start;
+}
+@media (max-width: 900px) {
+  .plaza-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 680px) {
+  .plaza-grid { grid-template-columns: repeat(2, 1fr); padding: 16px 16px 100px; }
+}
+.plaza-card {
+  padding: 12px;
+  border: 0.5px solid var(--rule2);
+  background: var(--paper);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.plaza-card:hover { border-color: var(--gold2); }
+.plaza-card-title {
+  font-size: 0.82rem; font-weight: 700;
+  margin-bottom: 6px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.plaza-card-tags {
+  font-family: 'Inconsolata', monospace;
+  font-size: 0.6rem; color: var(--teal);
+}
+.plaza-empty {
+  grid-column: 1 / -1;
+  text-align: center; color: var(--ink4);
+  font-size: 0.8rem; padding: 40px 0;
+}
 
 .header-right {
   display: flex; align-items: center; gap: 6px;
@@ -821,6 +862,7 @@ body.en [data-lang="ja"].inline { display: none; }
     <button class="view-btn active" id="btn-write" onclick="switchView('write')"><span data-lang="ja" class="inline">植える</span><span data-lang="en" class="inline">Plant</span></button>
     <button class="view-btn" id="btn-forest" onclick="switchView('forest')"><span data-lang="ja" class="inline">森林浴</span><span data-lang="en" class="inline">Forest</span></button>
     <button class="view-btn" id="btn-map" onclick="switchView('map')"><span data-lang="ja" class="inline">すん</span><span data-lang="en" class="inline">Sun</span></button>
+    <button class="view-btn" id="btn-plaza" onclick="switchView('plaza')"><span data-lang="ja" class="inline">ひろば</span><span data-lang="en" class="inline">Plaza</span></button>
   </div>
 
   <div class="header-right">
@@ -1020,6 +1062,11 @@ body.en [data-lang="ja"].inline { display: none; }
     </div>
   </div>
 
+  <!-- ══ VIEW D: ひろば ══ -->
+  <div id="view-plaza" class="view-panel">
+    <div class="plaza-grid" id="plaza-grid"></div>
+  </div>
+
 </div>
 
 <!-- はにほモーダル：Hoheto+ユーザーが自分の関心の橋かけを受け取る場所 -->
@@ -1098,8 +1145,6 @@ body.en [data-lang="ja"].inline { display: none; }
     <a href="mailto:support@hohe.to" style="color:var(--ink4);text-decoration:none;">サポート</a>
     &nbsp;·&nbsp;
     <a href="/log" style="color:var(--ink4);text-decoration:none;">はにほ日誌</a>
-    &nbsp;·&nbsp;
-    <a href="/guide" style="color:var(--ink4);text-decoration:none;">使い方</a>
   </div>
 </div>
 
@@ -1238,6 +1283,9 @@ function switchView(v) {
     } else {
       initMap(); drawMap();
     }
+  }
+  if (v === 'plaza') {
+    if (window.loadPlazaPosts) window.loadPlazaPosts();
   }
 }
 
@@ -2428,7 +2476,7 @@ function mobileOnViewChange(v){
 
 // ヘッダーのビューボタンにモバイル対応を追加（DOMContentLoaded後）
 document.addEventListener('DOMContentLoaded', function(){
-  ['write','forest','map'].forEach(function(v){
+  ['write','forest','map','plaza'].forEach(function(v){
     var btn = document.getElementById('btn-'+v);
     if(btn) btn.addEventListener('click', function(){ mobileOnViewChange(v); });
   });
@@ -2992,6 +3040,31 @@ if (savedLangApp === 'en') setLang('en');
 
   window.loadMapTags = loadMapTagsFromDb;
   window._sbForTags = _db;
+
+  // ── ひろば：みんなの公開投稿を新しい順にダイジェスト表示 ──
+  async function loadPlazaPostsFromDb() {
+    var grid = document.getElementById('plaza-grid');
+    if (!grid) return;
+    var res = await _db.from('keywords')
+      .select('id, title, created_at, keyword_tags(tags(name))')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (res.error) { console.error('loadPlazaPosts:', res.error); return; }
+    var rows = res.data || [];
+    if (!rows.length) {
+      grid.innerHTML = '<div class="plaza-empty">まだ何も置かれていません。誰かが植えるのを、はにほが待っています。</div>';
+      return;
+    }
+    grid.innerHTML = rows.map(function(k) {
+      var tags = (k.keyword_tags || []).map(function(kt){ return kt.tags && kt.tags.name; }).filter(Boolean);
+      return '<div class="plaza-card" onclick="openPostDetail(\'' + k.id + '\')">' +
+        '<div class="plaza-card-title">' + esc(k.title || '') + '</div>' +
+        '<div class="plaza-card-tags">' + tags.slice(0,2).map(esc).join(' · ') + '</div>' +
+      '</div>';
+    }).join('');
+  }
+  window.loadPlazaPosts = loadPlazaPostsFromDb;
 
   // ── 森林浴：タグ・親子関係・共起データをSupabaseから取得 ──
   async function loadForestDataFromDb() {
