@@ -2967,7 +2967,15 @@ if (savedLangApp === 'en') setLang('en');
     var alreadyPlaced = !!mineRes.data;
     var isOwner = _detailOwnerId === _currentUser.id;
 
-    renderResonanceUI(keywordId, total, alreadyPlaced, isOwner);
+    var msgRes = await _db.from('resonances')
+      .select('message, created_at')
+      .eq('keyword_id', keywordId)
+      .not('message', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20);
+    var messages = (msgRes.data || []).filter(function(m){ return m.message; });
+
+    renderResonanceUI(keywordId, total, alreadyPlaced, isOwner, messages);
   }
 
   function buildGrowthSvg(seedsRem, sproutsRem, leaves) {
@@ -3000,7 +3008,7 @@ if (savedLangApp === 'en') setLang('en');
       parts.join('') + '</svg>';
   }
 
-  function renderResonanceUI(keywordId, total, alreadyPlaced, isOwner) {
+  function renderResonanceUI(keywordId, total, alreadyPlaced, isOwner, messages) {
     var container = document.getElementById('post-detail-resonance');
     var leaves = Math.floor(total / 25);
     var sproutsRem = Math.floor((total % 25) / 5);
@@ -3009,14 +3017,28 @@ if (savedLangApp === 'en') setLang('en');
 
     var actionHtml;
     if (isOwner) {
-      actionHtml = ''; // 自分の投稿には何も出さない
+      actionHtml = ''; // 自分の投稿には置くボタンは出さない
     } else if (alreadyPlaced) {
       actionHtml = '<div class="tane-done">🌱 そっと置きました</div>';
     } else {
-      actionHtml = '<button class="tane-btn" id="tane-btn">種を置く</button>';
+      actionHtml =
+        '<div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%;max-width:320px;">' +
+          '<input type="text" id="tane-message" maxlength="40" placeholder="一言そえる（任意）" ' +
+            'style="width:100%;background:var(--paper2);border:0.5px solid var(--rule);color:var(--ink);' +
+            'font-family:\'Noto Serif JP\',serif;font-size:0.82rem;padding:8px 10px;outline:none;text-align:center;">' +
+          '<button class="tane-btn" id="tane-btn">種を置く</button>' +
+        '</div>';
     }
 
-    container.innerHTML = svg + actionHtml;
+    var msgListHtml = (messages && messages.length)
+      ? '<div style="margin-top:16px;display:flex;flex-direction:column;gap:6px;width:100%;max-width:340px;">' +
+          messages.map(function(m) {
+            return '<div style="font-size:0.8rem;color:var(--ink3);padding:6px 10px;background:var(--paper2);border-left:2px solid var(--gold2);text-align:left;">' + esc(m.message) + '</div>';
+          }).join('') +
+        '</div>'
+      : '';
+
+    container.innerHTML = svg + actionHtml + msgListHtml;
 
     var btn = document.getElementById('tane-btn');
     if (btn) {
@@ -3025,7 +3047,13 @@ if (savedLangApp === 'en') setLang('en');
   }
 
   async function placeSeed(keywordId) {
-    var ins = await _db.from('resonances').insert({ keyword_id: keywordId, user_id: _currentUser.id });
+    var msgInput = document.getElementById('tane-message');
+    var message = msgInput ? msgInput.value.trim().slice(0, 40) : '';
+    var ins = await _db.from('resonances').insert({
+      keyword_id: keywordId,
+      user_id: _currentUser.id,
+      message: message || null
+    });
     if (ins.error) {
       console.error('placeSeed:', ins.error);
       showToast('置けませんでした');
